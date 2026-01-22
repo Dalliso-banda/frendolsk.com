@@ -67,17 +67,19 @@ const staticProjects = [
   },
 ];
 
-// Try to import database functions
-let getDb: (() => import('knex').Knex) | null = null;
-try {
-  const dbModule = require('@/db');
-  getDb = dbModule.getDb;
-} catch {
-  // Database not available
+// Dynamic import for database module
+async function getDbModule() {
+  try {
+    const dbModule = await import('@/db');
+    return dbModule.getDb;
+  } catch {
+    return null;
+  }
 }
 
 export async function GET() {
   // Try to get data from database first
+  const getDb = await getDbModule();
   if (getDb) {
     try {
       const db = getDb();

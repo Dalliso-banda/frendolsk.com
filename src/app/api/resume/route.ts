@@ -129,18 +129,19 @@ const staticResume = {
   ],
 };
 
-// Try to import database functions, but gracefully handle if not available
-let getDb: (() => import('knex').Knex) | null = null;
-try {
-  // Dynamic import to prevent build errors if db module isn't ready
-  const dbModule = require('@/db');
-  getDb = dbModule.getDb;
-} catch {
-  // Database not available, will use static data
+// Dynamic import for database module
+async function getDbModule() {
+  try {
+    const dbModule = await import('@/db');
+    return dbModule.getDb;
+  } catch {
+    return null;
+  }
 }
 
 export async function GET() {
   // Try to get data from database first
+  const getDb = await getDbModule();
   if (getDb) {
     try {
       const db = getDb();

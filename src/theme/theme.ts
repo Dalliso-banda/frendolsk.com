@@ -265,35 +265,35 @@ const darkThemeOptions: ThemeOptions = {
           background: ${alpha(palette.blue.main, 0.4)};
           color: ${darkColors.fg.default};
         }
-        
+
         html {
           scroll-behavior: smooth;
         }
-        
+
         body {
           scrollbar-width: thin;
           scrollbar-color: ${darkColors.border.default} ${darkColors.canvas.default};
         }
-        
+
         ::-webkit-scrollbar {
           width: 10px;
           height: 10px;
         }
-        
+
         ::-webkit-scrollbar-track {
           background: ${darkColors.canvas.default};
         }
-        
+
         ::-webkit-scrollbar-thumb {
           background: ${darkColors.border.default};
           border-radius: 5px;
           border: 2px solid ${darkColors.canvas.default};
         }
-        
+
         ::-webkit-scrollbar-thumb:hover {
           background: ${darkColors.fg.subtle};
         }
-        
+
         /* GitHub-style code blocks */
         code {
           font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
@@ -302,7 +302,7 @@ const darkThemeOptions: ThemeOptions = {
           border-radius: 6px;
           padding: 0.2em 0.4em;
         }
-        
+
         pre code {
           background: transparent;
           padding: 0;
@@ -748,35 +748,35 @@ const lightThemeOptions: ThemeOptions = {
           background: ${alpha(palette.blue.main, 0.3)};
           color: ${lightColors.fg.default};
         }
-        
+
         html {
           scroll-behavior: smooth;
         }
-        
+
         body {
           scrollbar-width: thin;
           scrollbar-color: ${lightColors.border.default} ${lightColors.canvas.inset};
         }
-        
+
         ::-webkit-scrollbar {
           width: 10px;
           height: 10px;
         }
-        
+
         ::-webkit-scrollbar-track {
           background: ${lightColors.canvas.inset};
         }
-        
+
         ::-webkit-scrollbar-thumb {
           background: ${lightColors.border.default};
           border-radius: 5px;
           border: 2px solid ${lightColors.canvas.inset};
         }
-        
+
         ::-webkit-scrollbar-thumb:hover {
           background: ${lightColors.fg.subtle};
         }
-        
+
         /* GitHub-style code blocks */
         code {
           font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
@@ -785,7 +785,7 @@ const lightThemeOptions: ThemeOptions = {
           border-radius: 6px;
           padding: 0.2em 0.4em;
         }
-        
+
         pre code {
           background: transparent;
           padding: 0;
