@@ -1,12 +1,15 @@
 # DevHolm
 
-[![Next.js](https://img.shields.io/badge/Next.js-15-black?logo=next.js)](https://nextjs.org/)
-[![React](https://img.shields.io/badge/React-19-blue?logo=react)](https://react.dev/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?logo=typescript)](https://www.typescriptlang.org/)
-[![Material UI](https://img.shields.io/badge/Material%20UI-6-007FFF?logo=mui)](https://mui.com/)
+[![CI/CD Pipeline](https://github.com/chrishacia/devholm/actions/workflows/ci.yml/badge.svg)](https://github.com/chrishacia/devholm/actions/workflows/ci.yml)
+[![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=next.js)](https://nextjs.org/)
+[![React](https://img.shields.io/badge/React-19-61DAFB?logo=react)](https://react.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Material UI](https://img.shields.io/badge/Material%20UI-6-007FFF?logo=mui&logoColor=white)](https://mui.com/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?logo=postgresql&logoColor=white)](https://www.postgresql.org/)
+[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?logo=docker&logoColor=white)](https://www.docker.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-A modern, feature-rich **personal website template** built with **Next.js 15**, **React 19**, **TypeScript**, **Material UI**, and **PostgreSQL**. Perfect for developers, creators, and professionals who want a polished online presence with a full admin dashboard.
+A modern, feature-rich **personal website template** built with **Next.js 16**, **React 19**, **TypeScript**, **Material UI**, and **PostgreSQL**. Perfect for developers, creators, and professionals who want a polished online presence with a full admin dashboard.
 
 🌐 **Live Example:** [chrishacia.com](https://chrishacia.com)
 💬 **Discord:** [Join the Community](https://discord.gg/8gG5vpN3YP)
@@ -16,7 +19,7 @@ A modern, feature-rich **personal website template** built with **Next.js 15**, 
 ## ✨ Features
 
 ### 🖥️ Modern Tech Stack
-- **Next.js 15** with App Router and Server Components
+- **Next.js 16** with App Router and Server Components
 - **React 19** with the latest features
 - **TypeScript** for type safety
 - **Material UI 6** for beautiful, accessible components
