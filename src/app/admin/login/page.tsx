@@ -1,0 +1,210 @@
+'use client';
+
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { signIn } from 'next-auth/react';
+import {
+  Box,
+  Container,
+  Typography,
+  TextField,
+  Button,
+  Alert,
+  InputAdornment,
+  IconButton,
+  CircularProgress,
+  Paper,
+  alpha,
+} from '@mui/material';
+import {
+  Email,
+  Lock,
+  Visibility,
+  VisibilityOff,
+  AdminPanelSettings,
+  Home,
+} from '@mui/icons-material';
+
+export default function AdminLoginPage() {
+  const router = useRouter();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
+
+    try {
+      const result = await signIn('credentials', {
+        email,
+        password,
+        redirect: false,
+      });
+
+      if (result?.error) {
+        setError('Invalid email or password');
+        setLoading(false);
+        return;
+      }
+
+      // Redirect to admin dashboard on success
+      router.push('/admin');
+      router.refresh();
+    } catch {
+      setError('An unexpected error occurred');
+      setLoading(false);
+    }
+  };
+
+  return (
+    <Box
+      sx={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        bgcolor: 'background.default',
+        backgroundImage: (theme) =>
+          `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.05)} 0%, ${alpha(theme.palette.secondary.main, 0.05)} 50%, ${alpha(theme.palette.primary.main, 0.05)} 100%)`,
+      }}
+    >
+      <Container maxWidth="sm">
+        <Paper
+          sx={{
+            p: { xs: 3, sm: 4 },
+            maxWidth: 440,
+            mx: 'auto',
+          }}
+        >
+          {/* Logo/Header */}
+          <Box sx={{ textAlign: 'center', mb: 4 }}>
+            <Box
+              sx={{
+                width: 56,
+                height: 56,
+                borderRadius: 2,
+                bgcolor: (theme) => alpha(theme.palette.primary.main, 0.1),
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                mx: 'auto',
+                mb: 2,
+              }}
+            >
+              <AdminPanelSettings sx={{ fontSize: 28, color: 'primary.main' }} />
+            </Box>
+            <Typography variant="h4" component="h1" fontWeight={700} sx={{ mb: 1 }}>
+              Admin Login
+            </Typography>
+            <Typography variant="body1" color="text.secondary">
+              Enter your credentials to access the dashboard
+            </Typography>
+          </Box>
+
+          {/* Login Form */}
+          <Box component="form" onSubmit={handleSubmit}>
+            {error && (
+              <Alert severity="error" sx={{ mb: 3 }}>
+                {error}
+              </Alert>
+            )}
+
+            <TextField
+              fullWidth
+              label="Email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              autoComplete="email"
+              autoFocus
+              slotProps={{
+                input: {
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <Email sx={{ color: 'text.secondary' }} />
+                    </InputAdornment>
+                  ),
+                },
+              }}
+              sx={{ mb: 3 }}
+            />
+
+            <TextField
+              fullWidth
+              label="Password"
+              type={showPassword ? 'text' : 'password'}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              autoComplete="current-password"
+              slotProps={{
+                input: {
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <Lock sx={{ color: 'text.secondary' }} />
+                    </InputAdornment>
+                  ),
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        onClick={() => setShowPassword(!showPassword)}
+                        edge="end"
+                        aria-label={showPassword ? 'Hide password' : 'Show password'}
+                      >
+                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                },
+              }}
+              sx={{ mb: 3 }}
+            />
+
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              size="large"
+              disabled={loading || !email || !password}
+              sx={{
+                py: 1.5,
+                fontWeight: 600,
+              }}
+            >
+              {loading ? (
+                <CircularProgress size={24} color="inherit" />
+              ) : (
+                'Sign In'
+              )}
+            </Button>
+          </Box>
+
+          {/* Footer */}
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            display="block"
+            textAlign="center"
+            sx={{ mt: 4 }}
+          >
+            Protected area. Unauthorized access is prohibited.
+          </Typography>
+
+          {/* Back to Site */}
+          <Button
+            href="/"
+            startIcon={<Home />}
+            sx={{ mt: 2, mx: 'auto', display: 'flex' }}
+          >
+            Back to Site
+          </Button>
+        </Paper>
+      </Container>
+    </Box>
+  );
+}
