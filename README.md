@@ -246,6 +246,8 @@ The included workflow automatically:
 3. Builds Docker image
 4. Deploys to your server
 
+> 💡 **Note:** GitHub Actions are **free for public repositories**. If you fork/clone this repo and make it private, you'll be charged for Actions minutes. See [GitHub's pricing](https://docs.github.com/en/billing/managing-billing-for-github-actions/about-billing-for-github-actions) for details.
+
 Set these **GitHub Secrets**:
 
 | Secret | Description |
