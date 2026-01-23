@@ -23,8 +23,9 @@ services:
       dockerfile: Dockerfile
     container_name: app
     restart: unless-stopped
-    ports:
-      - "3000:3000"
+    # NOTE: ports are NOT defined here - they come from docker-compose.override.yml
+    # This prevents port conflicts when override specifies a different port (e.g., 3001)
+    # For local dev, create a .env file or docker-compose.override.yml with your port
     environment:
       - NODE_ENV=${NODE_ENV:-production}
       - DATABASE_URL=postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-mysite}
