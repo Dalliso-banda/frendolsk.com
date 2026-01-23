@@ -359,6 +359,7 @@ jobs:
 
           # Deploy on server
           ssh -o StrictHostKeyChecking=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} << 'ENDSSH'
+            set -e  # Exit on any error
             cd ${{ secrets.DEPLOY_PATH }}
 
             # Secure the override file (contains secrets)
@@ -371,14 +372,20 @@ jobs:
             # Docker Compose automatically reads both docker-compose.yml AND docker-compose.override.yml
             docker compose up -d --remove-orphans
 
-            echo "⏳ Waiting for health check..."
-            sleep 10
+            echo "⏳ Waiting for health check (45s)..."
+            sleep 45
 
             echo "🔍 Checking service status..."
             docker compose ps
-
-            # Migrations now run automatically via docker-entrypoint.sh
-            # No need for manual migration step
+            
+            # Verify container is actually running
+            CONTAINER_STATUS=$(docker compose ps --format json | grep -o '"State":"[^"]*"' | head -1 | cut -d'"' -f4)
+            if [ "$CONTAINER_STATUS" != "running" ]; then
+              echo "❌ Container failed to start! Status: $CONTAINER_STATUS"
+              docker compose logs --tail 50
+              exit 1
+            fi
+            echo "✅ Container is running"
 
             echo "🧹 Cleaning up old images..."
             docker image prune -f
@@ -390,7 +397,10 @@ jobs:
         run: |
           echo "🔍 Verifying deployment..."
           sleep 5
-          curl -sf ${{ secrets.SITE_URL }}/api/health || echo "⚠️ Health check endpoint not responding"
+          if ! curl -sf --max-time 30 ${{ secrets.SITE_URL }}/api/health; then
+            echo "❌ Health check failed!"
+            exit 1
+          fi
           echo "✅ Deployment verification complete"
 
   # ===========================================================================
