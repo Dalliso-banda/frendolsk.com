@@ -144,10 +144,12 @@ export default function RootLayout({
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
       <body className={`${inter.variable} ${crimsonPro.variable} ${jetbrainsMono.variable}`}>
-        <Providers>{children}</Providers>
-        <Suspense fallback={null}>
+        <Providers>{children} 
+             <Suspense fallback={null}>
           <AnalyticsTracker />
         </Suspense>
+        </Providers>
+     
       </body>
     </html>
   );
