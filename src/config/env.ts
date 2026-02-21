@@ -1,3 +1,4 @@
+import 'dotenv/config';
 /**
  * Centralized Environment Configuration
  * =====================================
@@ -12,9 +13,11 @@
 // =============================================================================
 // Helper Functions
 // =============================================================================
-
+console.log('Dotenv Check:', process.env.DATABASE_NAME || 'FAILED: Not loading from .env');
 function getEnv(key: string, defaultValue: string = ''): string {
+
   return process.env[key] || defaultValue;
+
 }
 
 function getEnvInt(key: string, defaultValue: number): number {
