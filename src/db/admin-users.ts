@@ -213,7 +213,7 @@ export async function getPrimaryAdminUser(): Promise<AdminUserProfile | null> {
 export async function createAdminUser(data: CreateAdminUserData): Promise<AdminUser> {
   const db = getDb();
   const passwordHash = await bcrypt.hash(data.password, 12);
-
+    console.log(data)
   const [row] = await db('admin_users')
     .insert({
       email: data.email,

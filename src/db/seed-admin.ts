@@ -15,16 +15,18 @@ import { hashPassword } from './users';
 import { admin } from '@/config/env';
 
 async function seedAdmin() {
+
+  console.log('Starting admin seeding process...',admin);
   const email = admin.email;
   const password = admin.password;
-  const name = admin.name;
+  const display_name = admin.name;
 
   console.log('Creating admin user...');
 
   const db = getDb();
 
   // Check if user already exists
-  const existingUser = await db('users').where('email', email).first();
+  const existingUser = await db('admin_users').where('email', email).first();
 
   if (existingUser) {
     console.log(`Admin user already exists: ${email}`);
@@ -35,12 +37,17 @@ async function seedAdmin() {
   // Create admin user
   const passwordHash = await hashPassword(password);
 
-  await db('users').insert({
+  console.log('Password hash:', passwordHash );
+
+
+
+  await db('admin_users').insert({
     email,
-    name,
+    display_name,
     password_hash: passwordHash,
-    role: 'admin',
+ 
   });
+
 
   console.log(`✓ Admin user created successfully!`);
   console.log(`  Email: ${email}`);
