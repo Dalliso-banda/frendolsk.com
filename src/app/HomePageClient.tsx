@@ -62,7 +62,7 @@ function RightSidebar({ tags }: { tags: TagData[] }) {
       <SidebarWidget title="About">
         <Typography variant="body2" color="text.secondary" sx={{ mb: 2.5, lineHeight: 1.7 }}>
           I&apos;m a full-stack developer passionate about building beautiful, performant web
-          applications. Currently exploring the intersection of design and engineering.
+          applications. Currently exploring the intersection of AI and engineering.
         </Typography>
         <Button
           component={Link}
@@ -207,7 +207,7 @@ export default function HomePage() {
                     : 'none',
                 })}
               >
-                {authorName}
+               {/* this part to update automaticlly {authorName}*/} Dalitso Banda
               </Box>
             </Typography>
 

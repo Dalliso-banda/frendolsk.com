@@ -89,8 +89,8 @@ export async function GET(request: NextRequest) {
       {
         data: {
           site: {
-            name: 'My Site',
-            description: '',
+            name: 'Dalitso Banda',
+            description: 'A personal site to Dalitso banda  Zambian softwae engineer',
             url: 'http://localhost:3000',
             logoUrl: null,
             faviconUrl: null,
@@ -114,9 +114,9 @@ export async function GET(request: NextRequest) {
           },
           seo: {
             titleTemplate: '%s',
-            defaultTitle: 'My Site',
+            defaultTitle: 'Dalitso Banda',
             ogImage: null,
-            twitterCard: 'summary',
+            twitterCard: 'A personal site to Dalitso banda  Zambian softwae engineer',
           },
         },
       },

@@ -8,7 +8,7 @@
  */
 
 import { Box, Typography, Container, Grid2, Avatar, Chip, Paper, alpha } from '@mui/material';
-import { Code, Lightbulb, Rocket, Groups, Coffee, Psychology, Person } from '@mui/icons-material';
+import { Code, Rocket, Groups, Coffee, MusicNote,Psychology, Person,PhotoCamera } from '@mui/icons-material';
 import { AuthAwareMainLayout } from '@/components';
 import { useSiteSettings } from '@/hooks/useSiteSettings';
 
@@ -16,23 +16,23 @@ import { useSiteSettings } from '@/hooks/useSiteSettings';
 const skills = [
   { name: 'React', category: 'frontend' },
   { name: 'TypeScript', category: 'frontend' },
-  { name: 'Next.js', category: 'frontend' },
   { name: 'Node.js', category: 'backend' },
   { name: 'PostgreSQL', category: 'backend' },
-  { name: 'GraphQL', category: 'backend' },
-  { name: 'Docker', category: 'devops' },
-  { name: 'AWS', category: 'devops' },
+  { name: 'MySQL', category: 'backend' },
+ {name:'Python Pandas', category:'data'},
   { name: 'Git', category: 'tools' },
 ];
 
 // CUSTOMIZE: Add your own interests here
 const interests = [
   { icon: Code, label: 'Software Development' },
-  { icon: Lightbulb, label: 'Learning' },
-  { icon: Rocket, label: 'Side Projects' },
+
+  { icon: Rocket, label: 'Space Science' },
   { icon: Groups, label: 'Open Source' },
-  { icon: Coffee, label: 'Coffee' },
+  { icon: MusicNote, label: 'DJing' },
   { icon: Psychology, label: 'Problem Solving' },
+
+  { icon: PhotoCamera, label: 'Photography' },
 ];
 
 export default function AboutPage() {
@@ -55,8 +55,7 @@ export default function AboutPage() {
                   mx: { xs: 'auto', md: 0 },
                   border: 3,
                   borderColor: 'primary.main',
-                  boxShadow: (theme) =>
-                    `0 0 30px ${alpha(theme.palette.primary.main, 0.25)}`,
+                  boxShadow: (theme) => `0 0 30px ${alpha(theme.palette.primary.main, 0.25)}`,
                   bgcolor: 'grey.500',
                   fontSize: { xs: '4rem', md: '5rem' },
                 }}
@@ -68,11 +67,7 @@ export default function AboutPage() {
               <Typography variant="h2" component="h1" gutterBottom sx={{ fontWeight: 700 }}>
                 About Me
               </Typography>
-              <Typography
-                variant="h5"
-                color="text.secondary"
-                sx={{ mb: 3, fontWeight: 400 }}
-              >
+              <Typography variant="h5" color="text.secondary" sx={{ mb: 3, fontWeight: 400 }}>
                 {/* CUSTOMIZE: Add your tagline here */}
                 Full Stack Developer • Open Source Enthusiast
               </Typography>
@@ -84,9 +79,13 @@ export default function AboutPage() {
               </Typography>
               <Typography variant="body1" color="text.secondary">
                 {/* CUSTOMIZE: Add more about yourself here */}
-                When I&apos;m not coding, you can find me exploring new technologies, contributing
-                to open source projects, or enjoying a good cup of coffee while reading about
-                the latest trends in web development.
+                When I&apos;m not at my desk debugging or solving linear algebra,I&apos;m usually
+                exploring my creative side.
+                Photography, Capturing the world through a lens and
+                finding beauty in the details.
+                 DJing,Blending rhythms and bringing energy to the
+                space through music. I believe that the best engineering happens at the intersection
+                of rigid logic and creative flow
               </Typography>
             </Grid2>
           </Grid2>
@@ -108,21 +107,22 @@ export default function AboutPage() {
             My Journey
           </Typography>
           <Typography variant="body1" color="text.secondary" sx={{ mb: 2.5 }}>
-            {/* CUSTOMIZE: Tell your story here */}
-            I started my journey in software development with a curiosity about how things work
-            on the internet. That curiosity led me to learn HTML, CSS, and JavaScript, and
-            eventually to building full-stack applications with modern frameworks.
+            {/* CUSTOMIZE: Tell your story here */}I started my journey in software development with
+            a spark of curiosity after seeing Game Shakers, which led me to dive head-first into the
+            complexities of C++. That initial fascination with how logic builds worlds eventually
+            transitioned into a passion for Web Development and building dynamic, full-stack
+            applications.
           </Typography>
           <Typography variant="body1" color="text.secondary" sx={{ mb: 2.5 }}>
-            Over the years, I&apos;ve had the opportunity to work on diverse projects, from
-            small business websites to large-scale enterprise applications. Each project has
-            taught me something new and reinforced my love for creating software that makes
-            a difference.
+            A pivotal moment in my career was being mentored by Christopher Hacia, a Senior Software
+            Engineer who became family. His guidance was the key to unlocking my true potential,
+            shifting my mindset from just "writing code" to engineering scalable, high-level
+            solutions with a professional edge.
           </Typography>
           <Typography variant="body1" color="text.secondary">
-            Today, I focus on building accessible, performant, and user-friendly web applications.
-            I believe in writing clean code, continuous learning, and sharing knowledge with
-            the developer community.
+            Today, my focus is on the frontier of Artificial Intelligence. I am currently
+            deep-diving into the mathematics of Machine Learning, driven by a belief in continuous
+            learning and the power of intelligent software.
           </Typography>
         </Paper>
 
@@ -133,12 +133,7 @@ export default function AboutPage() {
           </Typography>
           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1.5 }}>
             {skills.map((skill) => (
-              <Chip
-                key={skill.name}
-                label={skill.name}
-                variant="outlined"
-                size="medium"
-              />
+              <Chip key={skill.name} label={skill.name} variant="outlined" size="medium" />
             ))}
           </Box>
         </Box>

@@ -39,32 +39,13 @@ const usesCategories: UsesCategory[] = [
     icon: Computer,
     items: [
       {
-        name: 'MacBook Pro 16" (2019)',
-        description: '2.4 GHz 8-Core Intel Core i9 with 64GB RAM — my primary dev machine',
-      },
+        name: 'Packer bell book',
+        description: '2.9 GHz 2-Core Intel celeron with 8GB RAM — my primary dev machine',
+      }
+    ,
       {
-        name: '3× Samsung LU28R55 Monitors',
-        description: '28" 4K displays arranged across my workspace',
-      },
-      {
-        name: 'Logitech Ergo K860',
-        description: 'Split ergonomic keyboard for comfortable typing',
-      },
-      {
-        name: 'Apple Magic Trackpad 2',
-        description: 'Gesture-based navigation and precision control',
-      },
-      {
-        name: 'iPhone 14 Pro Max',
-        description: 'Primary mobile device for testing and daily use',
-      },
-      {
-        name: 'Samsung Galaxy A24',
-        description: 'Android device for cross-platform testing',
-      },
-      {
-        name: 'AirPods Pro 2',
-        description: 'Noise cancellation for focused work sessions',
+        name: 'infinix smart7',
+        description: 'My personal phone which i use to check resposivness of my sites ',
       },
     ],
   },
@@ -77,20 +58,17 @@ const usesCategories: UsesCategory[] = [
         description: 'Primary code editor — fast, extensible, and reliable',
       },
       {
-        name: 'iTerm2',
-        description: 'Feature-rich terminal emulator for macOS',
+        name: 'Terminal',
+        description: 'Feature-rich terminal on linux mint',
       },
       {
         name: 'Docker Desktop',
         description: 'Container management for local development environments',
       },
+    
       {
-        name: 'pgAdmin 4',
-        description: 'PostgreSQL database management and querying',
-      },
-      {
-        name: 'BBEdit',
-        description: 'Lightweight text editor for quick edits and file comparison',
+        name: 'Nano',
+        description: 'Lightweight text editor for quick edits ',
       },
     ],
   },
@@ -99,8 +77,8 @@ const usesCategories: UsesCategory[] = [
     icon: Brush,
     items: [
       {
-        name: 'Adobe Photoshop',
-        description: 'Image editing and graphic design work',
+        name: 'Stich',
+        description: 'Googles AI UI designer',
       },
       {
         name: 'Figma',
@@ -112,10 +90,7 @@ const usesCategories: UsesCategory[] = [
     title: 'CLI & Version Control',
     icon: Terminal,
     items: [
-      {
-        name: 'zsh + Oh My Zsh',
-        description: 'Shell with plugins, themes, and productivity enhancements',
-      },
+   
       {
         name: 'git',
         description: 'Version control for all projects',
@@ -133,31 +108,9 @@ const usesCategories: UsesCategory[] = [
       {
         name: 'Digital Ocean',
         description: 'Primary cloud provider for droplets and managed databases',
-      },
-      {
-        name: 'AWS',
-        description: 'Used occasionally for specific services and infrastructure',
-      },
+      }
     ],
-  },
-  {
-    title: 'Workspace',
-    icon: Chair,
-    items: [
-      {
-        name: 'Dual L-Desk Setup',
-        description: 'Expansive workspace with room for multiple systems',
-      },
-      {
-        name: 'Multi-Monitor Array',
-        description: 'Work machine on one side, gaming rig on the other',
-      },
-      {
-        name: 'Gaming PC',
-        description: 'Separate system for gaming and personal projects',
-      },
-    ],
-  },
+  }
 ];
 
 export default function UsesPage() {

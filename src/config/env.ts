@@ -55,13 +55,13 @@ export const env = {
 
 export const app = {
   /** Public URL of the site */
-  url: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
+  url: process.env.NEXT_PUBLIC_APP_URL || 'Frendolsk.com',
 
   /** Site name displayed in UI */
-  name: process.env.NEXT_PUBLIC_SITE_NAME || 'My Site',
+  name: process.env.NEXT_PUBLIC_SITE_NAME || 'Frendo',
 
   /** Site description for SEO */
-  description: process.env.NEXT_PUBLIC_SITE_DESCRIPTION || 'A personal website',
+  description: process.env.NEXT_PUBLIC_SITE_DESCRIPTION || 'Dalitso Bandas aka frendos personal site'
 };
 
 // =============================================================================
@@ -72,13 +72,13 @@ export const app = {
 
 export const author = {
   /** Author's display name */
-  name: process.env.NEXT_PUBLIC_AUTHOR_NAME || 'Your Name',
+  name: process.env.NEXT_PUBLIC_AUTHOR_NAME || 'Dalitso',
 
   /** Author's email */
-  email: process.env.NEXT_PUBLIC_AUTHOR_EMAIL || 'you@example.com',
+  email: process.env.NEXT_PUBLIC_AUTHOR_EMAIL || 'dalitsofernandobanda.com',
 
   /** Author's website URL */
-  url: process.env.NEXT_PUBLIC_AUTHOR_URL || 'https://example.com',
+  url: process.env.NEXT_PUBLIC_AUTHOR_URL || 'https://frendolsk.com',
 };
 
 // =============================================================================

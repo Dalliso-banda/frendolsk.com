@@ -642,7 +642,7 @@ export default function SettingsPage() {
                   label="Title Template"
                   value={formData.seo.titleTemplate}
                   onChange={(e) => updateSeoField('titleTemplate', e.target.value)}
-                  helperText="Use %s for page title (e.g., '%s | My Site')"
+                  helperText="Use %s for page title (e.g., '%s |Frendolsk')"
                   sx={{ mb: 3 }}
                 />
 
