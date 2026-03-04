@@ -1,5 +1,5 @@
-import { describe, it, expect, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { render, screen, cleanup } from '@testing-library/react';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 
 // Mock next/navigation
@@ -33,9 +33,7 @@ vi.mock('@/config', () => ({
       { label: 'Home', href: '/' },
       { label: 'About', href: '/about' },
     ],
-    resources: [
-      { label: 'Blog', href: '/blog' },
-    ],
+    resources: [{ label: 'Blog', href: '/blog' }],
   },
 }));
 
@@ -61,10 +59,14 @@ const Wrapper = ({ children }: { children: React.ReactNode }) => (
 );
 
 describe('Logo', () => {
+  beforeEach(() => {
+    cleanup();
+  });
+
   it('renders the logo link', async () => {
     const { Logo } = await import('../common/Logo');
     render(<Logo />, { wrapper: Wrapper });
-    
+
     const link = screen.getByRole('link');
     expect(link).toBeInTheDocument();
     expect(link).toHaveAttribute('href', '/');
@@ -73,9 +75,9 @@ describe('Logo', () => {
   it('renders with different sizes', async () => {
     const { Logo } = await import('../common/Logo');
     const { rerender } = render(<Logo size="small" />, { wrapper: Wrapper });
-    
+
     expect(screen.getByRole('link')).toBeInTheDocument();
-    
+
     rerender(
       <Wrapper>
         <Logo size="large" />

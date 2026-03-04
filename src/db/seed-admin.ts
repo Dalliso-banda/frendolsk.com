@@ -10,16 +10,15 @@
  * IMPORTANT: Change the password immediately after first login!
  */
 
+import 'dotenv/config';
 import { getDb, closeDb } from './index';
-import { hashPassword } from './users';
+import bcrypt from 'bcryptjs';
 import { admin } from '@/config/env';
 
 async function seedAdmin() {
-
-  console.log('Starting admin seeding process...',admin);
   const email = admin.email;
   const password = admin.password;
-  const display_name = admin.name;
+  const displayName = admin.name;
 
   console.log('Creating admin user...');
 
@@ -35,19 +34,14 @@ async function seedAdmin() {
   }
 
   // Create admin user
-  const passwordHash = await hashPassword(password);
-
-  console.log('Password hash:', passwordHash );
-
-
+  const passwordHash = await bcrypt.hash(password, 12);
 
   await db('admin_users').insert({
     email,
-    display_name,
+    display_name: displayName,
     password_hash: passwordHash,
- 
+    totp_enabled: false,
   });
-
 
   console.log(`✓ Admin user created successfully!`);
   console.log(`  Email: ${email}`);

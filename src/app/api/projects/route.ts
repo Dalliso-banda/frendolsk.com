@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 
 /**
  * Projects API Route
- * 
+ *
  * Returns projects data from the database, with static example fallback.
  * CUSTOMIZE: Replace the staticProjects data with your own projects,
  * or better yet, use the database seeds to populate your portfolio.
@@ -14,67 +14,62 @@ const staticProjects = [
     id: '1',
     title: 'Personal Portfolio',
     slug: 'personal-portfolio',
-    description: 'My personal website built with Next.js, featuring a blog, projects showcase, and contact form. Fully responsive with dark mode support.',
+    description:
+      'My personal website built with Next.js, featuring a blog, projects showcase, and contact form. Fully responsive with dark mode support.',
     image_url: '/images/projects/portfolio.png',
-    github_url: 'https://github.com/Dalliso-banda/frendolsk.com',
-    live_url: 'https://frendolsk.com',
+    github_url: 'https://github.com/yourusername/portfolio',
+    live_url: 'https://yoursite.com',
     is_featured: true,
-    technologies: ['Next.js', 'React', 'TypeScript', 'PostgreSQL', 'MUI'],
+    technologies: ['Next.js', 'React', 'TypeScript', 'PostgreSQL', 'Tailwind CSS'],
   },
   {
     id: '2',
-    title: 'Artasylum',
+    title: 'Task Manager App',
     slug: 'task-manager',
-    description: 'A site for people who write poetry to publish there poems ',
+    description:
+      'A full-stack task management application with real-time updates, team collaboration features, and calendar integration.',
     image_url: '/images/projects/task-manager.png',
-    github_url: 'https://github.com/yourusername/tasrk-manage',
-    live_url: 'https://artasylum.xyz',
+    github_url: 'https://github.com/yourusername/task-manager',
+    live_url: 'https://tasks.yoursite.com',
     is_featured: true,
-    technologies: ['React', 'Node.js', 'postgres','express'],
+    technologies: ['React', 'Node.js', 'Socket.io', 'MongoDB', 'Docker'],
   },
   {
     id: '3',
-    title: 'Rule based Template',
-    slug: 'rule-based-chat-bot',
-    description: 'A beautiful weather dashboard that displays forecasts, historical data, and weather alerts using multiple weather APIs.',
+    title: 'Weather Dashboard',
+    slug: 'weather-dashboard',
+    description:
+      'A beautiful weather dashboard that displays forecasts, historical data, and weather alerts using multiple weather APIs.',
     image_url: '/images/projects/weather.png',
-    github_url: 'https://github.com/Dalliso-banda/ruleBasedChatBot',
-    live_url: null,
-    is_featured: true,
-    technologies: ['compromise.js', 'node.js'],
+    github_url: 'https://github.com/yourusername/weather-app',
+    live_url: 'https://weather.yoursite.com',
+    is_featured: false,
+    technologies: ['Vue.js', 'Chart.js', 'OpenWeather API'],
   },
   {
     id: '4',
-    title: 'Wadal',
+    title: 'E-commerce API',
     slug: 'ecommerce-api',
-    description: 'A silly project of converting android phones into sim card farms that be sending bulk messages.',
+    description:
+      'A RESTful API for e-commerce applications with authentication, product management, cart functionality, and payment integration.',
     image_url: '/images/projects/api.png',
-    github_url: 'https://github.com/Dalliso-banda/wadal',
+    github_url: 'https://github.com/yourusername/ecommerce-api',
     live_url: null,
-    is_featured: false,
-    technologies: ['Node.js'],
-  },  {
-    id: '5',
-    title: 'THriftzone',
-    slug: 'ecommerce',
-    description: 'online platfrorm for buying and selling second-hand clothes, promoting sustainable fashion and reducing waste.',
-    image_url: '/images/projects/api.png',
-    github_url: 'https://github.com/Dalliso-banda/thriftzone',
-    live_url: null,
-    is_featured: false,
-    technologies: ['Node.js'],
+    is_featured: true,
+    technologies: ['Node.js', 'Express', 'PostgreSQL', 'Stripe', 'JWT'],
   },
-   {
-    id: '6',
-    title: 'DOCRUSH',
-    slug: 'health',
-    description: 'A prototype of what could be an intermedaite between the doctor and patient built with the gemini API.',
-    image_url: '/images/projects/api.png',
-    github_url: 'https://github.com/Dalliso-banda/docRush-AIGenesis',
+  {
+    id: '5',
+    title: 'CLI Tool Suite',
+    slug: 'cli-tools',
+    description:
+      'A collection of command-line tools for developer productivity, including file utilities, git helpers, and project scaffolding.',
+    image_url: '/images/projects/cli.png',
+    github_url: 'https://github.com/yourusername/cli-tools',
     live_url: null,
     is_featured: false,
-    technologies: ['Node.js'],
-  }
+    technologies: ['TypeScript', 'Node.js', 'Commander.js'],
+  },
 ];
 
 // Dynamic import for database module
@@ -93,10 +88,10 @@ export async function GET() {
   if (getDb) {
     try {
       const db = getDb();
-      
+
       // Check if table exists
       const tableExists = await db.schema.hasTable('projects');
-      
+
       if (tableExists) {
         // Fetch projects with technologies
         const projectsRaw = await db('projects')

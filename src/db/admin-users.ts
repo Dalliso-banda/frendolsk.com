@@ -150,7 +150,15 @@ export async function verifyAdminCredentials(
 ): Promise<AdminUser | null> {
   const db = getDb();
   const user = await db('admin_users')
-    .select('id', 'email', 'display_name', 'avatar_url', 'password_hash', 'created_at', 'updated_at')
+    .select(
+      'id',
+      'email',
+      'display_name',
+      'avatar_url',
+      'password_hash',
+      'created_at',
+      'updated_at'
+    )
     .where('email', email)
     .first();
 
@@ -213,7 +221,7 @@ export async function getPrimaryAdminUser(): Promise<AdminUserProfile | null> {
 export async function createAdminUser(data: CreateAdminUserData): Promise<AdminUser> {
   const db = getDb();
   const passwordHash = await bcrypt.hash(data.password, 12);
-    console.log(data)
+
   const [row] = await db('admin_users')
     .insert({
       email: data.email,
@@ -282,9 +290,7 @@ export async function updateAdminEmail(id: string, email: string): Promise<boole
   const existing = await db('admin_users').where('email', email).whereNot('id', id).first();
   if (existing) return false;
 
-  const result = await db('admin_users')
-    .where('id', id)
-    .update({ email, updated_at: new Date() });
+  const result = await db('admin_users').where('id', id).update({ email, updated_at: new Date() });
 
   return result > 0;
 }
@@ -296,12 +302,10 @@ export async function updateAdminPassword(id: string, newPassword: string): Prom
   const db = getDb();
   const passwordHash = await bcrypt.hash(newPassword, 12);
 
-  const result = await db('admin_users')
-    .where('id', id)
-    .update({
-      password_hash: passwordHash,
-      updated_at: new Date(),
-    });
+  const result = await db('admin_users').where('id', id).update({
+    password_hash: passwordHash,
+    updated_at: new Date(),
+  });
 
   return result > 0;
 }
@@ -333,13 +337,11 @@ export async function deleteAdminUser(id: string): Promise<boolean> {
  */
 export async function clearAvatarMediaReference(mediaId: string): Promise<number> {
   const db = getDb();
-  const result = await db('admin_users')
-    .where('avatar_media_id', mediaId)
-    .update({ 
-      avatar_media_id: null, 
-      avatar_url: null,
-      updated_at: new Date() 
-    });
+  const result = await db('admin_users').where('avatar_media_id', mediaId).update({
+    avatar_media_id: null,
+    avatar_url: null,
+    updated_at: new Date(),
+  });
   return result;
 }
 
@@ -348,10 +350,7 @@ export async function clearAvatarMediaReference(mediaId: string): Promise<number
  */
 export async function getAvatarMediaId(userId: string): Promise<string | null> {
   const db = getDb();
-  const row = await db('admin_users')
-    .select('avatar_media_id')
-    .where('id', userId)
-    .first();
+  const row = await db('admin_users').select('avatar_media_id').where('id', userId).first();
   return row?.avatar_media_id || null;
 }
 

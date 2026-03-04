@@ -1,13 +1,12 @@
 require('dotenv').config();
 
-
 /**
  * Knex Configuration
- * 
+ *
  * Uses environment variables from:
  * - Local: .env file
  * - Production: docker-compose.override.yml environment
- * 
+ *
  * @type {import('knex').Knex.Config}
  */
 const config = {
@@ -16,7 +15,7 @@ const config = {
     connection: {
       host: process.env.DATABASE_HOST || 'localhost',
       port: parseInt(process.env.DATABASE_PORT || '5432', 10),
-      database: process.env.DATABASE_NAME || '',
+      database: process.env.DATABASE_NAME || 'mysite',
       user: process.env.DATABASE_USER || 'postgres',
       password: process.env.DATABASE_PASSWORD || '',
     },

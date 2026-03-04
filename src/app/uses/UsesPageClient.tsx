@@ -12,15 +12,7 @@ import {
   Paper,
   alpha,
 } from '@mui/material';
-import {
-  Computer,
-  Code,
-  Brush,
-  Terminal,
-  Cloud,
-  Chair,
-  Build,
-} from '@mui/icons-material';
+import { Computer, Code, Brush, Terminal, Cloud, Chair, Build } from '@mui/icons-material';
 import { AuthAwareMainLayout } from '@/components';
 
 interface UsesCategory {
@@ -39,13 +31,32 @@ const usesCategories: UsesCategory[] = [
     icon: Computer,
     items: [
       {
-        name: 'Packer bell book',
-        description: '2.9 GHz 2-Core Intel celeron with 8GB RAM — my primary dev machine',
-      }
-    ,
+        name: 'MacBook Pro 16" (2019)',
+        description: '2.4 GHz 8-Core Intel Core i9 with 64GB RAM — my primary dev machine',
+      },
       {
-        name: 'infinix smart7',
-        description: 'My personal phone which i use to check resposivness of my sites ',
+        name: '3× Samsung LU28R55 Monitors',
+        description: '28" 4K displays arranged across my workspace',
+      },
+      {
+        name: 'Logitech Ergo K860',
+        description: 'Split ergonomic keyboard for comfortable typing',
+      },
+      {
+        name: 'Apple Magic Trackpad 2',
+        description: 'Gesture-based navigation and precision control',
+      },
+      {
+        name: 'iPhone 14 Pro Max',
+        description: 'Primary mobile device for testing and daily use',
+      },
+      {
+        name: 'Samsung Galaxy A24',
+        description: 'Android device for cross-platform testing',
+      },
+      {
+        name: 'AirPods Pro 2',
+        description: 'Noise cancellation for focused work sessions',
       },
     ],
   },
@@ -58,17 +69,20 @@ const usesCategories: UsesCategory[] = [
         description: 'Primary code editor — fast, extensible, and reliable',
       },
       {
-        name: 'Terminal',
-        description: 'Feature-rich terminal on linux mint',
+        name: 'iTerm2',
+        description: 'Feature-rich terminal emulator for macOS',
       },
       {
         name: 'Docker Desktop',
         description: 'Container management for local development environments',
       },
-    
       {
-        name: 'Nano',
-        description: 'Lightweight text editor for quick edits ',
+        name: 'pgAdmin 4',
+        description: 'PostgreSQL database management and querying',
+      },
+      {
+        name: 'BBEdit',
+        description: 'Lightweight text editor for quick edits and file comparison',
       },
     ],
   },
@@ -77,8 +91,8 @@ const usesCategories: UsesCategory[] = [
     icon: Brush,
     items: [
       {
-        name: 'Stich',
-        description: 'Googles AI UI designer',
+        name: 'Adobe Photoshop',
+        description: 'Image editing and graphic design work',
       },
       {
         name: 'Figma',
@@ -90,7 +104,10 @@ const usesCategories: UsesCategory[] = [
     title: 'CLI & Version Control',
     icon: Terminal,
     items: [
-   
+      {
+        name: 'zsh + Oh My Zsh',
+        description: 'Shell with plugins, themes, and productivity enhancements',
+      },
       {
         name: 'git',
         description: 'Version control for all projects',
@@ -108,9 +125,31 @@ const usesCategories: UsesCategory[] = [
       {
         name: 'Digital Ocean',
         description: 'Primary cloud provider for droplets and managed databases',
-      }
+      },
+      {
+        name: 'AWS',
+        description: 'Used occasionally for specific services and infrastructure',
+      },
     ],
-  }
+  },
+  {
+    title: 'Workspace',
+    icon: Chair,
+    items: [
+      {
+        name: 'Dual L-Desk Setup',
+        description: 'Expansive workspace with room for multiple systems',
+      },
+      {
+        name: 'Multi-Monitor Array',
+        description: 'Work machine on one side, gaming rig on the other',
+      },
+      {
+        name: 'Gaming PC',
+        description: 'Separate system for gaming and personal projects',
+      },
+    ],
+  },
 ];
 
 export default function UsesPage() {
@@ -122,25 +161,21 @@ export default function UsesPage() {
           <Typography variant="h2" component="h1" gutterBottom sx={{ fontWeight: 700 }}>
             Uses
           </Typography>
-          <Typography
-            variant="h6"
-            color="text.secondary"
-            sx={{ maxWidth: 600, mx: 'auto' }}
-          >
-              A comprehensive list of the tools, apps, and gear I use daily for development,
-              design, and productivity. Inspired by{' '}
-              <Box
-                component="a"
-                href="https://uses.tech"
-                target="_blank"
-                rel="noopener noreferrer"
-                sx={{ color: 'primary.main' }}
-              >
-                uses.tech
-              </Box>
-              .
-            </Typography>
-          </Box>
+          <Typography variant="h6" color="text.secondary" sx={{ maxWidth: 600, mx: 'auto' }}>
+            A comprehensive list of the tools, apps, and gear I use daily for development, design,
+            and productivity. Inspired by{' '}
+            <Box
+              component="a"
+              href="https://uses.tech"
+              target="_blank"
+              rel="noopener noreferrer"
+              sx={{ color: 'primary.main' }}
+            >
+              uses.tech
+            </Box>
+            .
+          </Typography>
+        </Box>
 
         {/* Categories */}
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, mb: 6 }}>
@@ -199,7 +234,7 @@ export default function UsesPage() {
               </Paper>
             );
           })}
-          </Box>
+        </Box>
 
         {/* Note */}
         <Paper
@@ -214,8 +249,8 @@ export default function UsesPage() {
           }}
         >
           <Typography variant="body1" color="text.secondary">
-            <strong>Note:</strong> This page contains affiliate links where applicable.
-            I only recommend products I actually use and believe in.
+            <strong>Note:</strong> This page contains affiliate links where applicable. I only
+            recommend products I actually use and believe in.
           </Typography>
         </Paper>
       </Container>

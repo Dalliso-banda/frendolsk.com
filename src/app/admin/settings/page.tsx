@@ -286,7 +286,15 @@ export default function SettingsPage() {
 
   if (loading) {
     return (
-      <Box sx={{ p: 3, display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 400 }}>
+      <Box
+        sx={{
+          p: 3,
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          minHeight: 400,
+        }}
+      >
         <CircularProgress />
       </Box>
     );
@@ -303,7 +311,16 @@ export default function SettingsPage() {
   return (
     <Box sx={{ p: { xs: 2, sm: 3 } }}>
       {/* Header */}
-      <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 2 }}>
+      <Box
+        sx={{
+          mb: 3,
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'flex-start',
+          flexWrap: 'wrap',
+          gap: 2,
+        }}
+      >
         <Box>
           <Typography variant="h4" component="h1" fontWeight="bold" gutterBottom>
             Settings
@@ -512,7 +529,8 @@ export default function SettingsPage() {
               Social Links
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-              Add your social media profile full URLs. These will be displayed in your site&apos;s footer and author cards.
+              Add your social media profile full URLs. These will be displayed in your site&apos;s
+              footer and author cards.
             </Typography>
             <Divider sx={{ mb: 3 }} />
 
@@ -539,7 +557,11 @@ export default function SettingsPage() {
                   placeholder="https://github.com/username"
                   slotProps={{ inputLabel: { shrink: true } }}
                   InputProps={{
-                    startAdornment: <InputAdornment position="start"><GitHub fontSize="small" /></InputAdornment>,
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <GitHub fontSize="small" />
+                      </InputAdornment>
+                    ),
                   }}
                 />
               </Grid>
@@ -552,7 +574,11 @@ export default function SettingsPage() {
                   placeholder="https://linkedin.com/in/username"
                   slotProps={{ inputLabel: { shrink: true } }}
                   InputProps={{
-                    startAdornment: <InputAdornment position="start"><LinkedIn fontSize="small" /></InputAdornment>,
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <LinkedIn fontSize="small" />
+                      </InputAdornment>
+                    ),
                   }}
                 />
               </Grid>
@@ -565,7 +591,11 @@ export default function SettingsPage() {
                   placeholder="https://facebook.com/username"
                   slotProps={{ inputLabel: { shrink: true } }}
                   InputProps={{
-                    startAdornment: <InputAdornment position="start"><Facebook fontSize="small" /></InputAdornment>,
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <Facebook fontSize="small" />
+                      </InputAdornment>
+                    ),
                   }}
                 />
               </Grid>
@@ -578,7 +608,11 @@ export default function SettingsPage() {
                   placeholder="https://instagram.com/username"
                   slotProps={{ inputLabel: { shrink: true } }}
                   InputProps={{
-                    startAdornment: <InputAdornment position="start"><Instagram fontSize="small" /></InputAdornment>,
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <Instagram fontSize="small" />
+                      </InputAdornment>
+                    ),
                   }}
                 />
               </Grid>
@@ -591,7 +625,11 @@ export default function SettingsPage() {
                   placeholder="https://tiktok.com/@username"
                   slotProps={{ inputLabel: { shrink: true } }}
                   InputProps={{
-                    startAdornment: <InputAdornment position="start"><TikTokIcon fontSize="small" /></InputAdornment>,
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <TikTokIcon fontSize="small" />
+                      </InputAdornment>
+                    ),
                   }}
                 />
               </Grid>
@@ -604,7 +642,11 @@ export default function SettingsPage() {
                   placeholder="https://youtube.com/@username"
                   slotProps={{ inputLabel: { shrink: true } }}
                   InputProps={{
-                    startAdornment: <InputAdornment position="start"><YouTube fontSize="small" /></InputAdornment>,
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <YouTube fontSize="small" />
+                      </InputAdornment>
+                    ),
                   }}
                 />
               </Grid>
@@ -617,7 +659,11 @@ export default function SettingsPage() {
                   placeholder="https://discord.gg/invite-code"
                   slotProps={{ inputLabel: { shrink: true } }}
                   InputProps={{
-                    startAdornment: <InputAdornment position="start"><DiscordIcon fontSize="small" /></InputAdornment>,
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <DiscordIcon fontSize="small" />
+                      </InputAdornment>
+                    ),
                   }}
                 />
               </Grid>
@@ -642,7 +688,7 @@ export default function SettingsPage() {
                   label="Title Template"
                   value={formData.seo.titleTemplate}
                   onChange={(e) => updateSeoField('titleTemplate', e.target.value)}
-                  helperText="Use %s for page title (e.g., '%s |Frendolsk')"
+                  helperText="Use %s for page title (e.g., '%s | My Site')"
                   sx={{ mb: 3 }}
                 />
 

@@ -1,7 +1,17 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Box, Typography, Button, Container, Card, CardContent, Chip, alpha, Skeleton } from '@mui/material';
+import {
+  Box,
+  Typography,
+  Button,
+  Container,
+  Card,
+  CardContent,
+  Chip,
+  alpha,
+  Skeleton,
+} from '@mui/material';
 import Link from '@/components/common/Link';
 import { ArrowForward, Code, Article, Person } from '@mui/icons-material';
 import { AuthAwareMainLayout, ThreeColumnLayout, SidebarWidget } from '@/components';
@@ -62,7 +72,7 @@ function RightSidebar({ tags }: { tags: TagData[] }) {
       <SidebarWidget title="About">
         <Typography variant="body2" color="text.secondary" sx={{ mb: 2.5, lineHeight: 1.7 }}>
           I&apos;m a full-stack developer passionate about building beautiful, performant web
-          applications. Currently exploring the intersection of AI and engineering.
+          applications. Currently exploring the intersection of design and engineering.
         </Typography>
         <Button
           component={Link}
@@ -86,16 +96,18 @@ function RightSidebar({ tags }: { tags: TagData[] }) {
               <Skeleton width={60} height={24} />
             </>
           ) : (
-            tags.slice(0, 8).map((tag) => (
-              <Chip
-                key={tag.id}
-                label={tag.name}
-                size="small"
-                component={Link}
-                href={`/blog/tag/${tag.slug}`}
-                clickable
-              />
-            ))
+            tags
+              .slice(0, 8)
+              .map((tag) => (
+                <Chip
+                  key={tag.id}
+                  label={tag.name}
+                  size="small"
+                  component={Link}
+                  href={`/blog/tag/${tag.slug}`}
+                  clickable
+                />
+              ))
           )}
         </Box>
       </SidebarWidget>
@@ -202,12 +214,13 @@ export default function HomePage() {
                   WebkitBackgroundClip: 'text',
                   WebkitTextFillColor: 'transparent',
                   backgroundClip: 'text',
-                  textShadow: theme.palette.mode === 'dark' 
-                    ? `0 0 40px ${alpha(theme.palette.primary.main, 0.4)}`
-                    : 'none',
+                  textShadow:
+                    theme.palette.mode === 'dark'
+                      ? `0 0 40px ${alpha(theme.palette.primary.main, 0.4)}`
+                      : 'none',
                 })}
               >
-               {/* this part to update automaticlly {authorName}*/} Dalitso Banda
+                {authorName}
               </Box>
             </Typography>
 
@@ -236,13 +249,7 @@ export default function HomePage() {
               >
                 Read the Blog
               </Button>
-              <Button 
-                component={Link} 
-                href="/about" 
-                variant="outlined" 
-                size="large"
-                sx={{ px: 4 }}
-              >
+              <Button component={Link} href="/about" variant="outlined" size="large" sx={{ px: 4 }}>
                 About Me
               </Button>
             </Box>
@@ -290,69 +297,67 @@ export default function HomePage() {
             ) : featuredPosts.length === 0 ? (
               <Card>
                 <CardContent sx={{ p: 4, textAlign: 'center' }}>
-                  <Typography color="text.secondary">
-                    No posts yet. Check back soon!
-                  </Typography>
+                  <Typography color="text.secondary">No posts yet. Check back soon!</Typography>
                 </CardContent>
               </Card>
             ) : (
               featuredPosts.map((post) => (
-              <Card
-                key={post.id}
-                component={Link}
-                href={`/blog/${post.slug}`}
-                sx={(theme) => ({
-                  textDecoration: 'none',
-                  transition: 'all 0.2s ease',
-                  '&:hover': {
-                    transform: 'translateY(-2px)',
-                    boxShadow: `0 8px 30px ${alpha(theme.palette.primary.main, 0.15)}`,
-                    borderColor: alpha(theme.palette.primary.main, 0.3),
-                  },
-                })}
-              >
-                <CardContent sx={{ p: 3 }}>
-                  <Typography
-                    variant="h6"
-                    component="h3"
-                    sx={{
-                      mb: 1,
-                      fontWeight: 600,
-                      color: 'text.primary',
-                    }}
-                  >
-                    {post.title}
-                  </Typography>
-
-                  <Typography
-                    variant="body2"
-                    color="text.secondary"
-                    sx={{
-                      mb: 2,
-                      display: '-webkit-box',
-                      WebkitLineClamp: 2,
-                      WebkitBoxOrient: 'vertical',
-                      overflow: 'hidden',
-                    }}
-                  >
-                    {post.excerpt}
-                  </Typography>
-
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
-                    {post.tags.slice(0, 3).map((tag) => (
-                      <Chip key={tag.id} label={tag.name} size="small" variant="outlined" />
-                    ))}
-                    <Typography variant="caption" color="text.disabled" sx={{ ml: 'auto' }}>
-                      {new Date(post.publishedAt).toLocaleDateString('en-US', {
-                        month: 'short',
-                        day: 'numeric',
-                        year: 'numeric',
-                      })}
+                <Card
+                  key={post.id}
+                  component={Link}
+                  href={`/blog/${post.slug}`}
+                  sx={(theme) => ({
+                    textDecoration: 'none',
+                    transition: 'all 0.2s ease',
+                    '&:hover': {
+                      transform: 'translateY(-2px)',
+                      boxShadow: `0 8px 30px ${alpha(theme.palette.primary.main, 0.15)}`,
+                      borderColor: alpha(theme.palette.primary.main, 0.3),
+                    },
+                  })}
+                >
+                  <CardContent sx={{ p: 3 }}>
+                    <Typography
+                      variant="h6"
+                      component="h3"
+                      sx={{
+                        mb: 1,
+                        fontWeight: 600,
+                        color: 'text.primary',
+                      }}
+                    >
+                      {post.title}
                     </Typography>
-                  </Box>
-                </CardContent>
-              </Card>
-            ))
+
+                    <Typography
+                      variant="body2"
+                      color="text.secondary"
+                      sx={{
+                        mb: 2,
+                        display: '-webkit-box',
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient: 'vertical',
+                        overflow: 'hidden',
+                      }}
+                    >
+                      {post.excerpt}
+                    </Typography>
+
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
+                      {post.tags.slice(0, 3).map((tag) => (
+                        <Chip key={tag.id} label={tag.name} size="small" variant="outlined" />
+                      ))}
+                      <Typography variant="caption" color="text.disabled" sx={{ ml: 'auto' }}>
+                        {new Date(post.publishedAt).toLocaleDateString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                          year: 'numeric',
+                        })}
+                      </Typography>
+                    </Box>
+                  </CardContent>
+                </Card>
+              ))
             )}
           </Box>
         </Box>
