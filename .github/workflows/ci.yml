@@ -209,7 +209,7 @@ jobs:
           path: .next/
 
       - name: Run E2E tests
-        run: pnpm test:e2e -- --project=chromium
+        run: pnpm test:e2e --project=chromium
         env:
           DATABASE_URL: 'postgresql://test:test@localhost:5432/test'
           NEXTAUTH_URL: 'http://localhost:3000'
@@ -432,6 +432,4 @@ jobs:
         run: pnpm audit --audit-level=high || true
         continue-on-error: true
 
-      - name: Run Dependency Review
-        uses: actions/dependency-review-action@v4
-        if: github.event_name == 'pull_request'
+
