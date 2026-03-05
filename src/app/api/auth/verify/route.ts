@@ -67,7 +67,12 @@ export async function POST(request: NextRequest) {
       role: 'admin',
     });
   } catch (error) {
-    console.error('Verify error:', error);
+    if (
+      !(error instanceof Error) ||
+      !(error as NodeJS.ErrnoException).code?.includes('ECONNREFUSED')
+    ) {
+      console.error('Verify error:', error);
+    }
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
