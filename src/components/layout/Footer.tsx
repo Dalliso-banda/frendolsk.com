@@ -1,6 +1,15 @@
 'use client';
 
-import { Box, Container, Grid2 as Grid, Typography, IconButton, useTheme, alpha, SvgIcon } from '@mui/material';
+import {
+  Box,
+  Container,
+  Grid2 as Grid,
+  Typography,
+  IconButton,
+  useTheme,
+  alpha,
+  SvgIcon,
+} from '@mui/material';
 import { useState, useEffect } from 'react';
 import Link from '@/components/common/Link';
 import { GitHub, LinkedIn, RssFeed, Facebook, Instagram, YouTube } from '@mui/icons-material';
@@ -67,16 +76,18 @@ export function Footer() {
 
   // Build social links dynamically from settings - only include ones that have values
   // Only render social links after mounting to prevent hydration mismatch
-  const socialLinks: SocialLink[] = mounted ? Object.entries(socialPlatforms)
-    .filter(([key]) => {
-      const value = settings?.social?.[key as keyof typeof settings.social];
-      return value && value.trim() !== '';
-    })
-    .map(([key, config]) => ({
-      icon: config.icon,
-      href: settings?.social?.[key as keyof typeof settings.social] || '',
-      label: config.label,
-    })) : [];
+  const socialLinks: SocialLink[] = mounted
+    ? Object.entries(socialPlatforms)
+        .filter(([key]) => {
+          const value = settings?.social?.[key as keyof typeof settings.social];
+          return value && value.trim() !== '';
+        })
+        .map(([key, config]) => ({
+          icon: config.icon,
+          href: settings?.social?.[key as keyof typeof settings.social] || '',
+          label: config.label,
+        }))
+    : [];
 
   // Always add RSS Feed at the end
   socialLinks.push({ icon: RssFeed, href: '/rss.xml', label: 'RSS Feed' });
@@ -96,12 +107,8 @@ export function Footer() {
           {/* Logo & Description Column */}
           <Grid size={{ xs: 12, md: 6 }}>
             <Logo size="medium" />
-            <Typography
-              variant="body2"
-              color="text.secondary"
-              sx={{ mt: 2, mb: 3, maxWidth: 400 }}
-            >
-              {mounted ? (settings?.site?.description || '') : ''}
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 2, mb: 3, maxWidth: 400 }}>
+              {mounted ? settings?.site?.description || '' : ''}
             </Typography>
 
             {/* Social Links */}
@@ -201,11 +208,60 @@ export function Footer() {
           }}
         >
           <Typography variant="body2" color="text.secondary">
-            © {currentYear} {mounted ? (settings?.author?.name || 'Author') : 'Author'}. All rights reserved.
+            © {currentYear} {mounted ? settings?.author?.name || 'Author' : 'Author'}. All rights
+            reserved.
           </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Built with Next.js, TypeScript & MUI
-          </Typography>
+
+          {/* Powered by DevHolm */}
+          <Box
+            component="a"
+            href="https://github.com/chrishacia/devholm"
+            target="_blank"
+            rel="noopener noreferrer"
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 0.75,
+              textDecoration: 'none',
+              color: theme.palette.text.secondary,
+              transition: 'all 0.2s ease',
+              px: 1.5,
+              py: 0.5,
+              borderRadius: 1,
+              '&:hover': {
+                color: theme.palette.text.primary,
+                backgroundColor: alpha(theme.palette.primary.main, 0.08),
+              },
+            }}
+          >
+            <Box
+              sx={{
+                width: 18,
+                height: 18,
+                borderRadius: '4px',
+                background: 'linear-gradient(135deg, #22C55E 0%, #10B981 50%, #06B6D4 100%)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0,
+              }}
+            >
+              <Typography
+                sx={{
+                  fontSize: '8px',
+                  fontWeight: 700,
+                  color: 'white',
+                  lineHeight: 1,
+                  letterSpacing: '-0.02em',
+                }}
+              >
+                DH
+              </Typography>
+            </Box>
+            <Typography variant="caption" sx={{ fontWeight: 500 }}>
+              Powered by DevHolm
+            </Typography>
+          </Box>
         </Box>
       </Container>
     </Box>
