@@ -75,7 +75,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   logger: {
     error(error) {
       // CredentialsSignin is expected when invalid credentials are submitted
-      const err = error as Record<string, unknown>;
+      const err = error as unknown as Record<string, unknown>;
       if (
         err?.type === 'CredentialsSignin' ||
         err?.code === 'credentials' ||
