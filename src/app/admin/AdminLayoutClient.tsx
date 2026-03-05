@@ -117,10 +117,22 @@ export default function AdminLayoutClient({ children }: AdminLayoutClientProps) 
     }
   }, [status, fetchProfile]);
 
+  // Redirect unauthenticated users to login (defense-in-depth alongside middleware)
+  useEffect(() => {
+    if (status === 'unauthenticated' && pathname !== '/admin/login') {
+      router.push(`/admin/login?callbackUrl=${encodeURIComponent(pathname)}`);
+    }
+  }, [status, pathname, router]);
+
   // Login page doesn't need the admin shell
   const isLoginPage = pathname === '/admin/login';
   if (isLoginPage) {
     return <>{children}</>;
+  }
+
+  // Don't render admin UI for unauthenticated users
+  if (status === 'unauthenticated') {
+    return null;
   }
 
   const handleDrawerToggle = () => {
@@ -198,8 +210,8 @@ export default function AdminLayoutClient({ children }: AdminLayoutClientProps) 
       {/* Navigation */}
       <List sx={{ flex: 1, px: 1, py: 2 }}>
         {navItems.map((item) => {
-          const isActive = pathname === item.href ||
-            (item.href !== '/admin' && pathname.startsWith(item.href));
+          const isActive =
+            pathname === item.href || (item.href !== '/admin' && pathname.startsWith(item.href));
 
           return (
             <ListItem key={item.href} disablePadding sx={{ mb: 0.5 }}>
@@ -264,9 +276,7 @@ export default function AdminLayoutClient({ children }: AdminLayoutClientProps) 
             <ListItemIcon sx={{ minWidth: collapsed && !isMobile ? 0 : 40 }}>
               <Home />
             </ListItemIcon>
-            {(!collapsed || isMobile) && (
-              <ListItemText primary="Back to Site" />
-            )}
+            {(!collapsed || isMobile) && <ListItemText primary="Back to Site" />}
           </ListItemButton>
         </Tooltip>
       </Box>
@@ -352,7 +362,9 @@ export default function AdminLayoutClient({ children }: AdminLayoutClientProps) 
                 fontSize: '0.9rem',
               }}
             >
-              {profile?.displayName?.charAt(0).toUpperCase() || session?.user?.name?.charAt(0).toUpperCase() || 'A'}
+              {profile?.displayName?.charAt(0).toUpperCase() ||
+                session?.user?.name?.charAt(0).toUpperCase() ||
+                'A'}
             </Avatar>
             <Box sx={{ display: { xs: 'none', sm: 'block' } }}>
               <Typography variant="body2" fontWeight={600}>
@@ -372,25 +384,23 @@ export default function AdminLayoutClient({ children }: AdminLayoutClientProps) 
             transformOrigin={{ vertical: 'top', horizontal: 'right' }}
             sx={{ mt: 1 }}
           >
-            <MenuItem
-              component={Link}
-              href="/admin/profile"
-              onClick={handleMenuClose}
-            >
-              <ListItemIcon><Person fontSize="small" /></ListItemIcon>
+            <MenuItem component={Link} href="/admin/profile" onClick={handleMenuClose}>
+              <ListItemIcon>
+                <Person fontSize="small" />
+              </ListItemIcon>
               Profile
             </MenuItem>
-            <MenuItem
-              component={Link}
-              href="/admin/settings"
-              onClick={handleMenuClose}
-            >
-              <ListItemIcon><Settings fontSize="small" /></ListItemIcon>
+            <MenuItem component={Link} href="/admin/settings" onClick={handleMenuClose}>
+              <ListItemIcon>
+                <Settings fontSize="small" />
+              </ListItemIcon>
               Settings
             </MenuItem>
             <Divider />
             <MenuItem onClick={handleSignOut}>
-              <ListItemIcon><Logout fontSize="small" /></ListItemIcon>
+              <ListItemIcon>
+                <Logout fontSize="small" />
+              </ListItemIcon>
               Sign Out
             </MenuItem>
           </Menu>
