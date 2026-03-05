@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 
 /**
  * Resume API Route
- * 
+ *
  * Returns resume data from the database, with static example fallback.
  * CUSTOMIZE: Replace the staticResume data with your own information,
  * or better yet, use the database seeds to populate your resume.
@@ -145,11 +145,11 @@ export async function GET() {
   if (getDb) {
     try {
       const db = getDb();
-      
+
       // Check if tables exist
       const skillsExist = await db.schema.hasTable('skills');
       const experiencesExist = await db.schema.hasTable('experiences');
-      
+
       if (skillsExist && experiencesExist) {
         // Fetch skills grouped by category
         const skillsRaw = await db('skills').orderBy(['category', 'sort_order']);
@@ -196,7 +196,12 @@ export async function GET() {
         }
       }
     } catch (error) {
-      console.error('Resume API: Database error, using static data:', error);
+      if (
+        !(error instanceof Error) ||
+        !(error as NodeJS.ErrnoException).code?.includes('ECONNREFUSED')
+      ) {
+        console.error('Resume API: Database error, using static data:', error);
+      }
     }
   }
 

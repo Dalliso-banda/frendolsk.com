@@ -137,7 +137,7 @@ export async function seed(knex: Knex): Promise<void> {
   // ============================================
   await db('education').insert([
     {
-      institution: 'State University',
+      school: 'State University',
       degree: 'Bachelor of Science',
       field_of_study: 'Computer Science',
       start_date: '2013-09-01',

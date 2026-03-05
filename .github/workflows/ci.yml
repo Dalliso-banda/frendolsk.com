@@ -60,7 +60,6 @@ env:
   NODE_VERSION: '22'
   PNPM_VERSION: '10'
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
 
 jobs:
   # ===========================================================================
@@ -202,18 +201,14 @@ jobs:
       - name: Install Playwright browsers
         run: pnpm exec playwright install --with-deps chromium
 
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: build-output
-          path: .next/
-
       - name: Run E2E tests
-        run: pnpm test:e2e -- --project=chromium
+        run: pnpm test:e2e --project=chromium
         env:
           DATABASE_URL: 'postgresql://test:test@localhost:5432/test'
           NEXTAUTH_URL: 'http://localhost:3000'
           NEXTAUTH_SECRET: 'test-secret'
+          AUTH_SECRET: 'test-secret'
+          AUTH_URL: 'http://localhost:3000'
 
       - name: Upload Playwright report
         uses: actions/upload-artifact@v4
@@ -238,6 +233,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Lowercase image name
+        id: image
+        run: echo "name=${GITHUB_REPOSITORY,,}" >> "$GITHUB_OUTPUT"
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -252,7 +251,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          images: ${{ env.REGISTRY }}/${{ steps.image.outputs.name }}
           tags: |
             type=ref,event=branch
             type=sha,prefix=
@@ -282,6 +281,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Lowercase image name
+        id: image
+        run: echo "name=${GITHUB_REPOSITORY,,}" >> "$GITHUB_OUTPUT"
+
       - name: Setup SSH
         uses: webfactory/ssh-agent@v0.9.0
         with:
@@ -307,16 +310,15 @@ jobs:
           services:
             app:
               container_name: ${{ secrets.PROJECT_NAME }}-app
-              image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+              image: ${{ env.REGISTRY }}/${{ steps.image.outputs.name }}:latest
               restart: unless-stopped
-              ports:
-                - "${{ secrets.APP_PORT || '3000' }}:3000"
+              network_mode: host
               environment:
                 - NODE_ENV=production
                 - NEXT_PUBLIC_APP_URL=${{ secrets.SITE_URL }}
                 - NEXT_PUBLIC_SITE_NAME=${{ secrets.SITE_NAME }}
-                - DATABASE_URL=postgresql://${{ secrets.POSTGRES_USER }}:${{ secrets.POSTGRES_PASSWORD }}@host.docker.internal:5432/${{ secrets.POSTGRES_DB }}
-                - DATABASE_HOST=host.docker.internal
+                - DATABASE_URL=postgresql://${{ secrets.POSTGRES_USER }}:${{ secrets.POSTGRES_PASSWORD }}@localhost:5432/${{ secrets.POSTGRES_DB }}
+                - DATABASE_HOST=localhost
                 - DATABASE_PORT=5432
                 - DATABASE_NAME=${{ secrets.POSTGRES_DB }}
                 - DATABASE_USER=${{ secrets.POSTGRES_USER }}
@@ -328,8 +330,6 @@ jobs:
                 - ADMIN_PASSWORD=${{ secrets.ADMIN_PASSWORD }}
               volumes:
                 - ${{ secrets.PROJECT_NAME }}-uploads:/app/public/uploads
-              extra_hosts:
-                - "host.docker.internal:host-gateway"
               depends_on: []
 
             # Disable Docker PostgreSQL (using native PostgreSQL on host)
@@ -432,6 +432,4 @@ jobs:
         run: pnpm audit --audit-level=high || true
         continue-on-error: true
 
-      - name: Run Dependency Review
-        uses: actions/dependency-review-action@v4
-        if: github.event_name == 'pull_request'
+

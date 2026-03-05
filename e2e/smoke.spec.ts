@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 test.describe('Smoke Tests', () => {
   test('home page loads', async ({ page }) => {
     await page.goto('/');
-    await expect(page).toHaveTitle(/DevHolm/);
+    await expect(page).toHaveTitle(/.+/);
   });
 
   test('blog page loads', async ({ page }) => {

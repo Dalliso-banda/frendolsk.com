@@ -8,12 +8,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import {
-  getSiteInfo,
-  getAuthorInfo,
-  getSocialLinks,
-  getSeoConfig,
-} from '@/db/settings';
+import { getSiteInfo, getAuthorInfo, getSocialLinks, getSeoConfig } from '@/db/settings';
 import { checkRateLimit, getClientIp, rateLimitHeaders, RateLimits } from '@/lib/rate-limiter';
 
 // Cache the settings for 1 minute to reduce database load
@@ -23,11 +18,11 @@ const CACHE_TTL = 60 * 1000; // 1 minute
 
 async function getCachedSettings() {
   const now = Date.now();
-  
-  if (cachedSettings && (now - cacheTimestamp) < CACHE_TTL) {
+
+  if (cachedSettings && now - cacheTimestamp < CACHE_TTL) {
     return cachedSettings;
   }
-  
+
   try {
     const [site, author, social, seo] = await Promise.all([
       getSiteInfo(),
@@ -35,10 +30,10 @@ async function getCachedSettings() {
       getSocialLinks(),
       getSeoConfig(),
     ]);
-    
+
     cachedSettings = { site, author, social, seo };
     cacheTimestamp = now;
-    
+
     return cachedSettings;
   } catch (error) {
     // If we have cached settings, return them even if expired
@@ -82,8 +77,14 @@ export async function GET(request: NextRequest) {
       }
     );
   } catch (error) {
-    console.error('Site settings GET error:', error);
-    
+    // Only log unexpected errors, not connection refused (expected when DB is unavailable)
+    if (
+      !(error instanceof Error) ||
+      !(error as NodeJS.ErrnoException).code?.includes('ECONNREFUSED')
+    ) {
+      console.error('Site settings GET error:', error);
+    }
+
     // Return fallback settings if database is unavailable
     return NextResponse.json(
       {

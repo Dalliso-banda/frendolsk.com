@@ -2,11 +2,11 @@ require('dotenv').config();
 
 /**
  * Knex Configuration
- * 
+ *
  * Uses environment variables from:
  * - Local: .env file
  * - Production: docker-compose.override.yml environment
- * 
+ *
  * @type {import('knex').Knex.Config}
  */
 const config = {

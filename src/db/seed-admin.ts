@@ -10,6 +10,7 @@
  * IMPORTANT: Change the password immediately after first login!
  */
 
+import 'dotenv/config';
 import { getDb, closeDb } from './index';
 import bcrypt from 'bcryptjs';
 import { admin } from '@/config/env';

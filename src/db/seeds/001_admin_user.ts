@@ -1,6 +1,6 @@
 import type { Knex } from 'knex';
 import bcrypt from 'bcryptjs';
-import { admin } from '@/config/env';
+import { admin } from '../../config/env';
 
 export async function seed(knex: Knex): Promise<void> {
   // Clear existing data

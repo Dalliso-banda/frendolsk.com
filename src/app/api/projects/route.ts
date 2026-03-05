@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 
 /**
  * Projects API Route
- * 
+ *
  * Returns projects data from the database, with static example fallback.
  * CUSTOMIZE: Replace the staticProjects data with your own projects,
  * or better yet, use the database seeds to populate your portfolio.
@@ -14,7 +14,8 @@ const staticProjects = [
     id: '1',
     title: 'Personal Portfolio',
     slug: 'personal-portfolio',
-    description: 'My personal website built with Next.js, featuring a blog, projects showcase, and contact form. Fully responsive with dark mode support.',
+    description:
+      'My personal website built with Next.js, featuring a blog, projects showcase, and contact form. Fully responsive with dark mode support.',
     image_url: '/images/projects/portfolio.png',
     github_url: 'https://github.com/yourusername/portfolio',
     live_url: 'https://yoursite.com',
@@ -25,7 +26,8 @@ const staticProjects = [
     id: '2',
     title: 'Task Manager App',
     slug: 'task-manager',
-    description: 'A full-stack task management application with real-time updates, team collaboration features, and calendar integration.',
+    description:
+      'A full-stack task management application with real-time updates, team collaboration features, and calendar integration.',
     image_url: '/images/projects/task-manager.png',
     github_url: 'https://github.com/yourusername/task-manager',
     live_url: 'https://tasks.yoursite.com',
@@ -36,7 +38,8 @@ const staticProjects = [
     id: '3',
     title: 'Weather Dashboard',
     slug: 'weather-dashboard',
-    description: 'A beautiful weather dashboard that displays forecasts, historical data, and weather alerts using multiple weather APIs.',
+    description:
+      'A beautiful weather dashboard that displays forecasts, historical data, and weather alerts using multiple weather APIs.',
     image_url: '/images/projects/weather.png',
     github_url: 'https://github.com/yourusername/weather-app',
     live_url: 'https://weather.yoursite.com',
@@ -47,7 +50,8 @@ const staticProjects = [
     id: '4',
     title: 'E-commerce API',
     slug: 'ecommerce-api',
-    description: 'A RESTful API for e-commerce applications with authentication, product management, cart functionality, and payment integration.',
+    description:
+      'A RESTful API for e-commerce applications with authentication, product management, cart functionality, and payment integration.',
     image_url: '/images/projects/api.png',
     github_url: 'https://github.com/yourusername/ecommerce-api',
     live_url: null,
@@ -58,7 +62,8 @@ const staticProjects = [
     id: '5',
     title: 'CLI Tool Suite',
     slug: 'cli-tools',
-    description: 'A collection of command-line tools for developer productivity, including file utilities, git helpers, and project scaffolding.',
+    description:
+      'A collection of command-line tools for developer productivity, including file utilities, git helpers, and project scaffolding.',
     image_url: '/images/projects/cli.png',
     github_url: 'https://github.com/yourusername/cli-tools',
     live_url: null,
@@ -83,10 +88,10 @@ export async function GET() {
   if (getDb) {
     try {
       const db = getDb();
-      
+
       // Check if table exists
       const tableExists = await db.schema.hasTable('projects');
-      
+
       if (tableExists) {
         // Fetch projects with technologies
         const projectsRaw = await db('projects')
@@ -113,7 +118,12 @@ export async function GET() {
         }
       }
     } catch (error) {
-      console.error('Projects API: Database error, using static data:', error);
+      if (
+        !(error instanceof Error) ||
+        !(error as NodeJS.ErrnoException).code?.includes('ECONNREFUSED')
+      ) {
+        console.error('Projects API: Database error, using static data:', error);
+      }
     }
   }
 

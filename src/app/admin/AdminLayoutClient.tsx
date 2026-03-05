@@ -123,10 +123,22 @@ export default function AdminLayoutClient({ children }: AdminLayoutClientProps) 
     }
   }, [status, fetchProfile]);
 
+  // Redirect unauthenticated users to login (defense-in-depth alongside middleware)
+  useEffect(() => {
+    if (status === 'unauthenticated' && pathname !== '/admin/login') {
+      router.push(`/admin/login?callbackUrl=${encodeURIComponent(pathname)}`);
+    }
+  }, [status, pathname, router]);
+
   // Login page doesn't need the admin shell
   const isLoginPage = pathname === '/admin/login';
   if (isLoginPage) {
     return <>{children}</>;
+  }
+
+  // Don't render admin UI for unauthenticated users
+  if (status === 'unauthenticated') {
+    return null;
   }
 
   const handleDrawerToggle = () => {

@@ -1,7 +1,7 @@
 /**
  * Standalone Admin Seeder
  * =======================
- * 
+ *
  * Creates or updates the admin user on startup.
  * Designed to work in the minimal production Docker image.
  */
@@ -14,7 +14,7 @@ async function seedAdmin() {
   const databaseUrl = process.env.DATABASE_URL;
   const adminEmail = process.env.ADMIN_EMAIL;
   const adminPassword = process.env.ADMIN_PASSWORD;
-  
+
   if (!databaseUrl) {
     console.error('❌ DATABASE_URL environment variable is required');
     process.exit(1);
@@ -32,25 +32,22 @@ async function seedAdmin() {
 
   try {
     // Check if admin user exists
-    const existing = await db('admin_users')
-      .where('email', adminEmail)
-      .first();
+    const existing = await db('admin_users').where('email', adminEmail).first();
 
     if (existing) {
       console.log(`✅ Admin user ${adminEmail} already exists`);
     } else {
       // Hash password and create admin
       const passwordHash = await bcrypt.hash(adminPassword, 12);
-      
+
       await db('admin_users').insert({
         email: adminEmail,
         password_hash: passwordHash,
-        name: 'Admin',
-        role: 'admin',
+        display_name: 'Admin',
         created_at: new Date(),
         updated_at: new Date(),
       });
-      
+
       console.log(`✅ Created admin user: ${adminEmail}`);
     }
 

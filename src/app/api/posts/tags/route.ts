@@ -8,16 +8,18 @@ import { getAllTags } from '@/db/posts';
 export async function GET() {
   try {
     const tags = await getAllTags();
-    
+
     // Only return tags that have at least one published post
-    const activeTags = tags.filter(tag => tag.postCount > 0);
-    
+    const activeTags = tags.filter((tag) => tag.postCount > 0);
+
     return NextResponse.json({ tags: activeTags });
   } catch (error) {
-    console.error('Failed to fetch tags:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch tags' },
-      { status: 500 }
-    );
+    if (
+      !(error instanceof Error) ||
+      !(error as NodeJS.ErrnoException).code?.includes('ECONNREFUSED')
+    ) {
+      console.error('Failed to fetch tags:', error);
+    }
+    return NextResponse.json({ error: 'Failed to fetch tags' }, { status: 500 });
   }
 }

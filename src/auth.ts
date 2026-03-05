@@ -72,6 +72,19 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     maxAge: authConfig.sessionDuration,
   },
   trustHost: true,
+  logger: {
+    error(error) {
+      // CredentialsSignin is expected when invalid credentials are submitted
+      const err = error as unknown as Record<string, unknown>;
+      if (
+        err?.type === 'CredentialsSignin' ||
+        err?.code === 'credentials' ||
+        (error instanceof Error && error.message?.includes('CredentialsSignin'))
+      )
+        return;
+      console.error('[auth][error]', error);
+    },
+  },
   cookies: {
     sessionToken: {
       name:
