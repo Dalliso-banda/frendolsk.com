@@ -4,7 +4,7 @@ import { getPublishedPosts } from '@/db/posts';
 /**
  * GET /api/posts
  * Get published blog posts with pagination
- * 
+ *
  * Query params:
  * - page: Page number (default: 1)
  * - pageSize: Posts per page (default: 10, max: 50)
@@ -22,10 +22,12 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(result);
   } catch (error) {
-    console.error('Failed to fetch posts:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch posts' },
-      { status: 500 }
-    );
+    if (
+      !(error instanceof Error) ||
+      !(error as NodeJS.ErrnoException).code?.includes('ECONNREFUSED')
+    ) {
+      console.error('Failed to fetch posts:', error);
+    }
+    return NextResponse.json({ error: 'Failed to fetch posts' }, { status: 500 });
   }
 }

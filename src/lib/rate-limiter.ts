@@ -84,9 +84,7 @@ export async function checkRateLimit(options: RateLimitOptions): Promise<RateLim
     }
 
     // Increment count
-    await db('rate_limits')
-      .where('key', key)
-      .increment('count', 1);
+    await db('rate_limits').where('key', key).increment('count', 1);
 
     return {
       allowed: true,
@@ -95,7 +93,13 @@ export async function checkRateLimit(options: RateLimitOptions): Promise<RateLim
       retryAfterSeconds: 0,
     };
   } catch (error) {
-    console.error('Rate limit check error:', error);
+    // Only log unexpected errors, not connection refused (expected when DB is unavailable)
+    if (
+      !(error instanceof Error) ||
+      !(error as NodeJS.ErrnoException).code?.includes('ECONNREFUSED')
+    ) {
+      console.error('Rate limit check error:', error);
+    }
     // Fail open - allow the request if rate limiting fails
     return {
       allowed: true,
@@ -183,9 +187,7 @@ export async function cleanupExpiredRateLimits(): Promise<number> {
   const now = new Date();
 
   try {
-    const deleted = await db('rate_limits')
-      .where('expires_at', '<', now)
-      .delete();
+    const deleted = await db('rate_limits').where('expires_at', '<', now).delete();
 
     return deleted;
   } catch (error) {

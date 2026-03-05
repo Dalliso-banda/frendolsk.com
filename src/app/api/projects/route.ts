@@ -118,7 +118,12 @@ export async function GET() {
         }
       }
     } catch (error) {
-      console.error('Projects API: Database error, using static data:', error);
+      if (
+        !(error instanceof Error) ||
+        !(error as NodeJS.ErrnoException).code?.includes('ECONNREFUSED')
+      ) {
+        console.error('Projects API: Database error, using static data:', error);
+      }
     }
   }
 

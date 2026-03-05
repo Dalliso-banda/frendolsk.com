@@ -4,9 +4,7 @@ import { getToken } from 'next-auth/jwt';
 
 // Cookie name must match auth.ts configuration
 const COOKIE_NAME =
-  process.env.NODE_ENV === 'production'
-    ? '__Secure-authjs.session-token'
-    : 'authjs.session-token';
+  process.env.NODE_ENV === 'production' ? '__Secure-authjs.session-token' : 'authjs.session-token';
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -41,5 +39,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/admin/:path*'],
+  matcher: ['/admin', '/admin/:path*'],
 };

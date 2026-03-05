@@ -1,7 +1,7 @@
 /**
  * Analytics Tracking API
  * ======================
- * 
+ *
  * Receives page view events from the client-side tracker.
  * Privacy-focused: No IP logging, minimal data collection.
  */
@@ -88,16 +88,16 @@ const RATE_LIMIT_MAX = 30; // Max 30 events per minute per session
 function isRateLimited(sessionId: string): boolean {
   const now = Date.now();
   const entry = rateLimitMap.get(sessionId);
-  
+
   if (!entry || now > entry.resetAt) {
     rateLimitMap.set(sessionId, { count: 1, resetAt: now + RATE_LIMIT_WINDOW });
     return false;
   }
-  
+
   if (entry.count >= RATE_LIMIT_MAX) {
     return true;
   }
-  
+
   entry.count++;
   return false;
 }
@@ -121,9 +121,9 @@ interface TrackingPayload {
 
 function validatePayload(body: unknown): TrackingPayload | null {
   if (!body || typeof body !== 'object') return null;
-  
+
   const payload = body as Record<string, unknown>;
-  
+
   // Required fields
   if (typeof payload.sessionId !== 'string' || payload.sessionId.length < 10) {
     return null;
@@ -131,7 +131,7 @@ function validatePayload(body: unknown): TrackingPayload | null {
   if (typeof payload.pagePath !== 'string' || payload.pagePath.length === 0) {
     return null;
   }
-  
+
   return {
     sessionId: payload.sessionId,
     pagePath: payload.pagePath,
@@ -174,7 +174,7 @@ export async function POST(request: NextRequest) {
     // Get request metadata
     const userAgent = request.headers.get('user-agent');
     const acceptLanguage = request.headers.get('accept-language');
-    
+
     // Extract country from Cloudflare/Vercel headers or Accept-Language
     let country: string | undefined;
     const cfCountry = request.headers.get('cf-ipcountry');
@@ -212,7 +212,13 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Analytics tracking error:', error);
+    // Only log unexpected errors, not connection refused (expected when DB is unavailable)
+    if (
+      !(error instanceof Error) ||
+      !(error as NodeJS.ErrnoException).code?.includes('ECONNREFUSED')
+    ) {
+      console.error('Analytics tracking error:', error);
+    }
     // Don't expose internal errors, fail silently
     return NextResponse.json({ success: true });
   }

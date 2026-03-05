@@ -77,7 +77,13 @@ export async function GET(request: NextRequest) {
       }
     );
   } catch (error) {
-    console.error('Site settings GET error:', error);
+    // Only log unexpected errors, not connection refused (expected when DB is unavailable)
+    if (
+      !(error instanceof Error) ||
+      !(error as NodeJS.ErrnoException).code?.includes('ECONNREFUSED')
+    ) {
+      console.error('Site settings GET error:', error);
+    }
 
     // Return fallback settings if database is unavailable
     return NextResponse.json(
