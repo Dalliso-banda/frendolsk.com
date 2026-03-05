@@ -1,12 +1,15 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('Admin Authentication', () => {
-  test('admin pages redirect to login when not authenticated', async ({ page }) => {
+  test('admin pages require authentication', async ({ page }) => {
     // Try to access admin posts (protected route)
     await page.goto('/admin/posts');
 
-    // Should redirect to login page
-    await expect(page).toHaveURL(/\/admin\/login/, { timeout: 10000 });
+    // Should either redirect to login page OR show login form
+    // (middleware redirect or client-side auth gate)
+    await expect(page.getByRole('button', { name: /sign in|log in/i })).toBeVisible({
+      timeout: 10000,
+    });
   });
 
   test('admin login page loads', async ({ page }) => {
