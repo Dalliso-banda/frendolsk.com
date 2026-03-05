@@ -16,11 +16,16 @@ export async function middleware(request: NextRequest) {
 
   // Protect all admin routes
   if (pathname.startsWith('/admin')) {
-    const token = await getToken({
-      req: request,
-      secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET,
-      cookieName: COOKIE_NAME,
-    });
+    let token = null;
+    try {
+      token = await getToken({
+        req: request,
+        secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET,
+        cookieName: COOKIE_NAME,
+      });
+    } catch {
+      // If token verification fails, treat as unauthenticated
+    }
 
     // Not logged in - redirect to login
     if (!token) {
