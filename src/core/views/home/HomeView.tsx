@@ -1,11 +1,23 @@
 'use client';
 
+/**
+ * Home View — Core
+ * ================
+ *
+ * Layout and structure for the homepage (/).
+ * Personalizable text comes from the content prop.
+ *
+ * To customize: Edit src/user/content/home.ts
+ * For full layout control: pnpm devholm eject home
+ */
+
 import { Box, Typography, Button, Container, Card, CardContent, Chip, alpha } from '@mui/material';
 import Link from '@/components/common/Link';
 import { ArrowForward, Code, Article, Person } from '@mui/icons-material';
 import { AuthAwareMainLayout, ThreeColumnLayout, SidebarWidget } from '@/components';
 import { siteConfig } from '@/config';
 import type { SiteSettings } from '@/hooks/useSiteSettings';
+import type { HomeContent } from '@core/types/content';
 
 interface FeaturedPost {
   id: string;
@@ -23,51 +35,43 @@ interface TagData {
   postCount: number;
 }
 
-interface HomePageClientProps {
+interface HomeViewProps {
   settings: SiteSettings;
   initialPosts: FeaturedPost[];
   initialTags: TagData[];
+  content: HomeContent;
 }
 
 function LeftSidebar() {
   return (
-    <>
-      <SidebarWidget title="Quick Links">
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-          {[
-            { label: 'About Me', href: '/about', icon: Person },
-            { label: 'Latest Posts', href: '/blog', icon: Article },
-            { label: 'Projects', href: '/projects', icon: Code },
-          ].map((item) => (
-            <Button
-              key={item.href}
-              component={Link}
-              href={item.href}
-              startIcon={<item.icon sx={{ fontSize: '1.25rem' }} />}
-              sx={{
-                justifyContent: 'flex-start',
-                textTransform: 'none',
-                px: 2,
-                py: 1,
-                gap: 1.5,
-              }}
-            >
-              {item.label}
-            </Button>
-          ))}
-        </Box>
-      </SidebarWidget>
-    </>
+    <SidebarWidget title="Quick Links">
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+        {[
+          { label: 'About Me', href: '/about', icon: Person },
+          { label: 'Latest Posts', href: '/blog', icon: Article },
+          { label: 'Projects', href: '/projects', icon: Code },
+        ].map((item) => (
+          <Button
+            key={item.href}
+            component={Link}
+            href={item.href}
+            startIcon={<item.icon sx={{ fontSize: '1.25rem' }} />}
+            sx={{ justifyContent: 'flex-start', textTransform: 'none', px: 2, py: 1, gap: 1.5 }}
+          >
+            {item.label}
+          </Button>
+        ))}
+      </Box>
+    </SidebarWidget>
   );
 }
 
-function RightSidebar({ tags }: { tags: TagData[] }) {
+function RightSidebar({ tags, sidebarAboutText }: { tags: TagData[]; sidebarAboutText: string }) {
   return (
     <>
       <SidebarWidget title="About">
         <Typography variant="body2" color="text.secondary" sx={{ mb: 2.5, lineHeight: 1.7 }}>
-          I&apos;m a full-stack developer passionate about building beautiful, performant web
-          applications. Currently exploring the intersection of design and engineering.
+          {sidebarAboutText}
         </Typography>
         <Button
           component={Link}
@@ -89,18 +93,16 @@ function RightSidebar({ tags }: { tags: TagData[] }) {
               No tags yet
             </Typography>
           ) : (
-            tags
-              .slice(0, 8)
-              .map((tag) => (
-                <Chip
-                  key={tag.id}
-                  label={tag.name}
-                  size="small"
-                  component={Link}
-                  href={`/blog/tag/${tag.slug}`}
-                  clickable
-                />
-              ))
+            tags.slice(0, 8).map((tag) => (
+              <Chip
+                key={tag.id}
+                label={tag.name}
+                size="small"
+                component={Link}
+                href={`/blog/tag/${tag.slug}`}
+                clickable
+              />
+            ))
           )}
         </Box>
       </SidebarWidget>
@@ -108,15 +110,13 @@ function RightSidebar({ tags }: { tags: TagData[] }) {
   );
 }
 
-export default function HomePage({ settings, initialPosts, initialTags }: HomePageClientProps) {
-  const featuredPosts = initialPosts;
-  const tags = initialTags;
-
+export default function HomeView({ settings, initialPosts, initialTags, content }: HomeViewProps) {
   const authorName = settings?.author?.name || siteConfig.author.name;
+  const { heroTagline, sidebarAboutText } = content;
 
   return (
     <AuthAwareMainLayout>
-      {/* Hero Section - Neo-Noir Atmospheric */}
+      {/* Hero Section */}
       <Box
         sx={(theme) => ({
           py: { xs: 10, md: 14 },
@@ -131,7 +131,6 @@ export default function HomePage({ settings, initialPosts, initialTags }: HomePa
                  radial-gradient(ellipse at 70% 80%, ${alpha('#D4A855', 0.06)} 0%, transparent 50%),
                  linear-gradient(180deg, ${theme.palette.background.default} 0%, ${alpha('#F0EDE8', 0.5)} 100%)`,
           borderBottom: `1px solid ${alpha(theme.palette.primary.main, 0.1)}`,
-          // Subtle animated glow
           '&::before': {
             content: '""',
             position: 'absolute',
@@ -181,15 +180,9 @@ export default function HomePage({ settings, initialPosts, initialTags }: HomePa
             <Typography
               variant="h5"
               color="text.secondary"
-              sx={{
-                mb: 5,
-                fontWeight: 400,
-                lineHeight: 1.7,
-                maxWidth: 600,
-              }}
+              sx={{ mb: 5, fontWeight: 400, lineHeight: 1.7, maxWidth: 600 }}
             >
-              Full-stack developer crafting digital experiences. I write about web development,
-              technology, and the occasional life update. Welcome to my corner of the internet.
+              {heroTagline}
             </Typography>
 
             <Box sx={{ display: 'flex', gap: 2.5, flexWrap: 'wrap' }}>
@@ -212,7 +205,10 @@ export default function HomePage({ settings, initialPosts, initialTags }: HomePa
       </Box>
 
       {/* Main Content with Three Column Layout */}
-      <ThreeColumnLayout leftSidebar={<LeftSidebar />} rightSidebar={<RightSidebar tags={tags} />}>
+      <ThreeColumnLayout
+        leftSidebar={<LeftSidebar />}
+        rightSidebar={<RightSidebar tags={initialTags} sidebarAboutText={sidebarAboutText} />}
+      >
         {/* Featured Posts Section */}
         <Box sx={{ mb: 6 }}>
           <Box
@@ -232,14 +228,14 @@ export default function HomePage({ settings, initialPosts, initialTags }: HomePa
           </Box>
 
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-            {featuredPosts.length === 0 ? (
+            {initialPosts.length === 0 ? (
               <Card>
                 <CardContent sx={{ p: 4, textAlign: 'center' }}>
                   <Typography color="text.secondary">No posts yet. Check back soon!</Typography>
                 </CardContent>
               </Card>
             ) : (
-              featuredPosts.map((post) => (
+              initialPosts.map((post) => (
                 <Card
                   key={post.id}
                   component={Link}
@@ -255,18 +251,9 @@ export default function HomePage({ settings, initialPosts, initialTags }: HomePa
                   })}
                 >
                   <CardContent sx={{ p: 3 }}>
-                    <Typography
-                      variant="h6"
-                      component="h3"
-                      sx={{
-                        mb: 1,
-                        fontWeight: 600,
-                        color: 'text.primary',
-                      }}
-                    >
+                    <Typography variant="h6" component="h3" sx={{ mb: 1, fontWeight: 600 }}>
                       {post.title}
                     </Typography>
-
                     <Typography
                       variant="body2"
                       color="text.secondary"
@@ -280,8 +267,9 @@ export default function HomePage({ settings, initialPosts, initialTags }: HomePa
                     >
                       {post.excerpt}
                     </Typography>
-
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
+                    <Box
+                      sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}
+                    >
                       {post.tags.slice(0, 3).map((tag) => (
                         <Chip key={tag.id} label={tag.name} size="small" variant="outlined" />
                       ))}

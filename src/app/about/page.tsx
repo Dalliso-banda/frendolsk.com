@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
-import AboutPageClient from './AboutPageClient';
+import config from '@config';
+import { DEFAULT_ABOUT_CONTENT } from '@core/views/about/defaults';
+import AboutView from '@core/views/about/AboutView';
 import { siteConfig } from '@/config';
 import { PersonJsonLd, BreadcrumbJsonLd } from '@/components/seo/JsonLd';
 import { fetchSiteSettings } from '@/lib/fetchSiteSettings';
@@ -29,6 +31,7 @@ export const metadata: Metadata = {
 
 export default async function AboutPage() {
   const settings = await fetchSiteSettings();
+  const content = config.content?.about ?? DEFAULT_ABOUT_CONTENT;
 
   return (
     <>
@@ -39,7 +42,7 @@ export default async function AboutPage() {
           { name: 'About', url: `${siteConfig.url}/about` },
         ]}
       />
-      <AboutPageClient settings={settings} />
+      <AboutView settings={settings} content={content} />
     </>
   );
 }

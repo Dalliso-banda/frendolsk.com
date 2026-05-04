@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import BlogPostClient from './BlogPostClient';
+import BlogPostView from '@core/views/blog/post/BlogPostView';
 import { siteConfig } from '@/config';
 import { getPostBySlug } from '@/db/posts';
 
@@ -9,7 +9,7 @@ type Props = {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const post = await getPostBySlug(slug);
+  const post = await getPostBySlug(slug).catch(() => null);
 
   if (!post) {
     return {
@@ -58,5 +58,5 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default function BlogPostPage() {
-  return <BlogPostClient />;
+  return <BlogPostView />;
 }

@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import ProjectsPageClient from './ProjectsPageClient';
+import ProjectsView from '@core/views/projects/ProjectsView';
 import { siteConfig } from '@/config';
 import { getAllProjects } from '@/db/projects';
 
@@ -25,7 +25,7 @@ export const metadata: Metadata = {
 };
 
 export default async function ProjectsPage() {
-  const projects = await getAllProjects();
+  const projects = await getAllProjects().catch(() => []);
 
-  return <ProjectsPageClient projects={projects} />;
+  return <ProjectsView projects={projects} />;
 }

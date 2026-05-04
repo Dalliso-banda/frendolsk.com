@@ -1,46 +1,32 @@
 'use client';
 
 /**
- * About Page Client Component
+ * About View — Core
+ * =================
  *
- * CUSTOMIZE: Replace the placeholder content below with your own bio,
- * skills, and interests to make this page your own!
+ * Layout and structure for the /about page.
+ * Content (bio, skills, interests, tagline) comes from the content prop,
+ * which is populated from devholm.config.ts → content.about.
+ *
+ * To customize this page:
+ *   Option A (content only): Edit src/user/content/about.ts
+ *   Option B (full layout): pnpm devholm eject about
  */
 
 import { Box, Typography, Container, Grid2, Avatar, Chip, Paper, alpha } from '@mui/material';
-import { Code, Lightbulb, Rocket, Groups, Coffee, Psychology, Person } from '@mui/icons-material';
+import { Person } from '@mui/icons-material';
 import { AuthAwareMainLayout } from '@/components';
 import type { SiteSettings } from '@/hooks/useSiteSettings';
+import type { AboutContent } from '@core/types/content';
 
-interface AboutPageClientProps {
+interface AboutViewProps {
   settings: SiteSettings;
+  content: AboutContent;
 }
 
-// CUSTOMIZE: Add your own skills here
-const skills = [
-  { name: 'React', category: 'frontend' },
-  { name: 'TypeScript', category: 'frontend' },
-  { name: 'Next.js', category: 'frontend' },
-  { name: 'Node.js', category: 'backend' },
-  { name: 'PostgreSQL', category: 'backend' },
-  { name: 'GraphQL', category: 'backend' },
-  { name: 'Docker', category: 'devops' },
-  { name: 'AWS', category: 'devops' },
-  { name: 'Git', category: 'tools' },
-];
-
-// CUSTOMIZE: Add your own interests here
-const interests = [
-  { icon: Code, label: 'Software Development' },
-  { icon: Lightbulb, label: 'Learning' },
-  { icon: Rocket, label: 'Side Projects' },
-  { icon: Groups, label: 'Open Source' },
-  { icon: Coffee, label: 'Coffee' },
-  { icon: Psychology, label: 'Problem Solving' },
-];
-
-export default function AboutPage({ settings }: AboutPageClientProps) {
+export default function AboutView({ settings, content }: AboutViewProps) {
   const authorName = settings?.author?.name || 'Developer';
+  const { tagline, intro, story, skills, interests } = content;
 
   return (
     <AuthAwareMainLayout>
@@ -66,26 +52,25 @@ export default function AboutPage({ settings }: AboutPageClientProps) {
                 <Person sx={{ fontSize: { xs: 100, md: 120 } }} />
               </Avatar>
             </Grid2>
+
             <Grid2 size={{ xs: 12, md: 8 }}>
               <Typography variant="h2" component="h1" gutterBottom sx={{ fontWeight: 700 }}>
                 About Me
               </Typography>
               <Typography variant="h5" color="text.secondary" sx={{ mb: 3, fontWeight: 400 }}>
-                {/* CUSTOMIZE: Add your tagline here */}
-                Full Stack Developer • Open Source Enthusiast
+                {tagline}
               </Typography>
-              <Typography variant="body1" color="text.secondary" paragraph sx={{ mb: 2.5 }}>
-                {/* CUSTOMIZE: Add your intro paragraph here */}
-                Welcome to my corner of the internet! I&apos;m a passionate developer who loves
-                building things for the web. I enjoy turning complex problems into simple,
-                beautiful, and intuitive solutions.
-              </Typography>
-              <Typography variant="body1" color="text.secondary">
-                {/* CUSTOMIZE: Add more about yourself here */}
-                When I&apos;m not coding, you can find me exploring new technologies, contributing
-                to open source projects, or enjoying a good cup of coffee while reading about the
-                latest trends in web development.
-              </Typography>
+              {intro.map((paragraph, i) => (
+                <Typography
+                  key={i}
+                  variant="body1"
+                  color="text.secondary"
+                  paragraph
+                  sx={{ mb: i < intro.length - 1 ? 2.5 : 0 }}
+                >
+                  {paragraph}
+                </Typography>
+              ))}
             </Grid2>
           </Grid2>
         </Box>
@@ -105,28 +90,22 @@ export default function AboutPage({ settings }: AboutPageClientProps) {
           <Typography variant="h4" component="h2" gutterBottom sx={{ fontWeight: 600, mb: 3 }}>
             My Journey
           </Typography>
-          <Typography variant="body1" color="text.secondary" sx={{ mb: 2.5 }}>
-            {/* CUSTOMIZE: Tell your story here */}I started my journey in software development with
-            a curiosity about how things work on the internet. That curiosity led me to learn HTML,
-            CSS, and JavaScript, and eventually to building full-stack applications with modern
-            frameworks.
-          </Typography>
-          <Typography variant="body1" color="text.secondary" sx={{ mb: 2.5 }}>
-            Over the years, I&apos;ve had the opportunity to work on diverse projects, from small
-            business websites to large-scale enterprise applications. Each project has taught me
-            something new and reinforced my love for creating software that makes a difference.
-          </Typography>
-          <Typography variant="body1" color="text.secondary">
-            Today, I focus on building accessible, performant, and user-friendly web applications. I
-            believe in writing clean code, continuous learning, and sharing knowledge with the
-            developer community.
-          </Typography>
+          {story.map((paragraph, i) => (
+            <Typography
+              key={i}
+              variant="body1"
+              color="text.secondary"
+              sx={{ mb: i < story.length - 1 ? 2.5 : 0 }}
+            >
+              {paragraph}
+            </Typography>
+          ))}
         </Paper>
 
         {/* Skills Section */}
         <Box sx={{ mb: 6 }}>
           <Typography variant="h4" component="h2" sx={{ fontWeight: 600, mb: 3 }}>
-            Skills & Technologies
+            Skills &amp; Technologies
           </Typography>
           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1.5 }}>
             {skills.map((skill) => (
@@ -155,18 +134,10 @@ export default function AboutPage({ settings }: AboutPageClientProps) {
                       minHeight: 120,
                       height: '100%',
                       transition: 'transform 0.2s',
-                      '&:hover': {
-                        transform: 'translateY(-2px)',
-                      },
+                      '&:hover': { transform: 'translateY(-2px)' },
                     }}
                   >
-                    <IconComponent
-                      sx={{
-                        fontSize: 32,
-                        color: 'primary.main',
-                        mb: 1.5,
-                      }}
-                    />
+                    <IconComponent sx={{ fontSize: 32, color: 'primary.main', mb: 1.5 }} />
                     <Typography
                       variant="body2"
                       fontWeight={500}

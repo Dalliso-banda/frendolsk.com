@@ -45,6 +45,8 @@ import {
 } from '@mui/icons-material';
 import Link from '@/components/common/Link';
 import { useTheme as useAppTheme } from '@/theme/ThemeProvider';
+import config from '@config';
+import type { AdminNavPosition } from '@core/types/extensions';
 
 // Type for profile data from API
 interface ProfileData {
@@ -67,7 +69,7 @@ interface NavItem {
   icon: ReactNode;
 }
 
-const navItems: NavItem[] = [
+const CORE_NAV_ITEMS: NavItem[] = [
   { label: 'Dashboard', href: '/admin', icon: <Dashboard /> },
   { label: 'Blog Posts', href: '/admin/posts', icon: <Article /> },
   { label: 'Projects', href: '/admin/projects', icon: <FolderOpen /> },
@@ -78,6 +80,45 @@ const navItems: NavItem[] = [
   { label: 'Analytics', href: '/admin/analytics', icon: <Analytics /> },
   { label: 'Settings', href: '/admin/settings', icon: <Settings /> },
 ];
+
+/**
+ * Merge user-registered admin extension nav items into the core nav list.
+ * Items with no position are appended before 'Settings'.
+ */
+function buildNavItems(): NavItem[] {
+  const extensions = config.extensions?.admin ?? [];
+  if (!extensions.length) return CORE_NAV_ITEMS;
+
+  const items = [...CORE_NAV_ITEMS];
+
+  for (const ext of extensions) {
+    const { navItem } = ext;
+    const position: AdminNavPosition | undefined = navItem.position;
+
+    if (!position || position === 'before:dashboard') {
+      // Insert before dashboard (index 0)
+      items.splice(0, 0, navItem);
+    } else if (position.startsWith('after:')) {
+      const segment = position.slice('after:'.length);
+      const idx = items.findIndex((item) => item.href.endsWith('/' + segment));
+      if (idx !== -1) {
+        items.splice(idx + 1, 0, navItem);
+      } else {
+        // Fallback: insert before Settings
+        const settingsIdx = items.findIndex((item) => item.label === 'Settings');
+        items.splice(settingsIdx > 0 ? settingsIdx : items.length - 1, 0, navItem);
+      }
+    } else {
+      // Default: before Settings
+      const settingsIdx = items.findIndex((item) => item.label === 'Settings');
+      items.splice(settingsIdx > 0 ? settingsIdx : items.length - 1, 0, navItem);
+    }
+  }
+
+  return items;
+}
+
+const navItems = buildNavItems();
 
 interface AdminLayoutClientProps {
   children: ReactNode;
@@ -273,6 +314,14 @@ export default function AdminLayoutClient({ children }: AdminLayoutClientProps) 
             {(!collapsed || isMobile) && <ListItemText primary="Back to Site" />}
           </ListItemButton>
         </Tooltip>
+        {(!collapsed || isMobile) && (
+          <Typography
+            variant="caption"
+            sx={{ display: 'block', mt: 1.5, textAlign: 'center', color: 'text.disabled' }}
+          >
+            v{process.env.NEXT_PUBLIC_APP_VERSION}
+          </Typography>
+        )}
       </Box>
     </Box>
   );

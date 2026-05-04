@@ -1,7 +1,7 @@
 # DevHolm
 
 [![CI/CD Pipeline](https://github.com/chrishacia/devholm/actions/workflows/ci.yml/badge.svg)](https://github.com/chrishacia/devholm/actions/workflows/ci.yml)
-[![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=next.js)](https://nextjs.org/)
+[![Next.js](https://img.shields.io/badge/Next.js-15-black?logo=next.js)](https://nextjs.org/)
 [![React](https://img.shields.io/badge/React-19-61DAFB?logo=react)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Material UI](https://img.shields.io/badge/Material%20UI-6-007FFF?logo=mui&logoColor=white)](https://mui.com/)
@@ -9,24 +9,85 @@
 [![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?logo=docker&logoColor=white)](https://www.docker.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-A modern, feature-rich **personal website template** built with **Next.js 16**, **React 19**, **TypeScript**, **Material UI**, and **PostgreSQL**. Perfect for developers, creators, and professionals who want a polished online presence with a full admin dashboard.
+A modern **personal website framework** built with **Next.js 15**, **React 19**, **TypeScript**, **Material UI**, and **PostgreSQL**. DevHolm uses a layered architecture that separates the framework engine from your personalizations — making upgrades safe and non-destructive.
 
 🌐 **Live Example:** [chrishacia.com](https://chrishacia.com)
 💬 **Discord:** [Join the Community](https://discord.gg/8gG5vpN3YP)
 
 ---
 
-## ✨ Features
+## Architecture
 
-### 🖥️ Modern Tech Stack
+DevHolm follows a **layered framework model**:
 
-- **Next.js 16** with App Router and Server Components
-- **React 19** with the latest features
-- **TypeScript** for type safety
-- **Material UI 6** for beautiful, accessible components
-- **PostgreSQL** with Knex.js for robust data management
+```
+src/core/    ← Framework engine (updated by DevHolm, never touch directly)
+src/user/    ← Your customizations (content, extensions, view overrides)
+src/app/     ← Next.js routing (thin wrappers only)
+devholm.config.ts  ← Your single configuration file
+```
 
-### 📝 Content Management
+See [docs/architecture.md](docs/architecture.md) for the full picture.
+
+---
+
+## Quick Start
+
+```bash
+pnpm install
+cp .env.example .env   # fill in DB + auth secrets
+pnpm db:migrate
+pnpm seed:admin
+pnpm dev
+```
+
+See [docs/getting-started.md](docs/getting-started.md) for the complete guide.
+
+---
+
+## Customization
+
+Edit `devholm.config.ts` and the files in `src/user/`:
+
+```typescript
+// devholm.config.ts
+const config: DevHolmConfig = {
+  content: { about, home, now },   // Your narrative content
+  slots: { 'home.hero.below': MyBanner },  // Inject components into views
+  views: { 'about': () => import('./src/user/views/about/AboutView') },  // Eject & override
+  extensions: { admin: myExtensions },  // Add admin sidebar items
+};
+```
+
+---
+
+## CLI
+
+```bash
+pnpm devholm status           # See what's ejected and extended
+pnpm devholm eject about      # Override the About view locally
+pnpm devholm new:extension telemetry  # Scaffold admin extension
+pnpm devholm new:migration add_subscribers  # Create user DB migration
+pnpm devholm list:slots       # See all injection points
+```
+
+See [docs/cli.md](docs/cli.md).
+
+---
+
+## Documentation
+
+| Doc | Description |
+|---|---|
+| [Getting Started](docs/getting-started.md) | Installation and first setup |
+| [Architecture](docs/architecture.md) | Layer model, directory structure, aliases |
+| [Configuration](docs/configuration.md) | Full `devholm.config.ts` reference |
+| [Extensions](docs/extensions.md) | Slots, admin extensions, view overrides, migrations |
+| [CLI](docs/cli.md) | All CLI commands |
+| [Upgrading](docs/upgrading.md) | How to update DevHolm safely |
+
+---
+
 
 - **Blog System** — Markdown support, tags, series, reading time, RSS feed
 - **Projects Portfolio** — Showcase your work with images and links

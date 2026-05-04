@@ -24,7 +24,10 @@ const config = {
       max: 10,
     },
     migrations: {
-      directory: './src/db/migrations',
+      directory: [
+        './src/db/migrations',
+        './src/user/extensions/db/migrations',
+      ],
       tableName: 'knex_migrations',
       extension: 'ts',
       loadExtensions: ['.ts'],
@@ -50,7 +53,10 @@ const config = {
       max: 10,
     },
     migrations: {
-      directory: './src/db/migrations',
+      directory: [
+        './src/db/migrations',
+        './src/user/extensions/db/migrations',
+      ],
       tableName: 'knex_migrations',
       extension: 'ts',
       loadExtensions: ['.ts'],

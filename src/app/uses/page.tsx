@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import UsesPageClient from './UsesPageClient';
+import UsesView from '@core/views/uses/UsesView';
 import { siteConfig } from '@/config';
 import { getAllCategoriesWithItems } from '@/db/uses';
 
@@ -25,7 +25,7 @@ export const metadata: Metadata = {
 };
 
 export default async function UsesPage() {
-  const categories = await getAllCategoriesWithItems();
+  const categories = await getAllCategoriesWithItems().catch(() => []);
 
-  return <UsesPageClient categories={categories} />;
+  return <UsesView categories={categories} />;
 }
