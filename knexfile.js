@@ -25,7 +25,7 @@ const config = {
     },
     migrations: {
       directory: [
-        './src/db/migrations',
+        './src/core/db/migrations',
         './src/user/extensions/db/migrations',
       ],
       tableName: 'knex_migrations',
@@ -33,7 +33,7 @@ const config = {
       loadExtensions: ['.ts'],
     },
     seeds: {
-      directory: './src/db/seeds',
+      directory: './src/core/db/seeds',
       extension: 'ts',
       loadExtensions: ['.ts'],
     },
@@ -54,7 +54,7 @@ const config = {
     },
     migrations: {
       directory: [
-        './src/db/migrations',
+        './src/core/db/migrations',
         './src/user/extensions/db/migrations',
       ],
       tableName: 'knex_migrations',
@@ -62,7 +62,7 @@ const config = {
       loadExtensions: ['.ts'],
     },
     seeds: {
-      directory: './src/db/seeds',
+      directory: './src/core/db/seeds',
       extension: 'ts',
       loadExtensions: ['.ts'],
     },

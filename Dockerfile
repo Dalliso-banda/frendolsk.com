@@ -66,7 +66,8 @@ COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 
 # Copy migration infrastructure
-COPY --from=builder /app/src/db/migrations ./migrations
+COPY --from=builder /app/src/core/db/migrations ./migrations
+COPY --from=builder /app/src/user/extensions/db/migrations ./migrations/user
 COPY --from=builder /app/scripts/migrate.js ./migrate.js
 COPY --from=builder /app/scripts/seed-admin.js ./seed-admin.js
 

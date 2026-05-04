@@ -25,7 +25,7 @@ async function runMigrations() {
   // Determine migrations directory (production vs development)
   const migrationsDir = fs.existsSync(path.join(__dirname, 'migrations'))
     ? path.join(__dirname, 'migrations')  // Production: /app/migrations
-    : path.join(__dirname, '../src/db/migrations');  // Development
+    : path.join(__dirname, '../src/core/db/migrations');  // Development
 
   console.log(`📂 Using migrations from: ${migrationsDir}`);
 
