@@ -41,7 +41,7 @@ RUN pnpm build
 
 # Create a flat production deployment for migrations (resolves pnpm symlink issues)
 # The --legacy flag is required for pnpm v10 compatibility
-RUN pnpm deploy --filter=. --prod --legacy /app/deploy
+RUN pnpm deploy --filter=. --prod --legacy --config.strict-dep-builds=false /app/deploy
 
 # =============================================================================
 # Stage 3: Production Runner
