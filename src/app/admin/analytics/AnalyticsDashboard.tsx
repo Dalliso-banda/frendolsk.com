@@ -1,14 +1,18 @@
 'use client';
 
 /**
- * Admin Analytics Dashboard
- * =========================
- * 
- * Displays site traffic analytics including:
- * - Total page views and unique visitors
- * - Top pages
- * - Referrer breakdown
- * - Traffic over time
+ * Admin Analytics Dashboard (v2)
+ * ================================
+ *
+ * Enhanced analytics dashboard with:
+ * - Session quality panel (bounce rate, depth, entry/exit pages)
+ * - Attribution panel (traffic sources, campaign performance, referrers)
+ * - Audience technology panel (device, browser, OS)
+ * - Site quality panel (status codes, 404s)
+ * - Data health panel
+ * - Collapsible sections
+ *
+ * Privacy-first: session-only tracking, no persistent IDs, no IP storage.
  */
 
 import { useState, useEffect, useCallback } from 'react';
@@ -17,6 +21,8 @@ import {
   Button,
   Card,
   CardContent,
+  Chip,
+  Collapse,
   Grid2 as Grid,
   Typography,
   Select,
@@ -46,12 +52,22 @@ import {
   Visibility,
   People,
   TrendingUp,
+  TrendingDown,
   Language,
   Refresh,
   OpenInNew,
   ErrorOutline,
   ChevronRight,
   ArrowBack,
+  BarChart,
+  DevicesOther,
+  BugReport,
+  ExpandMore,
+  ExpandLess,
+  Campaign,
+  AccessTime,
+  ExitToApp,
+  Input,
 } from '@mui/icons-material';
 import { format } from 'date-fns';
 
@@ -59,49 +75,67 @@ import { format } from 'date-fns';
 // Types
 // =============================================================================
 
+interface SessionDepthBucket {
+  bucket: '1' | '2-3' | '4-6' | '7-10' | '11+';
+  sessions: number;
+}
+
+interface HourlyTrafficPoint {
+  hour: number;
+  views: number;
+  visitors: number;
+}
+
+interface CampaignRow {
+  campaign: string;
+  source: string | null;
+  medium: string | null;
+  visits: number;
+  uniqueVisitors: number;
+}
+
+interface BreakdownRow {
+  label: string;
+  visits: number;
+  uniqueVisitors: number;
+}
+
 interface AnalyticsSummary {
   totalPageViews: number;
   uniqueVisitors: number;
   total404s: number;
-  topPages: Array<{
-    path: string;
-    views: number;
-    uniqueVisitors: number;
-  }>;
-  topReferrers: Array<{
-    domain: string | null;
-    visits: number;
-    uniqueVisitors: number;
-  }>;
-  recentReferrers: Array<{
-    domain: string;
-    url: string;
-    visitedAt: string;
-  }>;
-  viewsByDay: Array<{
-    date: string;
-    views: number;
-    visitors: number;
-  }>;
-  trafficSources: Array<{
-    source: string;
-    visits: number;
-  }>;
-  top404s: Array<{
-    path: string;
-    hits: number;
-    lastHit: string;
-  }>;
+  pagesPerVisit: number;
+  bounceRate: number;
+  topPages: Array<{ path: string; views: number; uniqueVisitors: number }>;
+  entryPages: Array<{ path: string; sessions: number }>;
+  exitPages: Array<{ path: string; sessions: number }>;
+  topReferrers: Array<{ domain: string | null; visits: number; uniqueVisitors: number }>;
+  recentReferrers: Array<{ domain: string; url: string; visitedAt: string }>;
+  viewsByDay: Array<{ date: string; views: number; visitors: number }>;
+  hourlyTraffic: HourlyTrafficPoint[];
+  peakHours: Array<{ hour: number; views: number }>;
+  sessionDepth: SessionDepthBucket[];
+  trafficSources: Array<{ source: string; visits: number }>;
+  campaignPerformance: CampaignRow[];
+  deviceBreakdown: BreakdownRow[];
+  browserBreakdown: BreakdownRow[];
+  osBreakdown: BreakdownRow[];
+  statusCodeMix: Array<{ statusCode: number; hits: number }>;
+  top404s: Array<{ path: string; hits: number; lastHit: string }>;
+  dataHealth: {
+    latestEventAt: string | null;
+    latestRollupAt: string | null;
+    rawRetentionDays: number;
+    persistentVisitorIdEnabled: boolean;
+  };
 }
 
-// Drill-down modal view types
 type DrillDownView = 'pages' | 'referrers' | '404s' | 'page-referrers' | 'referrer-pages' | null;
 
-// Breadcrumb item for navigation history
 interface BreadcrumbItem {
   view: DrillDownView;
   label: string;
-  context?: string; // pagePath or domain for nested views
+  context?: string;
 }
 
 interface PaginatedData<T> {
@@ -113,7 +147,25 @@ interface PaginatedData<T> {
 }
 
 // =============================================================================
-// Stats Card Component
+// Helpers
+// =============================================================================
+
+function formatHour(hour: number): string {
+  if (hour === 0) return '12am';
+  if (hour < 12) return `${hour}am`;
+  if (hour === 12) return '12pm';
+  return `${hour - 12}pm`;
+}
+
+function getStatusColor(code: number, theme: ReturnType<typeof useTheme>) {
+  if (code >= 500) return theme.palette.error.main;
+  if (code >= 400) return theme.palette.warning.main;
+  if (code >= 300) return theme.palette.info.main;
+  return theme.palette.success.main;
+}
+
+// =============================================================================
+// Stats Card
 // =============================================================================
 
 interface StatsCardProps {
@@ -122,9 +174,10 @@ interface StatsCardProps {
   icon: React.ReactNode;
   color: string;
   subtitle?: string;
+  note?: string;
 }
 
-function StatsCard({ title, value, icon, color, subtitle }: StatsCardProps) {
+function StatsCard({ title, value, icon, color, subtitle, note }: StatsCardProps) {
   return (
     <Card
       sx={{
@@ -138,7 +191,12 @@ function StatsCard({ title, value, icon, color, subtitle }: StatsCardProps) {
           <Box>
             <Typography
               variant="caption"
-              sx={{ color: 'text.secondary', textTransform: 'uppercase', fontWeight: 600 }}
+              sx={{
+                color: 'text.secondary',
+                textTransform: 'uppercase',
+                fontWeight: 600,
+                letterSpacing: 0.5,
+              }}
             >
               {title}
             </Typography>
@@ -150,17 +208,17 @@ function StatsCard({ title, value, icon, color, subtitle }: StatsCardProps) {
                 {subtitle}
               </Typography>
             )}
+            {note && (
+              <Typography
+                variant="caption"
+                display="block"
+                sx={{ color: 'text.disabled', mt: 0.25 }}
+              >
+                {note}
+              </Typography>
+            )}
           </Box>
-          <Box
-            sx={{
-              p: 1,
-              borderRadius: 2,
-              bgcolor: alpha(color, 0.1),
-              color,
-            }}
-          >
-            {icon}
-          </Box>
+          <Box sx={{ p: 1, borderRadius: 2, bgcolor: alpha(color, 0.1), color }}>{icon}</Box>
         </Box>
       </CardContent>
     </Card>
@@ -168,42 +226,36 @@ function StatsCard({ title, value, icon, color, subtitle }: StatsCardProps) {
 }
 
 // =============================================================================
-// Traffic Source Bar
+// Bar Row (reusable horizontal bar for breakdowns)
 // =============================================================================
 
-interface TrafficSourceBarProps {
+interface BarRowProps {
   label: string;
   value: number;
   total: number;
   color: string;
 }
 
-function TrafficSourceBar({ label, value, total, color }: TrafficSourceBarProps) {
-  const safeValue = value ?? 0;
-  const safeTotal = total ?? 0;
-  const percentage = safeTotal > 0 ? (safeValue / safeTotal) * 100 : 0;
-  
+function BarRow({ label, value, total, color }: BarRowProps) {
+  const pct = total > 0 ? Math.min((value / total) * 100, 100) : 0;
   return (
-    <Box sx={{ mb: 2 }}>
+    <Box sx={{ mb: 1.5 }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
-        <Typography variant="body2" fontWeight={500}>
+        <Typography variant="body2" fontWeight={500} noWrap sx={{ maxWidth: '68%' }}>
           {label}
         </Typography>
         <Typography variant="body2" color="text.secondary">
-          {safeValue.toLocaleString()} ({percentage.toFixed(1)}%)
+          {value.toLocaleString()}
         </Typography>
       </Box>
       <LinearProgress
         variant="determinate"
-        value={percentage}
+        value={pct}
         sx={{
-          height: 8,
+          height: 6,
           borderRadius: 1,
-          bgcolor: alpha(color, 0.1),
-          '& .MuiLinearProgress-bar': {
-            bgcolor: color,
-            borderRadius: 1,
-          },
+          bgcolor: alpha(color, 0.12),
+          '& .MuiLinearProgress-bar': { bgcolor: color, borderRadius: 1 },
         }}
       />
     </Box>
@@ -211,28 +263,29 @@ function TrafficSourceBar({ label, value, total, color }: TrafficSourceBarProps)
 }
 
 // =============================================================================
-// Simple Chart Component (ASCII-style for now)
+// Views Over Time Chart
 // =============================================================================
 
-interface SimpleChartProps {
+function SimpleChart({
+  data,
+  days,
+}: {
   data: Array<{ date: string; views: number }>;
-}
-
-function SimpleChart({ data }: SimpleChartProps) {
+  days: number;
+}) {
   const theme = useTheme();
   const maxViews = Math.max(...data.map((d) => d.views), 1);
-  
+  const labelEvery = days <= 7 ? 1 : days <= 30 ? 3 : days <= 90 ? 7 : 30;
+
   return (
-    <Box sx={{ display: 'flex', alignItems: 'flex-end', gap: 0.5, height: 150 }}>
-      {data.map((item) => {
+    <Box sx={{ display: 'flex', alignItems: 'flex-end', gap: '2px', height: 120 }}>
+      {data.map((item, idx) => {
         const height = (item.views / maxViews) * 100;
         const date = new Date(item.date);
-        const dayLabel = date.toLocaleDateString('en-US', { weekday: 'short' });
-        
         return (
           <Tooltip
             key={item.date}
-            title={`${date.toLocaleDateString()}: ${item.views} views`}
+            title={`${date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}: ${item.views.toLocaleString()} views`}
             arrow
           >
             <Box
@@ -241,32 +294,27 @@ function SimpleChart({ data }: SimpleChartProps) {
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
+                minWidth: 0,
               }}
             >
               <Box
                 sx={{
                   width: '100%',
-                  height: `${Math.max(height, 5)}%`,
+                  height: `${Math.max(height, 3)}%`,
                   bgcolor: theme.palette.primary.main,
-                  borderRadius: '4px 4px 0 0',
-                  minHeight: 4,
-                  transition: 'height 0.3s ease',
-                  '&:hover': {
-                    bgcolor: theme.palette.primary.dark,
-                  },
+                  borderRadius: '3px 3px 0 0',
+                  minHeight: 3,
+                  '&:hover': { opacity: 0.75 },
                 }}
               />
-              <Typography
-                variant="caption"
-                sx={{
-                  mt: 0.5,
-                  fontSize: '0.65rem',
-                  color: 'text.secondary',
-                  display: { xs: 'none', sm: 'block' },
-                }}
-              >
-                {dayLabel}
-              </Typography>
+              {idx % labelEvery === 0 && (
+                <Typography
+                  variant="caption"
+                  sx={{ mt: 0.5, fontSize: '0.6rem', color: 'text.disabled' }}
+                >
+                  {date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                </Typography>
+              )}
             </Box>
           </Tooltip>
         );
@@ -276,7 +324,107 @@ function SimpleChart({ data }: SimpleChartProps) {
 }
 
 // =============================================================================
-// Main Dashboard Component
+// Hourly Traffic Chart
+// =============================================================================
+
+function HourlyChart({ data }: { data: HourlyTrafficPoint[] }) {
+  const theme = useTheme();
+  const filled = Array.from(
+    { length: 24 },
+    (_, h) => data.find((d) => d.hour === h) ?? { hour: h, views: 0, visitors: 0 }
+  );
+  const maxViews = Math.max(...filled.map((d) => d.views), 1);
+  return (
+    <Box sx={{ display: 'flex', alignItems: 'flex-end', gap: '2px', height: 90 }}>
+      {filled.map((item) => (
+        <Tooltip
+          key={item.hour}
+          title={`${formatHour(item.hour)}: ${item.views.toLocaleString()} views`}
+          arrow
+        >
+          <Box
+            sx={{
+              flex: 1,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              minWidth: 0,
+            }}
+          >
+            <Box
+              sx={{
+                width: '100%',
+                height: `${Math.max((item.views / maxViews) * 100, 3)}%`,
+                bgcolor: theme.palette.info.main,
+                borderRadius: '2px 2px 0 0',
+                minHeight: 3,
+                '&:hover': { opacity: 0.75 },
+              }}
+            />
+            {item.hour % 6 === 0 && (
+              <Typography
+                variant="caption"
+                sx={{ mt: 0.25, fontSize: '0.58rem', color: 'text.disabled' }}
+              >
+                {formatHour(item.hour)}
+              </Typography>
+            )}
+          </Box>
+        </Tooltip>
+      ))}
+    </Box>
+  );
+}
+
+// =============================================================================
+// Collapsible Section
+// =============================================================================
+
+function Section({
+  title,
+  icon,
+  children,
+  defaultOpen = true,
+}: {
+  title: string;
+  icon: React.ReactNode;
+  children: React.ReactNode;
+  defaultOpen?: boolean;
+}) {
+  const [open, setOpen] = useState(defaultOpen);
+  return (
+    <Box sx={{ mb: 1 }}>
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 1,
+          cursor: 'pointer',
+          py: 1,
+          borderBottom: '1px solid',
+          borderColor: 'divider',
+          mb: 2,
+          '&:hover': { opacity: 0.8 },
+        }}
+        onClick={() => setOpen((v) => !v)}
+      >
+        <Box sx={{ color: 'text.secondary' }}>{icon}</Box>
+        <Typography variant="h6" fontWeight={700} sx={{ flex: 1 }}>
+          {title}
+        </Typography>
+        {open ? (
+          <ExpandLess sx={{ color: 'text.secondary' }} />
+        ) : (
+          <ExpandMore sx={{ color: 'text.secondary' }} />
+        )}
+      </Box>
+      <Collapse in={open}>{children}</Collapse>
+    </Box>
+  );
+}
+
+// =============================================================================
+// Main Dashboard
 // =============================================================================
 
 export default function AnalyticsDashboard() {
@@ -285,136 +433,100 @@ export default function AnalyticsDashboard() {
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<AnalyticsSummary | null>(null);
   const [dateRange, setDateRange] = useState(30);
-  
-  // Drill-down modal state
   const [drillDownView, setDrillDownView] = useState<DrillDownView>(null);
   const [drillDownData, setDrillDownData] = useState<PaginatedData<unknown> | null>(null);
   const [drillDownLoading, setDrillDownLoading] = useState(false);
   const [drillDownPage, setDrillDownPage] = useState(1);
-  
-  // Navigation history for nested drill-downs
   const [breadcrumbs, setBreadcrumbs] = useState<BreadcrumbItem[]>([]);
   const [currentContext, setCurrentContext] = useState<string | null>(null);
 
   const fetchAnalytics = useCallback(async () => {
     setLoading(true);
     setError(null);
-    
     try {
-      const response = await fetch(`/api/analytics?action=summary&days=${dateRange}`);
-      
-      if (!response.ok) {
-        if (response.status === 401) {
-          setError('You must be logged in to view analytics.');
-        } else {
-          setError('Failed to load analytics data.');
-        }
+      const res = await fetch(`/api/analytics?action=summary&days=${dateRange}`);
+      if (!res.ok) {
+        setError(
+          res.status === 401
+            ? 'You must be logged in to view analytics.'
+            : 'Failed to load analytics data.'
+        );
         return;
       }
-      
-      const result = await response.json();
-      setData(result);
+      setData(await res.json());
     } catch {
       setError('An error occurred while loading analytics.');
     } finally {
       setLoading(false);
     }
   }, [dateRange]);
-  
-  // Fetch drill-down data
-  const fetchDrillDownData = useCallback(async (view: DrillDownView, page: number = 1, context?: string) => {
-    if (!view) return;
-    
-    setDrillDownLoading(true);
-    try {
-      let url = `/api/analytics?days=${dateRange}&page=${page}&limit=25`;
-      
-      switch (view) {
-        case 'pages':
-          url += '&action=all-pages';
-          break;
-        case 'referrers':
-          url += '&action=all-referrers';
-          break;
-        case '404s':
-          url += '&action=all-404s';
-          break;
-        case 'page-referrers':
-          if (!context) return;
+
+  const fetchDrillDown = useCallback(
+    async (view: DrillDownView, page = 1, context?: string) => {
+      if (!view) return;
+      setDrillDownLoading(true);
+      try {
+        let url = `/api/analytics?days=${dateRange}&page=${page}&limit=25`;
+        if (view === 'pages') url += '&action=all-pages';
+        else if (view === 'referrers') url += '&action=all-referrers';
+        else if (view === '404s') url += '&action=all-404s';
+        else if (view === 'page-referrers' && context)
           url += `&action=page-referrers&pagePath=${encodeURIComponent(context)}`;
-          break;
-        case 'referrer-pages':
-          if (!context) return;
+        else if (view === 'referrer-pages' && context)
           url += `&action=referrer-pages&domain=${encodeURIComponent(context)}`;
-          break;
+        const res = await fetch(url);
+        if (res.ok) {
+          const r = await res.json();
+          setDrillDownData({
+            data: r.pages || r.referrers || r.errors || [],
+            total: r.total,
+            page: r.page,
+            limit: r.limit,
+            totalPages: r.totalPages,
+          });
+        }
+      } catch (err) {
+        console.error('Drill-down error:', err);
+      } finally {
+        setDrillDownLoading(false);
       }
-      
-      const response = await fetch(url);
-      
-      if (response.ok) {
-        const result = await response.json();
-        setDrillDownData({
-          data: result.pages || result.referrers || result.errors || [],
-          total: result.total,
-          page: result.page,
-          limit: result.limit,
-          totalPages: result.totalPages,
-        });
-      }
-    } catch (err) {
-      console.error('Failed to fetch drill-down data:', err);
-    } finally {
-      setDrillDownLoading(false);
-    }
-  }, [dateRange]);
-  
-  // Handle opening drill-down view
+    },
+    [dateRange]
+  );
+
+  const getViewTitle = (v: DrillDownView) =>
+    v === 'pages'
+      ? 'All Pages'
+      : v === 'referrers'
+        ? 'All Referrers'
+        : v === '404s'
+          ? 'All 404 Errors'
+          : v === 'page-referrers'
+            ? 'Page Referrers'
+            : 'Referrer Pages';
+
   const openDrillDown = (view: DrillDownView) => {
     setDrillDownView(view);
     setDrillDownPage(1);
     setCurrentContext(null);
     setBreadcrumbs([{ view, label: getViewTitle(view) }]);
-    fetchDrillDownData(view, 1);
+    fetchDrillDown(view, 1);
   };
-  
-  // Handle navigating to a nested drill-down view
-  const navigateToNestedView = (view: DrillDownView, context: string, label: string) => {
-    setBreadcrumbs(prev => [...prev, { view, label, context }]);
+  const navigateNested = (view: DrillDownView, context: string, label: string) => {
+    setBreadcrumbs((p) => [...p, { view, label, context }]);
     setDrillDownView(view);
     setDrillDownPage(1);
     setCurrentContext(context);
-    fetchDrillDownData(view, 1, context);
+    fetchDrillDown(view, 1, context);
   };
-  
-  // Handle navigating back in breadcrumbs
-  const navigateToBreadcrumb = (index: number) => {
-    const targetCrumb = breadcrumbs[index];
-    setBreadcrumbs(prev => prev.slice(0, index + 1));
-    setDrillDownView(targetCrumb.view);
+  const navigateCrumb = (idx: number) => {
+    const c = breadcrumbs[idx];
+    setBreadcrumbs((p) => p.slice(0, idx + 1));
+    setDrillDownView(c.view);
     setDrillDownPage(1);
-    setCurrentContext(targetCrumb.context || null);
-    fetchDrillDownData(targetCrumb.view, 1, targetCrumb.context);
+    setCurrentContext(c.context || null);
+    fetchDrillDown(c.view, 1, c.context);
   };
-  
-  // Get title for a drill-down view
-  const getViewTitle = (view: DrillDownView): string => {
-    switch (view) {
-      case 'pages': return 'All Pages';
-      case 'referrers': return 'All Referrers';
-      case '404s': return 'All 404 Errors';
-      case 'page-referrers': return 'Page Referrers';
-      case 'referrer-pages': return 'Referrer Pages';
-      default: return '';
-    }
-  };
-  
-  // Handle page change in drill-down
-  const handleDrillDownPageChange = (_: unknown, newPage: number) => {
-    setDrillDownPage(newPage + 1);
-    fetchDrillDownData(drillDownView, newPage + 1, currentContext || undefined);
-  };
-  
-  // Close drill-down modal
   const closeDrillDown = () => {
     setDrillDownView(null);
     setDrillDownData(null);
@@ -427,26 +539,21 @@ export default function AnalyticsDashboard() {
     fetchAnalytics();
   }, [fetchAnalytics]);
 
-  // Traffic source colors
-  const sourceColors = {
-    direct: theme.palette.primary.main,
-    referral: theme.palette.success.main,
-    social: theme.palette.info.main,
-    search: theme.palette.warning.main,
-    other: theme.palette.grey[500],
-  };
-
-  // Get referrer icon
   const getReferrerIcon = (domain: string | null) => {
     if (!domain) return <Language />;
-    if (domain.includes('facebook') || domain.includes('twitter') || domain.includes('linkedin')) {
-      return <People />;
-    }
-    if (domain.includes('google') || domain.includes('bing') || domain.includes('duckduckgo')) {
-      return <TrendingUp />;
-    }
+    if (/facebook|twitter|linkedin|instagram|reddit/.test(domain)) return <People />;
+    if (/google|bing|duckduckgo|yahoo/.test(domain)) return <TrendingUp />;
     return <Language />;
   };
+
+  const sourceColors = [
+    theme.palette.primary.main,
+    theme.palette.success.main,
+    theme.palette.info.main,
+    theme.palette.warning.main,
+    theme.palette.secondary.main,
+    theme.palette.grey[500],
+  ];
 
   return (
     <Box>
@@ -466,12 +573,11 @@ export default function AnalyticsDashboard() {
             Analytics
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            Track your site&apos;s traffic and referrer sources
+            Privacy-first traffic insights — session-based, no IP storage
           </Typography>
         </Box>
-        
         <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-          <FormControl size="small" sx={{ minWidth: 150 }}>
+          <FormControl size="small" sx={{ minWidth: 140 }}>
             <InputLabel>Date Range</InputLabel>
             <Select
               value={dateRange}
@@ -484,8 +590,7 @@ export default function AnalyticsDashboard() {
               <MenuItem value={365}>Last year</MenuItem>
             </Select>
           </FormControl>
-          
-          <Tooltip title="Refresh data">
+          <Tooltip title="Refresh">
             <IconButton onClick={fetchAnalytics} disabled={loading}>
               <Refresh />
             </IconButton>
@@ -493,368 +598,725 @@ export default function AnalyticsDashboard() {
         </Box>
       </Box>
 
-      {/* Error State */}
       {error && (
         <Alert severity="error" sx={{ mb: 3 }}>
           {error}
         </Alert>
       )}
 
-      {/* Loading State */}
       {loading && (
         <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
           <CircularProgress />
         </Box>
       )}
 
-      {/* Data Display */}
       {!loading && data && (
-        <Grid container spacing={3}>
-          {/* Stats Cards */}
-          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-            <StatsCard
-              title="Total Page Views"
-              value={data.totalPageViews}
-              icon={<Visibility />}
-              color={theme.palette.primary.main}
-              subtitle={`Last ${dateRange} days`}
-            />
-          </Grid>
-          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-            <StatsCard
-              title="Unique Visitors"
-              value={data.uniqueVisitors}
-              icon={<People />}
-              color={theme.palette.success.main}
-              subtitle={`Last ${dateRange} days`}
-            />
-          </Grid>
-          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-            <StatsCard
-              title="Top Referrer"
-              value={data.topReferrers[0]?.domain || 'Direct'}
-              icon={<Language />}
-              color={theme.palette.info.main}
-              subtitle={`${data.topReferrers[0]?.visits || 0} visits`}
-            />
-          </Grid>
-          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-            <StatsCard
-              title="Pages per Visit"
-              value={
-                (data.uniqueVisitors ?? 0) > 0
-                  ? ((data.totalPageViews ?? 0) / data.uniqueVisitors).toFixed(1)
-                  : '0'
-              }
-              icon={<TrendingUp />}
-              color={theme.palette.warning.main}
-              subtitle="Average"
-            />
-          </Grid>
-
-          {/* Views Over Time Chart */}
-          <Grid size={{ xs: 12, md: 8 }}>
-            <Card>
-              <CardContent>
-                <Typography variant="h6" fontWeight={600} gutterBottom>
-                  Views Over Time
-                </Typography>
-                {data.viewsByDay.length > 0 ? (
-                  <SimpleChart data={data.viewsByDay.slice(-14)} />
-                ) : (
-                  <Typography color="text.secondary" sx={{ py: 4, textAlign: 'center' }}>
-                    No data available for this period
-                  </Typography>
-                )}
-              </CardContent>
-            </Card>
+        <Box>
+          {/* Summary Cards */}
+          <Grid container spacing={2} sx={{ mb: 4 }}>
+            <Grid size={{ xs: 12, sm: 6, lg: 2.4 }}>
+              <StatsCard
+                title="Page Views"
+                value={data.totalPageViews}
+                icon={<Visibility />}
+                color={theme.palette.primary.main}
+                subtitle={`Last ${dateRange} days`}
+              />
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6, lg: 2.4 }}>
+              <StatsCard
+                title="Unique Sessions"
+                value={data.uniqueVisitors}
+                icon={<People />}
+                color={theme.palette.success.main}
+                subtitle={`Last ${dateRange} days`}
+                note="Session-based, not persistent visitors"
+              />
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6, lg: 2.4 }}>
+              <StatsCard
+                title="Pages / Visit"
+                value={data.pagesPerVisit.toFixed(1)}
+                icon={<TrendingUp />}
+                color={theme.palette.info.main}
+                subtitle="Average per session"
+              />
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6, lg: 2.4 }}>
+              <StatsCard
+                title="Bounce Rate"
+                value={`${data.bounceRate.toFixed(1)}%`}
+                icon={data.bounceRate > 70 ? <TrendingDown /> : <TrendingUp />}
+                color={
+                  data.bounceRate > 70 ? theme.palette.warning.main : theme.palette.success.main
+                }
+                subtitle="1-page sessions"
+              />
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6, lg: 2.4 }}>
+              <StatsCard
+                title="404 Errors"
+                value={data.total404s}
+                icon={<ErrorOutline />}
+                color={data.total404s > 0 ? theme.palette.error.main : theme.palette.success.main}
+                subtitle={`Last ${dateRange} days`}
+              />
+            </Grid>
           </Grid>
 
-          {/* Traffic Sources */}
-          <Grid size={{ xs: 12, md: 4 }}>
-            <Card sx={{ height: '100%' }}>
-              <CardContent>
-                <Typography variant="h6" fontWeight={600} gutterBottom>
-                  Traffic Sources
-                </Typography>
-                <Box sx={{ mt: 2 }}>
-                  {data.trafficSources.slice(0, 5).map((source, index) => {
-                    const colors = [sourceColors.direct, sourceColors.referral, sourceColors.social, sourceColors.search, sourceColors.other];
-                    return (
-                      <TrafficSourceBar
-                        key={source.source}
-                        label={source.source === 'direct' ? 'Direct' : source.source}
-                        value={source.visits}
-                        total={data.totalPageViews}
-                        color={colors[index % colors.length]}
-                      />
-                    );
-                  })}
-                  {data.trafficSources.length === 0 && (
-                    <Typography color="text.secondary" sx={{ py: 2, textAlign: 'center' }}>
-                      No traffic source data yet
+          {/* Traffic Trend */}
+          <Section title="Traffic Trend" icon={<BarChart />}>
+            <Grid container spacing={2} sx={{ mb: 3 }}>
+              <Grid size={{ xs: 12, md: 8 }}>
+                <Card>
+                  <CardContent>
+                    <Typography variant="subtitle1" fontWeight={600} gutterBottom>
+                      Views Over Time
                     </Typography>
-                  )}
-                </Box>
-              </CardContent>
-            </Card>
-          </Grid>
-
-          {/* Top Pages */}
-          <Grid size={{ xs: 12, md: 6 }}>
-            <Card>
-              <CardContent>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-                  <Typography variant="h6" fontWeight={600}>
-                    Top Pages
-                  </Typography>
-                  <Button
-                    size="small"
-                    endIcon={<ChevronRight />}
-                    onClick={() => openDrillDown('pages')}
-                  >
-                    View All
-                  </Button>
-                </Box>
-                <TableContainer>
-                  <Table size="small">
-                    <TableHead>
-                      <TableRow>
-                        <TableCell>Page</TableCell>
-                        <TableCell align="right">Views</TableCell>
-                        <TableCell align="right">Visitors</TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {data.topPages.length > 0 ? (
-                        data.topPages.slice(0, 10).map((page, index) => (
-                          <TableRow key={`${page.path}-${index}`} hover>
-                            <TableCell>
-                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                <Typography
-                                  variant="body2"
-                                  sx={{
-                                    maxWidth: 200,
-                                    overflow: 'hidden',
-                                    textOverflow: 'ellipsis',
-                                    whiteSpace: 'nowrap',
-                                  }}
-                                >
-                                  {page.path}
-                                </Typography>
-                                <Tooltip title="View page">
-                                  <IconButton
-                                    size="small"
-                                    href={page.path}
-                                    target="_blank"
-                                  >
-                                    <OpenInNew fontSize="small" />
-                                  </IconButton>
-                                </Tooltip>
-                              </Box>
-                            </TableCell>
-                            <TableCell align="right">
-                              <Typography variant="body2" fontWeight={500}>
-                                {(page.views ?? 0).toLocaleString()}
-                              </Typography>
-                            </TableCell>
-                            <TableCell align="right">
-                              <Typography variant="body2" color="text.secondary">
-                                {(page.uniqueVisitors ?? 0).toLocaleString()}
-                              </Typography>
-                            </TableCell>
-                          </TableRow>
-                        ))
-                      ) : (
-                        <TableRow>
-                          <TableCell colSpan={3} align="center">
-                            <Typography color="text.secondary" sx={{ py: 2 }}>
-                              No page views recorded yet
-                            </Typography>
-                          </TableCell>
-                        </TableRow>
-                      )}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
-              </CardContent>
-            </Card>
-          </Grid>
-
-          {/* Top Referrers */}
-          <Grid size={{ xs: 12, md: 6 }}>
-            <Card>
-              <CardContent>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-                  <Typography variant="h6" fontWeight={600}>
-                    Top Referrers
-                  </Typography>
-                  <Button
-                    size="small"
-                    endIcon={<ChevronRight />}
-                    onClick={() => openDrillDown('referrers')}
-                  >
-                    View All
-                  </Button>
-                </Box>
-                <TableContainer>
-                  <Table size="small">
-                    <TableHead>
-                      <TableRow>
-                        <TableCell>Source</TableCell>
-                        <TableCell align="right">Visits</TableCell>
-                        <TableCell align="right">Visitors</TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {data.topReferrers.length > 0 ? (
-                        data.topReferrers.slice(0, 10).map((referrer, index) => (
-                          <TableRow key={referrer.domain || `direct-${index}`} hover>
-                            <TableCell>
-                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                {getReferrerIcon(referrer.domain)}
-                                <Typography variant="body2">
-                                  {referrer.domain || 'Direct / None'}
-                                </Typography>
-                              </Box>
-                            </TableCell>
-                            <TableCell align="right">
-                              <Typography variant="body2" fontWeight={500}>
-                                {referrer.visits.toLocaleString()}
-                              </Typography>
-                            </TableCell>
-                            <TableCell align="right">
-                              <Typography variant="body2" color="text.secondary">
-                                {referrer.uniqueVisitors.toLocaleString()}
-                              </Typography>
-                            </TableCell>
-                          </TableRow>
-                        ))
-                      ) : (
-                        <TableRow>
-                          <TableCell colSpan={3} align="center">
-                            <Typography color="text.secondary" sx={{ py: 2 }}>
-                              No referrer data yet
-                            </Typography>
-                          </TableCell>
-                        </TableRow>
-                      )}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
-              </CardContent>
-            </Card>
-          </Grid>
-
-          {/* 404 Errors Table */}
-          <Grid size={{ xs: 12 }}>
-            <Card>
-              <CardContent>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <ErrorOutline color="error" />
-                    <Typography variant="h6" fontWeight={600}>
-                      404 Errors
-                    </Typography>
-                    {data.total404s > 0 && (
-                      <Typography variant="body2" color="text.secondary">
-                        ({data.total404s.toLocaleString()} total)
+                    {data.viewsByDay.length > 0 ? (
+                      <SimpleChart data={data.viewsByDay} days={dateRange} />
+                    ) : (
+                      <Typography color="text.secondary" sx={{ py: 3, textAlign: 'center' }}>
+                        No data for this period
                       </Typography>
                     )}
-                  </Box>
-                  {data.top404s.length > 0 && (
-                    <Button
-                      size="small"
-                      endIcon={<ChevronRight />}
-                      onClick={() => openDrillDown('404s')}
+                  </CardContent>
+                </Card>
+              </Grid>
+              <Grid size={{ xs: 12, md: 4 }}>
+                <Card sx={{ height: '100%' }}>
+                  <CardContent>
+                    <Typography variant="subtitle1" fontWeight={600} gutterBottom>
+                      Hourly Traffic
+                    </Typography>
+                    {data.hourlyTraffic.length > 0 ? (
+                      <>
+                        <HourlyChart data={data.hourlyTraffic} />
+                        {data.peakHours.length > 0 && (
+                          <Typography
+                            variant="caption"
+                            color="text.secondary"
+                            sx={{ mt: 1, display: 'block' }}
+                          >
+                            Peak: {data.peakHours.map((p) => formatHour(p.hour)).join(', ')}
+                          </Typography>
+                        )}
+                      </>
+                    ) : (
+                      <Typography color="text.secondary" sx={{ py: 3, textAlign: 'center' }}>
+                        No hourly data yet
+                      </Typography>
+                    )}
+                  </CardContent>
+                </Card>
+              </Grid>
+            </Grid>
+          </Section>
+
+          {/* Session Quality */}
+          <Section title="Session Quality" icon={<AccessTime />}>
+            <Grid container spacing={2} sx={{ mb: 3 }}>
+              <Grid size={{ xs: 12, md: 4 }}>
+                <Card sx={{ height: '100%' }}>
+                  <CardContent>
+                    <Typography variant="subtitle1" fontWeight={600} gutterBottom>
+                      Session Depth
+                    </Typography>
+                    <Typography
+                      variant="caption"
+                      color="text.secondary"
+                      display="block"
+                      sx={{ mb: 1.5 }}
                     >
-                      View All
-                    </Button>
-                  )}
-                </Box>
-                <TableContainer>
-                  <Table size="small">
-                    <TableHead>
-                      <TableRow>
-                        <TableCell>Requested URL</TableCell>
-                        <TableCell align="right">Hits</TableCell>
-                        <TableCell align="right">Last Hit</TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {data.top404s.length > 0 ? (
-                        data.top404s.slice(0, 10).map((error, index) => (
-                          <TableRow key={`${error.path}-${index}`} hover>
-                            <TableCell>
-                              <Typography
-                                variant="body2"
-                                sx={{
-                                  maxWidth: 400,
-                                  overflow: 'hidden',
-                                  textOverflow: 'ellipsis',
-                                  whiteSpace: 'nowrap',
-                                  fontFamily: 'monospace',
-                                  color: 'error.main',
-                                }}
-                              >
-                                {error.path}
-                              </Typography>
-                            </TableCell>
-                            <TableCell align="right">
-                              <Typography variant="body2" fontWeight={500}>
-                                {error.hits.toLocaleString()}
-                              </Typography>
-                            </TableCell>
-                            <TableCell align="right">
-                              <Typography variant="body2" color="text.secondary">
-                                {format(new Date(error.lastHit), 'MMM d, h:mm a')}
-                              </Typography>
-                            </TableCell>
+                      Pages viewed per session
+                    </Typography>
+                    {data.sessionDepth.length > 0 ? (
+                      (() => {
+                        const total = data.sessionDepth.reduce((s, b) => s + b.sessions, 0);
+                        return data.sessionDepth.map((b) => (
+                          <BarRow
+                            key={b.bucket}
+                            label={`${b.bucket} page${b.bucket === '1' ? '' : 's'}`}
+                            value={b.sessions}
+                            total={total}
+                            color={theme.palette.primary.main}
+                          />
+                        ));
+                      })()
+                    ) : (
+                      <Typography color="text.secondary" sx={{ py: 2, textAlign: 'center' }}>
+                        No session data yet
+                      </Typography>
+                    )}
+                  </CardContent>
+                </Card>
+              </Grid>
+              <Grid size={{ xs: 12, md: 4 }}>
+                <Card sx={{ height: '100%' }}>
+                  <CardContent>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                      <Input fontSize="small" sx={{ color: 'success.main' }} />
+                      <Typography variant="subtitle1" fontWeight={600}>
+                        Entry Pages
+                      </Typography>
+                    </Box>
+                    <Typography
+                      variant="caption"
+                      color="text.secondary"
+                      display="block"
+                      sx={{ mb: 1.5 }}
+                    >
+                      Where sessions begin
+                    </Typography>
+                    {data.entryPages.length > 0 ? (
+                      <TableContainer>
+                        <Table size="small">
+                          <TableBody>
+                            {data.entryPages.slice(0, 8).map((p) => (
+                              <TableRow key={p.path} hover>
+                                <TableCell sx={{ py: 0.75 }}>
+                                  <Typography
+                                    variant="caption"
+                                    noWrap
+                                    sx={{ maxWidth: 180, display: 'block' }}
+                                  >
+                                    {p.path}
+                                  </Typography>
+                                </TableCell>
+                                <TableCell align="right" sx={{ py: 0.75 }}>
+                                  <Typography variant="caption" color="text.secondary">
+                                    {p.sessions.toLocaleString()}
+                                  </Typography>
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </TableContainer>
+                    ) : (
+                      <Typography color="text.secondary" sx={{ py: 2, textAlign: 'center' }}>
+                        No entry page data yet
+                      </Typography>
+                    )}
+                  </CardContent>
+                </Card>
+              </Grid>
+              <Grid size={{ xs: 12, md: 4 }}>
+                <Card sx={{ height: '100%' }}>
+                  <CardContent>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                      <ExitToApp fontSize="small" sx={{ color: 'warning.main' }} />
+                      <Typography variant="subtitle1" fontWeight={600}>
+                        Exit Pages
+                      </Typography>
+                    </Box>
+                    <Typography
+                      variant="caption"
+                      color="text.secondary"
+                      display="block"
+                      sx={{ mb: 1.5 }}
+                    >
+                      Where sessions end
+                    </Typography>
+                    {data.exitPages.length > 0 ? (
+                      <TableContainer>
+                        <Table size="small">
+                          <TableBody>
+                            {data.exitPages.slice(0, 8).map((p) => (
+                              <TableRow key={p.path} hover>
+                                <TableCell sx={{ py: 0.75 }}>
+                                  <Typography
+                                    variant="caption"
+                                    noWrap
+                                    sx={{ maxWidth: 180, display: 'block' }}
+                                  >
+                                    {p.path}
+                                  </Typography>
+                                </TableCell>
+                                <TableCell align="right" sx={{ py: 0.75 }}>
+                                  <Typography variant="caption" color="text.secondary">
+                                    {p.sessions.toLocaleString()}
+                                  </Typography>
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </TableContainer>
+                    ) : (
+                      <Typography color="text.secondary" sx={{ py: 2, textAlign: 'center' }}>
+                        No exit page data yet
+                      </Typography>
+                    )}
+                  </CardContent>
+                </Card>
+              </Grid>
+            </Grid>
+          </Section>
+
+          {/* Content Performance */}
+          <Section title="Content Performance" icon={<Visibility />}>
+            <Grid container spacing={2} sx={{ mb: 3 }}>
+              <Grid size={{ xs: 12 }}>
+                <Card>
+                  <CardContent>
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        mb: 1,
+                      }}
+                    >
+                      <Typography variant="subtitle1" fontWeight={600}>
+                        Top Pages
+                      </Typography>
+                      <Button
+                        size="small"
+                        endIcon={<ChevronRight />}
+                        onClick={() => openDrillDown('pages')}
+                      >
+                        View All
+                      </Button>
+                    </Box>
+                    <TableContainer>
+                      <Table size="small">
+                        <TableHead>
+                          <TableRow>
+                            <TableCell>Page</TableCell>
+                            <TableCell align="right">Views</TableCell>
+                            <TableCell align="right">Sessions</TableCell>
                           </TableRow>
+                        </TableHead>
+                        <TableBody>
+                          {data.topPages.length > 0 ? (
+                            data.topPages.map((page, i) => (
+                              <TableRow key={`${page.path}-${i}`} hover>
+                                <TableCell>
+                                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                    <Typography variant="body2" noWrap sx={{ maxWidth: 320 }}>
+                                      {page.path}
+                                    </Typography>
+                                    <Tooltip title="Open page">
+                                      <IconButton size="small" href={page.path} target="_blank">
+                                        <OpenInNew fontSize="small" />
+                                      </IconButton>
+                                    </Tooltip>
+                                  </Box>
+                                </TableCell>
+                                <TableCell align="right">
+                                  <Typography variant="body2" fontWeight={500}>
+                                    {page.views.toLocaleString()}
+                                  </Typography>
+                                </TableCell>
+                                <TableCell align="right">
+                                  <Typography variant="body2" color="text.secondary">
+                                    {page.uniqueVisitors.toLocaleString()}
+                                  </Typography>
+                                </TableCell>
+                              </TableRow>
+                            ))
+                          ) : (
+                            <TableRow>
+                              <TableCell colSpan={3} align="center">
+                                <Typography color="text.secondary" sx={{ py: 2 }}>
+                                  No page views yet
+                                </Typography>
+                              </TableCell>
+                            </TableRow>
+                          )}
+                        </TableBody>
+                      </Table>
+                    </TableContainer>
+                  </CardContent>
+                </Card>
+              </Grid>
+            </Grid>
+          </Section>
+
+          {/* Attribution */}
+          <Section title="Attribution" icon={<Campaign />}>
+            <Grid container spacing={2} sx={{ mb: 3 }}>
+              <Grid size={{ xs: 12, md: 4 }}>
+                <Card sx={{ height: '100%' }}>
+                  <CardContent>
+                    <Typography variant="subtitle1" fontWeight={600} gutterBottom>
+                      Traffic Sources
+                    </Typography>
+                    {data.trafficSources.length > 0 ? (
+                      data.trafficSources
+                        .slice(0, 8)
+                        .map((s, i) => (
+                          <BarRow
+                            key={s.source}
+                            label={s.source === 'direct' ? 'Direct' : s.source}
+                            value={s.visits}
+                            total={data.totalPageViews}
+                            color={sourceColors[i % sourceColors.length]}
+                          />
                         ))
+                    ) : (
+                      <Typography color="text.secondary" sx={{ py: 2, textAlign: 'center' }}>
+                        No source data
+                      </Typography>
+                    )}
+                  </CardContent>
+                </Card>
+              </Grid>
+              <Grid size={{ xs: 12, md: 4 }}>
+                <Card sx={{ height: '100%' }}>
+                  <CardContent>
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        mb: 1,
+                      }}
+                    >
+                      <Typography variant="subtitle1" fontWeight={600}>
+                        Top Referrers
+                      </Typography>
+                      <Button
+                        size="small"
+                        endIcon={<ChevronRight />}
+                        onClick={() => openDrillDown('referrers')}
+                      >
+                        View All
+                      </Button>
+                    </Box>
+                    <TableContainer>
+                      <Table size="small">
+                        <TableHead>
+                          <TableRow>
+                            <TableCell>Referrer</TableCell>
+                            <TableCell align="right">Visits</TableCell>
+                          </TableRow>
+                        </TableHead>
+                        <TableBody>
+                          {data.topReferrers.length > 0 ? (
+                            data.topReferrers.slice(0, 8).map((r, i) => (
+                              <TableRow key={r.domain || `direct-${i}`} hover>
+                                <TableCell>
+                                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                    {getReferrerIcon(r.domain)}
+                                    <Typography variant="body2" noWrap sx={{ maxWidth: 140 }}>
+                                      {r.domain || 'Direct'}
+                                    </Typography>
+                                  </Box>
+                                </TableCell>
+                                <TableCell align="right">
+                                  <Typography variant="body2" fontWeight={500}>
+                                    {r.visits.toLocaleString()}
+                                  </Typography>
+                                </TableCell>
+                              </TableRow>
+                            ))
+                          ) : (
+                            <TableRow>
+                              <TableCell colSpan={2} align="center">
+                                <Typography color="text.secondary" sx={{ py: 2 }}>
+                                  No referrer data
+                                </Typography>
+                              </TableCell>
+                            </TableRow>
+                          )}
+                        </TableBody>
+                      </Table>
+                    </TableContainer>
+                  </CardContent>
+                </Card>
+              </Grid>
+              <Grid size={{ xs: 12, md: 4 }}>
+                <Card sx={{ height: '100%' }}>
+                  <CardContent>
+                    <Typography variant="subtitle1" fontWeight={600} gutterBottom>
+                      Campaign Performance
+                    </Typography>
+                    {data.campaignPerformance.length > 0 ? (
+                      <TableContainer>
+                        <Table size="small">
+                          <TableHead>
+                            <TableRow>
+                              <TableCell>Campaign</TableCell>
+                              <TableCell align="right">Visits</TableCell>
+                            </TableRow>
+                          </TableHead>
+                          <TableBody>
+                            {data.campaignPerformance.slice(0, 8).map((c, i) => (
+                              <TableRow key={`${c.campaign}-${i}`} hover>
+                                <TableCell>
+                                  <Typography variant="body2" noWrap sx={{ maxWidth: 150 }}>
+                                    {c.campaign}
+                                  </Typography>
+                                  {(c.source || c.medium) && (
+                                    <Typography
+                                      variant="caption"
+                                      color="text.secondary"
+                                      display="block"
+                                    >
+                                      {[c.source, c.medium].filter(Boolean).join(' / ')}
+                                    </Typography>
+                                  )}
+                                </TableCell>
+                                <TableCell align="right">
+                                  <Typography variant="body2" fontWeight={500}>
+                                    {c.visits.toLocaleString()}
+                                  </Typography>
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </TableContainer>
+                    ) : (
+                      <Typography color="text.secondary" sx={{ py: 4, textAlign: 'center' }}>
+                        No UTM campaign data in this period
+                      </Typography>
+                    )}
+                  </CardContent>
+                </Card>
+              </Grid>
+            </Grid>
+          </Section>
+
+          {/* Audience Technology */}
+          <Section title="Audience Technology" icon={<DevicesOther />}>
+            <Grid container spacing={2} sx={{ mb: 3 }}>
+              {[
+                { title: 'Devices', data: data.deviceBreakdown, color: theme.palette.primary.main },
+                {
+                  title: 'Browsers',
+                  data: data.browserBreakdown,
+                  color: theme.palette.success.main,
+                },
+                {
+                  title: 'Operating Systems',
+                  data: data.osBreakdown,
+                  color: theme.palette.info.main,
+                },
+              ].map(({ title, data: breakdown, color }) => (
+                <Grid key={title} size={{ xs: 12, md: 4 }}>
+                  <Card sx={{ height: '100%' }}>
+                    <CardContent>
+                      <Typography variant="subtitle1" fontWeight={600} gutterBottom>
+                        {title}
+                      </Typography>
+                      {breakdown.length > 0 ? (
+                        (() => {
+                          const total = breakdown.reduce((s, d) => s + d.visits, 0);
+                          return breakdown.map((d) => (
+                            <BarRow
+                              key={d.label}
+                              label={d.label.charAt(0).toUpperCase() + d.label.slice(1)}
+                              value={d.visits}
+                              total={total}
+                              color={color}
+                            />
+                          ));
+                        })()
                       ) : (
-                        <TableRow>
-                          <TableCell colSpan={3} align="center">
-                            <Typography color="text.secondary" sx={{ py: 2 }}>
-                              No 404 errors recorded — great job! 🎉
-                            </Typography>
-                          </TableCell>
-                        </TableRow>
+                        <Typography color="text.secondary" sx={{ py: 2, textAlign: 'center' }}>
+                          No data yet
+                        </Typography>
                       )}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
+                    </CardContent>
+                  </Card>
+                </Grid>
+              ))}
+            </Grid>
+          </Section>
+
+          {/* Site Quality */}
+          <Section title="Site Quality" icon={<BugReport />}>
+            <Grid container spacing={2} sx={{ mb: 3 }}>
+              <Grid size={{ xs: 12, md: 4 }}>
+                <Card sx={{ height: '100%' }}>
+                  <CardContent>
+                    <Typography variant="subtitle1" fontWeight={600} gutterBottom>
+                      Status Code Mix
+                    </Typography>
+                    {data.statusCodeMix.length > 0 ? (
+                      (() => {
+                        const total = data.statusCodeMix.reduce((s, c) => s + c.hits, 0);
+                        return data.statusCodeMix.map((c) => (
+                          <BarRow
+                            key={c.statusCode}
+                            label={`HTTP ${c.statusCode}`}
+                            value={c.hits}
+                            total={total}
+                            color={getStatusColor(c.statusCode, theme)}
+                          />
+                        ));
+                      })()
+                    ) : (
+                      <Typography color="text.secondary" sx={{ py: 2, textAlign: 'center' }}>
+                        No status data
+                      </Typography>
+                    )}
+                  </CardContent>
+                </Card>
+              </Grid>
+              <Grid size={{ xs: 12, md: 8 }}>
+                <Card>
+                  <CardContent>
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        mb: 1,
+                      }}
+                    >
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <ErrorOutline color="error" />
+                        <Typography variant="subtitle1" fontWeight={600}>
+                          404 Errors
+                        </Typography>
+                        {data.total404s > 0 && (
+                          <Chip
+                            label={data.total404s.toLocaleString()}
+                            size="small"
+                            color="error"
+                            variant="outlined"
+                          />
+                        )}
+                      </Box>
+                      {data.top404s.length > 0 && (
+                        <Button
+                          size="small"
+                          endIcon={<ChevronRight />}
+                          onClick={() => openDrillDown('404s')}
+                        >
+                          View All
+                        </Button>
+                      )}
+                    </Box>
+                    <TableContainer>
+                      <Table size="small">
+                        <TableHead>
+                          <TableRow>
+                            <TableCell>Requested URL</TableCell>
+                            <TableCell align="right">Hits</TableCell>
+                            <TableCell align="right">Last Hit</TableCell>
+                          </TableRow>
+                        </TableHead>
+                        <TableBody>
+                          {data.top404s.length > 0 ? (
+                            data.top404s.map((e, i) => (
+                              <TableRow key={`${e.path}-${i}`} hover>
+                                <TableCell>
+                                  <Typography
+                                    variant="body2"
+                                    noWrap
+                                    sx={{
+                                      maxWidth: 360,
+                                      fontFamily: 'monospace',
+                                      color: 'error.main',
+                                    }}
+                                  >
+                                    {e.path}
+                                  </Typography>
+                                </TableCell>
+                                <TableCell align="right">
+                                  <Typography variant="body2" fontWeight={500}>
+                                    {e.hits.toLocaleString()}
+                                  </Typography>
+                                </TableCell>
+                                <TableCell align="right">
+                                  <Typography variant="body2" color="text.secondary">
+                                    {format(new Date(e.lastHit), 'MMM d, h:mm a')}
+                                  </Typography>
+                                </TableCell>
+                              </TableRow>
+                            ))
+                          ) : (
+                            <TableRow>
+                              <TableCell colSpan={3} align="center">
+                                <Typography color="text.secondary" sx={{ py: 2 }}>
+                                  No 404 errors — great job!
+                                </Typography>
+                              </TableCell>
+                            </TableRow>
+                          )}
+                        </TableBody>
+                      </Table>
+                    </TableContainer>
+                  </CardContent>
+                </Card>
+              </Grid>
+            </Grid>
+          </Section>
+
+          {/* Data Health */}
+          <Section title="Data Health" icon={<BarChart />} defaultOpen={false}>
+            <Card sx={{ mb: 3 }}>
+              <CardContent>
+                <Grid container spacing={2}>
+                  {[
+                    {
+                      label: 'Latest Event',
+                      value: data.dataHealth.latestEventAt
+                        ? format(new Date(data.dataHealth.latestEventAt), 'MMM d, h:mm a')
+                        : 'No events recorded',
+                    },
+                    {
+                      label: 'Latest Rollup',
+                      value: data.dataHealth.latestRollupAt
+                        ? format(new Date(data.dataHealth.latestRollupAt), 'MMM d, h:mm a')
+                        : 'No rollups yet',
+                    },
+                    { label: 'Raw Retention', value: `${data.dataHealth.rawRetentionDays} days` },
+                  ].map(({ label, value }) => (
+                    <Grid key={label} size={{ xs: 12, sm: 4 }}>
+                      <Typography variant="caption" color="text.secondary" display="block">
+                        {label}
+                      </Typography>
+                      <Typography variant="body2" fontWeight={500}>
+                        {value}
+                      </Typography>
+                    </Grid>
+                  ))}
+                  <Grid size={{ xs: 12, sm: 4 }}>
+                    <Typography variant="caption" color="text.secondary" display="block">
+                      Visitor Mode
+                    </Typography>
+                    <Chip
+                      label={
+                        data.dataHealth.persistentVisitorIdEnabled
+                          ? 'Persistent ID enabled'
+                          : 'Session-only (strict privacy)'
+                      }
+                      size="small"
+                      color={data.dataHealth.persistentVisitorIdEnabled ? 'warning' : 'success'}
+                      variant="outlined"
+                    />
+                  </Grid>
+                </Grid>
               </CardContent>
             </Card>
-          </Grid>
+          </Section>
 
           {/* Privacy Notice */}
-          <Grid size={{ xs: 12 }}>
-            <Alert severity="info" sx={{ mt: 2 }}>
-              <Typography variant="body2">
-                <strong>Privacy-focused analytics:</strong> This system does not track IP addresses,
-                use cookies for tracking, or collect personally identifiable information. Data is
-                aggregated and anonymized to provide insights while respecting visitor privacy.
-              </Typography>
-            </Alert>
-          </Grid>
-        </Grid>
+          <Alert severity="info">
+            <Typography variant="body2">
+              <strong>Privacy-focused analytics:</strong> No IP addresses stored. No tracking
+              cookies. No third-party scripts. Sessions use anonymous IDs in{' '}
+              <code>sessionStorage</code> — they do not persist across browser restarts. Returning
+              visitor metrics are unavailable under this strict privacy model.
+            </Typography>
+          </Alert>
+        </Box>
       )}
 
       {/* Drill-Down Dialog */}
-      <Dialog
-        open={drillDownView !== null}
-        onClose={closeDrillDown}
-        maxWidth="md"
-        fullWidth
-      >
+      <Dialog open={drillDownView !== null} onClose={closeDrillDown} maxWidth="md" fullWidth>
         <DialogTitle>
-          {/* Breadcrumb Navigation */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
             {breadcrumbs.length > 1 && (
-              <IconButton 
-                size="small" 
-                onClick={() => navigateToBreadcrumb(breadcrumbs.length - 2)}
+              <IconButton
+                size="small"
+                onClick={() => navigateCrumb(breadcrumbs.length - 2)}
                 sx={{ mr: 1 }}
               >
                 <ArrowBack fontSize="small" />
@@ -868,8 +1330,8 @@ export default function AnalyticsDashboard() {
                 {index < breadcrumbs.length - 1 ? (
                   <Button
                     size="small"
-                    onClick={() => navigateToBreadcrumb(index)}
-                    sx={{ textTransform: 'none', minWidth: 'auto', p: 0.5 }}
+                    onClick={() => navigateCrumb(index)}
+                    sx={{ textTransform: 'none', p: 0.5 }}
                   >
                     {crumb.label}
                   </Button>
@@ -883,10 +1345,13 @@ export default function AnalyticsDashboard() {
           </Box>
           {currentContext && (
             <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-              {drillDownView === 'page-referrers' ? `Page: ${currentContext}` : `Referrer: ${currentContext}`}
+              {drillDownView === 'page-referrers'
+                ? `Page: ${currentContext}`
+                : `Referrer: ${currentContext}`}
             </Typography>
           )}
         </DialogTitle>
+
         <DialogContent>
           {drillDownLoading ? (
             <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
@@ -902,7 +1367,7 @@ export default function AnalyticsDashboard() {
                         <>
                           <TableCell>Page</TableCell>
                           <TableCell align="right">Views</TableCell>
-                          <TableCell align="right">Visitors</TableCell>
+                          <TableCell align="right">Sessions</TableCell>
                           <TableCell align="center">Referrers</TableCell>
                         </>
                       )}
@@ -910,7 +1375,7 @@ export default function AnalyticsDashboard() {
                         <>
                           <TableCell>Referrer</TableCell>
                           <TableCell align="right">Visits</TableCell>
-                          <TableCell align="right">Visitors</TableCell>
+                          <TableCell align="right">Sessions</TableCell>
                           <TableCell align="right">Last Visit</TableCell>
                           <TableCell align="center">Pages</TableCell>
                         </>
@@ -923,19 +1388,14 @@ export default function AnalyticsDashboard() {
                           <TableCell align="right">Last Hit</TableCell>
                         </>
                       )}
-                      {drillDownView === 'page-referrers' && (
+                      {(drillDownView === 'page-referrers' ||
+                        drillDownView === 'referrer-pages') && (
                         <>
-                          <TableCell>Referrer</TableCell>
+                          <TableCell>
+                            {drillDownView === 'page-referrers' ? 'Referrer' : 'Page'}
+                          </TableCell>
                           <TableCell align="right">Visits</TableCell>
-                          <TableCell align="right">Visitors</TableCell>
-                          <TableCell align="right">Last Visit</TableCell>
-                        </>
-                      )}
-                      {drillDownView === 'referrer-pages' && (
-                        <>
-                          <TableCell>Page</TableCell>
-                          <TableCell align="right">Views</TableCell>
-                          <TableCell align="right">Visitors</TableCell>
+                          <TableCell align="right">Sessions</TableCell>
                           <TableCell align="right">Last Visit</TableCell>
                         </>
                       )}
@@ -948,15 +1408,7 @@ export default function AnalyticsDashboard() {
                           <>
                             <TableCell>
                               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                <Typography
-                                  variant="body2"
-                                  sx={{
-                                    maxWidth: 250,
-                                    overflow: 'hidden',
-                                    textOverflow: 'ellipsis',
-                                    whiteSpace: 'nowrap',
-                                  }}
-                                >
+                                <Typography variant="body2" noWrap sx={{ maxWidth: 240 }}>
                                   {item.path as string}
                                 </Typography>
                                 <IconButton size="small" href={item.path as string} target="_blank">
@@ -964,14 +1416,24 @@ export default function AnalyticsDashboard() {
                                 </IconButton>
                               </Box>
                             </TableCell>
-                            <TableCell align="right">{(item.views as number).toLocaleString()}</TableCell>
-                            <TableCell align="right">{(item.uniqueVisitors as number).toLocaleString()}</TableCell>
+                            <TableCell align="right">
+                              {(item.views as number).toLocaleString()}
+                            </TableCell>
+                            <TableCell align="right">
+                              {(item.uniqueVisitors as number).toLocaleString()}
+                            </TableCell>
                             <TableCell align="center">
                               <Tooltip title="View referrers for this page">
                                 <IconButton
                                   size="small"
                                   color="primary"
-                                  onClick={() => navigateToNestedView('page-referrers', item.path as string, `Referrers → ${item.path as string}`)}
+                                  onClick={() =>
+                                    navigateNested(
+                                      'page-referrers',
+                                      item.path as string,
+                                      `Referrers → ${item.path as string}`
+                                    )
+                                  }
                                 >
                                   <ChevronRight />
                                 </IconButton>
@@ -987,8 +1449,12 @@ export default function AnalyticsDashboard() {
                                 <Typography variant="body2">{item.domain as string}</Typography>
                               </Box>
                             </TableCell>
-                            <TableCell align="right">{(item.visits as number).toLocaleString()}</TableCell>
-                            <TableCell align="right">{(item.uniqueVisitors as number).toLocaleString()}</TableCell>
+                            <TableCell align="right">
+                              {(item.visits as number).toLocaleString()}
+                            </TableCell>
+                            <TableCell align="right">
+                              {(item.uniqueVisitors as number).toLocaleString()}
+                            </TableCell>
                             <TableCell align="right">
                               {format(new Date(item.lastVisit as string), 'MMM d, h:mm a')}
                             </TableCell>
@@ -997,7 +1463,13 @@ export default function AnalyticsDashboard() {
                                 <IconButton
                                   size="small"
                                   color="primary"
-                                  onClick={() => navigateToNestedView('referrer-pages', item.domain as string, `Pages → ${item.domain as string}`)}
+                                  onClick={() =>
+                                    navigateNested(
+                                      'referrer-pages',
+                                      item.domain as string,
+                                      `Pages → ${item.domain as string}`
+                                    )
+                                  }
                                 >
                                   <ChevronRight />
                                 </IconButton>
@@ -1010,29 +1482,21 @@ export default function AnalyticsDashboard() {
                             <TableCell>
                               <Typography
                                 variant="body2"
-                                sx={{
-                                  maxWidth: 250,
-                                  overflow: 'hidden',
-                                  textOverflow: 'ellipsis',
-                                  whiteSpace: 'nowrap',
-                                  fontFamily: 'monospace',
-                                  color: 'error.main',
-                                }}
+                                noWrap
+                                sx={{ maxWidth: 280, fontFamily: 'monospace', color: 'error.main' }}
                               >
                                 {item.path as string}
                               </Typography>
                             </TableCell>
-                            <TableCell align="right">{(item.hits as number).toLocaleString()}</TableCell>
+                            <TableCell align="right">
+                              {(item.hits as number).toLocaleString()}
+                            </TableCell>
                             <TableCell>
                               <Typography
                                 variant="body2"
                                 color="text.secondary"
-                                sx={{
-                                  maxWidth: 150,
-                                  overflow: 'hidden',
-                                  textOverflow: 'ellipsis',
-                                  whiteSpace: 'nowrap',
-                                }}
+                                noWrap
+                                sx={{ maxWidth: 160 }}
                               >
                                 {(item.referrer as string) || '—'}
                               </Typography>
@@ -1042,43 +1506,20 @@ export default function AnalyticsDashboard() {
                             </TableCell>
                           </>
                         )}
-                        {drillDownView === 'page-referrers' && (
+                        {(drillDownView === 'page-referrers' ||
+                          drillDownView === 'referrer-pages') && (
                           <>
                             <TableCell>
-                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                {getReferrerIcon(item.domain as string)}
-                                <Typography variant="body2">{item.domain as string}</Typography>
-                              </Box>
+                              <Typography variant="body2" noWrap sx={{ maxWidth: 280 }}>
+                                {(item.domain || item.path) as string}
+                              </Typography>
                             </TableCell>
-                            <TableCell align="right">{(item.visits as number).toLocaleString()}</TableCell>
-                            <TableCell align="right">{(item.uniqueVisitors as number).toLocaleString()}</TableCell>
                             <TableCell align="right">
-                              {format(new Date(item.lastVisit as string), 'MMM d, h:mm a')}
+                              {(((item.visits || item.views) as number) ?? 0).toLocaleString()}
                             </TableCell>
-                          </>
-                        )}
-                        {drillDownView === 'referrer-pages' && (
-                          <>
-                            <TableCell>
-                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                <Typography
-                                  variant="body2"
-                                  sx={{
-                                    maxWidth: 250,
-                                    overflow: 'hidden',
-                                    textOverflow: 'ellipsis',
-                                    whiteSpace: 'nowrap',
-                                  }}
-                                >
-                                  {item.path as string}
-                                </Typography>
-                                <IconButton size="small" href={item.path as string} target="_blank">
-                                  <OpenInNew fontSize="small" />
-                                </IconButton>
-                              </Box>
+                            <TableCell align="right">
+                              {((item.uniqueVisitors as number) ?? 0).toLocaleString()}
                             </TableCell>
-                            <TableCell align="right">{(item.views as number).toLocaleString()}</TableCell>
-                            <TableCell align="right">{(item.uniqueVisitors as number).toLocaleString()}</TableCell>
                             <TableCell align="right">
                               {format(new Date(item.lastVisit as string), 'MMM d, h:mm a')}
                             </TableCell>
@@ -1094,9 +1535,12 @@ export default function AnalyticsDashboard() {
                   component="div"
                   count={drillDownData.total}
                   page={drillDownPage - 1}
-                  onPageChange={handleDrillDownPageChange}
+                  onPageChange={(_, p) => {
+                    setDrillDownPage(p + 1);
+                    fetchDrillDown(drillDownView, p + 1, currentContext || undefined);
+                  }}
                   rowsPerPage={drillDownData.limit}
-                  rowsPerPageOptions={[25]}
+                  rowsPerPageOptions={[drillDownData.limit]}
                 />
               )}
             </>
@@ -1106,22 +1550,11 @@ export default function AnalyticsDashboard() {
             </Typography>
           )}
         </DialogContent>
+
         <DialogActions>
           <Button onClick={closeDrillDown}>Close</Button>
         </DialogActions>
       </Dialog>
-
-      {/* Empty State */}
-      {!loading && !error && !data && (
-        <Card sx={{ py: 8, textAlign: 'center' }}>
-          <Typography variant="h6" color="text.secondary">
-            No analytics data available
-          </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-            Analytics will appear here once your site starts receiving traffic.
-          </Typography>
-        </Card>
-      )}
     </Box>
   );
 }
