@@ -16,6 +16,7 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
+import type { Theme } from '@mui/material';
 import {
   Box,
   Button,
@@ -157,7 +158,7 @@ function formatHour(hour: number): string {
   return `${hour - 12}pm`;
 }
 
-function getStatusColor(code: number, theme: ReturnType<typeof useTheme>) {
+function getStatusColor(code: number, theme: Theme) {
   if (code >= 500) return theme.palette.error.main;
   if (code >= 400) return theme.palette.warning.main;
   if (code >= 300) return theme.palette.info.main;

@@ -317,7 +317,7 @@ export async function recordPageView(input: PageViewInput): Promise<void> {
     session_id: sessionId,
     page_path: pagePath,
     page_title: sanitizeString(input.pageTitle, 300),
-    referrer_url: sanitizeString(cleanReferrerUrl, 2000),
+    referrer_url: sanitizeString(cleanReferrerUrl ?? undefined, 2000),
     referrer_domain: referrerDomain,
     utm_source: sanitizeString(input.utmSource, 100),
     utm_medium: sanitizeString(input.utmMedium, 100),
@@ -375,7 +375,7 @@ export async function recordPageView(input: PageViewInput): Promise<void> {
     await db('analytics_referrers')
       .insert({
         referrer_domain: referrerDomain,
-        referrer_url_sample: sanitizeString(cleanReferrerUrl, 2000),
+        referrer_url_sample: sanitizeString(cleanReferrerUrl ?? undefined, 2000),
         total_visits: 1,
         unique_visitors: 1,
         first_seen_at: now,
@@ -384,7 +384,7 @@ export async function recordPageView(input: PageViewInput): Promise<void> {
       .onConflict('referrer_domain')
       .merge({
         total_visits: db.raw('analytics_referrers.total_visits + 1'),
-        referrer_url_sample: sanitizeString(cleanReferrerUrl, 2000),
+        referrer_url_sample: sanitizeString(cleanReferrerUrl ?? undefined, 2000),
         last_seen_at: now,
       });
   }
