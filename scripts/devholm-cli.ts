@@ -10,6 +10,7 @@
  *   eject <view>          Copy a core view into src/user/views/ for local override
  *   new:extension <name>  Scaffold a new admin extension
  *   new:migration <name>  Create a new user DB migration file
+ *   new:seed <name>       Create a new user DB seed file
  *   list:slots            Print all available extension slot names
  *   status                Print framework structure summary
  */
@@ -23,6 +24,7 @@ const CORE_VIEWS = path.join(ROOT, 'src/core/views');
 const USER_VIEWS = path.join(ROOT, 'src/user/views');
 const USER_EXTENSIONS = path.join(ROOT, 'src/user/extensions');
 const USER_DB_MIGRATIONS = path.join(ROOT, 'src/user/extensions/db/migrations');
+const USER_DB_SEEDS = path.join(ROOT, 'src/user/extensions/db/seeds');
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -213,6 +215,45 @@ export async function down(knex: Knex): Promise<void> {
 }
 
 /**
+ * new:seed <name>
+ *
+ * Creates a new user seed file in src/user/extensions/db/seeds/.
+ */
+async function cmdNewSeed(name: string) {
+  if (!/^[a-z][a-z0-9-]*$/.test(name)) {
+    error(`Seed name must be kebab-case lowercase, e.g. "my-feature". Got: "${name}"`);
+  }
+
+  await ensureDir(USER_DB_SEEDS);
+
+  const fileName = `${name}.ts`;
+  const filePath = path.join(USER_DB_SEEDS, fileName);
+
+  if (existsSync(filePath)) {
+    error(`User seed already exists: ${filePath}`);
+  }
+
+  await writeFile(
+    filePath,
+    `import type { Knex } from 'knex';
+
+export async function seed(knex: Knex): Promise<void> {
+  // TODO: implement user seed
+  // await knex('your_table').insert({
+  //   key: '${name}',
+  // });
+}
+`
+  );
+
+  log(`✓ Created seed:`);
+  log(`    src/user/extensions/db/seeds/${fileName}`);
+  log('');
+  log('Run it with:');
+  log(`  pnpm db:seed:user -- --specific=${fileName}`);
+}
+
+/**
  * list:slots
  *
  * Prints all valid SlotName values.
@@ -309,6 +350,10 @@ async function cmdStatus() {
     const migrations = await readdir(dbMigrationsDir);
     log(`  • db/migrations  (${migrations.length} migration${migrations.length !== 1 ? 's' : ''})`);
   }
+  if (existsSync(USER_DB_SEEDS)) {
+    const seeds = (await readdir(USER_DB_SEEDS)).filter((file) => file.endsWith('.ts'));
+    log(`  • db/seeds       (${seeds.length} seed${seeds.length !== 1 ? 's' : ''})`);
+  }
   log('');
 }
 
@@ -326,6 +371,7 @@ async function main() {
     log('  eject <view>          Copy a core view into src/user/views/ for local customization');
     log('  new:extension <name>  Scaffold a new admin extension');
     log('  new:migration <name>  Create a new user DB migration file');
+    log('  new:seed <name>       Create a new user DB seed file');
     log('  list:slots            Print all available extension slot names');
     log('  status                Print framework structure summary');
     return;
@@ -343,6 +389,10 @@ async function main() {
     case 'new:migration':
       if (!args[0]) error('Usage: pnpm devholm new:migration <name>');
       await cmdNewMigration(args[0]);
+      break;
+    case 'new:seed':
+      if (!args[0]) error('Usage: pnpm devholm new:seed <name>');
+      await cmdNewSeed(args[0]);
       break;
     case 'list:slots':
       await cmdListSlots();

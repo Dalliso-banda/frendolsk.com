@@ -1,9 +1,12 @@
 # Custom Database Seeds
 #
-# Place your real content seeds here.
-# These are the seeds with your actual data: projects, resume, uses items, etc.
+# Place your real content seed helpers or Knex seed files here.
+# These are the site-owned data files: projects, resume, uses items, etc.
 #
-# Run individual seeds or use: pnpm db:seed
-# Or create a new seed with: pnpm devholm new:seed <name>
+# For direct-run helper scripts, import from ../../../../core/db and run with tsx.
+# Example: tsx src/user/extensions/db/seeds/seed-projects.ts
+#
+# If you create true Knex seed files (exporting `seed(knex)`), keep them here too.
+# Those can be wired into broader framework seeding later without moving your data.
 #
 # The framework never modifies this directory.

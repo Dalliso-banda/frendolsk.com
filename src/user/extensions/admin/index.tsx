@@ -2,8 +2,8 @@
  * Admin Extensions — Index
  * ========================
  *
- * Register your custom admin pages here.
- * Each extension adds a nav item to the admin sidebar and a page at the given route.
+ * Register your custom admin nav items here.
+ * The page implementation for each href lives in ./pages.tsx.
  *
  * The admin layout reads this array from devholm.config.ts and merges
  * your nav items into the sidebar at the specified position.

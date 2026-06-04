@@ -91,10 +91,14 @@ export interface DevHolmConfig {
   views?: ViewOverride;
 
   /**
-   * Register custom admin pages and API extensions.
+   * Register custom admin nav items.
+   *
+   * The page implementation for a custom href lives in
+   * src/user/extensions/admin/pages.tsx.
+   * Custom API handlers live in src/user/extensions/api/index.ts.
    */
   extensions?: {
-    /** Custom admin nav items and their pages */
+    /** Custom admin nav items */
     admin?: AdminExtension[];
   };
 

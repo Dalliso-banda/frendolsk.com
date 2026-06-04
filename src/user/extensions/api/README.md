@@ -1,10 +1,17 @@
 # Custom API Routes
 #
-# Add your custom API route handlers here, organized by feature.
-# Then add thin re-export wrappers in src/app/api/<your-route>/route.ts
+# Register custom API endpoints in src/user/extensions/api/index.ts.
+# DevHolm's catch-all /api route dispatches to those handlers.
 #
 # Example structure:
-#   src/user/extensions/api/telemetry/route.ts    ← your handler
-#   src/app/api/telemetry/route.ts                ← re-export: export * from '@user/extensions/api/telemetry/route'
+#   src/user/extensions/api/index.ts              ← route registry
+#   src/user/extensions/api/telemetry/public.ts   ← handler implementation
+#   src/user/extensions/api/telemetry/admin.ts    ← handler implementation
+#
+# Example registry entry:
+#   {
+#     path: '/api/telemetry',
+#     handlers: { GET, POST },
+#   }
 #
 # The framework never modifies this directory.

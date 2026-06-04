@@ -1,10 +1,6 @@
 import type { Knex } from 'knex';
 
-/**
- * Seed inbox messages with sample data
- */
 export async function seed(knex: Knex): Promise<void> {
-  // Check if any messages exist
   const existingMessages = await knex('inbox_messages').count('* as count').first();
   if (existingMessages && Number(existingMessages.count) > 0) {
     console.log('Inbox messages already seeded, skipping...');
@@ -20,14 +16,7 @@ export async function seed(knex: Knex): Promise<void> {
       name: 'John Developer',
       email: 'john@example.com',
       subject: 'Collaboration Opportunity',
-      body: `Hi Chris,
-
-I came across your portfolio and was really impressed by your work on the various projects you've showcased. I'm particularly interested in the way you've implemented the design system.
-
-I'm working on a similar project and would love to discuss potential collaboration opportunities. Would you be available for a quick call sometime this week?
-
-Best regards,
-John`,
+      body: `Hi Chris,\n\nI came across your portfolio and was really impressed by your work on the various projects you've showcased. I'm particularly interested in the way you've implemented the design system.\n\nI'm working on a similar project and would love to discuss potential collaboration opportunities. Would you be available for a quick call sometime this week?\n\nBest regards,\nJohn`,
       status: 'unread',
       created_at: new Date(now.getTime() - 1 * oneDay),
       ip_address: '192.168.1.100',
@@ -38,20 +27,7 @@ John`,
       name: 'Sarah Smith',
       email: 'sarah@techstartup.io',
       subject: 'Job Opportunity - Senior Frontend Developer',
-      body: `Hello Chris,
-
-I'm a recruiter at TechStartup and we're looking for experienced frontend developers. Your background seems like a great fit for our team.
-
-We offer:
-- Competitive salary
-- Remote-first culture
-- Excellent benefits
-- Equity options
-
-Would you be interested in learning more about the position?
-
-Thanks,
-Sarah`,
+      body: `Hello Chris,\n\nI'm a recruiter at TechStartup and we're looking for experienced frontend developers. Your background seems like a great fit for our team.\n\nWe offer:\n- Competitive salary\n- Remote-first culture\n- Excellent benefits\n- Equity options\n\nWould you be interested in learning more about the position?\n\nThanks,\nSarah`,
       status: 'unread',
       created_at: new Date(now.getTime() - 2 * oneDay),
       ip_address: '10.0.0.50',
@@ -62,11 +38,7 @@ Sarah`,
       name: 'DevFan42',
       email: 'devfan@gmail.com',
       subject: 'Question about your Next.js article',
-      body: `Great article on Next.js! I had a quick question about the server components implementation. Could you clarify how you handle state management across server and client components?
-
-Also, how do you deal with caching strategies in a production environment?
-
-Thanks for sharing your knowledge!`,
+      body: `Great article on Next.js! I had a quick question about the server components implementation. Could you clarify how you handle state management across server and client components?\n\nAlso, how do you deal with caching strategies in a production environment?\n\nThanks for sharing your knowledge!`,
       status: 'read',
       created_at: new Date(now.getTime() - 3 * oneDay),
       read_at: new Date(now.getTime() - 2 * oneDay),
@@ -78,16 +50,7 @@ Thanks for sharing your knowledge!`,
       name: 'Alex Chen',
       email: 'alex.chen@devagency.com',
       subject: 'Freelance Project Inquiry',
-      body: `Hi Chris,
-
-We're a small agency looking for a freelance developer to help with a React/Node.js project. The project involves building a dashboard for a healthcare client.
-
-Timeline: 3 months
-Budget: Competitive rates
-
-Let me know if you're interested!
-
-Alex`,
+      body: `Hi Chris,\n\nWe're a small agency looking for a freelance developer to help with a React/Node.js project. The project involves building a dashboard for a healthcare client.\n\nTimeline: 3 months\nBudget: Competitive rates\n\nLet me know if you're interested!\n\nAlex`,
       status: 'read',
       created_at: new Date(now.getTime() - 5 * oneDay),
       read_at: new Date(now.getTime() - 4 * oneDay),
@@ -111,9 +74,7 @@ Alex`,
       name: 'Recruiter Bot',
       email: 'noreply@spammy-recruiter.com',
       subject: 'URGENT: $500k job opportunity!!!',
-      body: `CONGRATULATIONS!!! You have been selected for an AMAZING opportunity. Click here to claim your prize...
-
-This is clearly spam.`,
+      body: `CONGRATULATIONS!!! You have been selected for an AMAZING opportunity. Click here to claim your prize...\n\nThis is clearly spam.`,
       status: 'spam',
       created_at: new Date(now.getTime() - 10 * oneDay),
       ip_address: '45.33.32.156',
@@ -124,14 +85,7 @@ This is clearly spam.`,
       name: 'Maria Garcia',
       email: 'maria@opensource.dev',
       subject: 'Open Source Contribution',
-      body: `Hey Chris,
-
-I noticed you're interested in open source. I'm the maintainer of a popular React component library and we're looking for contributors.
-
-Would you be interested in collaborating? We have several "good first issue" tickets that might be a good starting point.
-
-Cheers,
-Maria`,
+      body: `Hey Chris,\n\nI noticed you're interested in open source. I'm the maintainer of a popular React component library and we're looking for contributors.\n\nWould you be interested in collaborating? We have several "good first issue" tickets that might be a good starting point.\n\nCheers,\nMaria`,
       status: 'unread',
       created_at: new Date(now.getTime() - 0.5 * oneDay),
       ip_address: '151.101.1.140',
@@ -142,9 +96,7 @@ Maria`,
       name: 'TypeScript Enthusiast',
       email: 'ts-fan@proton.me',
       subject: 'Re: TypeScript Best Practices',
-      body: `Your TypeScript article was exactly what I needed! I've been struggling with generic constraints and your examples made it click.
-
-One suggestion: maybe add a section about discriminated unions? They're super powerful but underused.`,
+      body: `Your TypeScript article was exactly what I needed! I've been struggling with generic constraints and your examples made it click.\n\nOne suggestion: maybe add a section about discriminated unions? They're super powerful but underused.`,
       status: 'read',
       created_at: new Date(now.getTime() - 4 * oneDay),
       read_at: new Date(now.getTime() - 3 * oneDay),

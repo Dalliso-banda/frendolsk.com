@@ -33,9 +33,15 @@ const config = {
       loadExtensions: ['.ts'],
     },
     seeds: {
-      directory: './src/core/db/seeds',
+      directory: [
+        './src/core/db/seeds/bootstrap',
+        './src/core/db/seeds/demo',
+        './src/user/extensions/db/seeds',
+      ],
       extension: 'ts',
       loadExtensions: ['.ts'],
+      recursive: true,
+      sortDirsSeparately: true,
     },
   },
   production: {
@@ -62,9 +68,15 @@ const config = {
       loadExtensions: ['.ts'],
     },
     seeds: {
-      directory: './src/core/db/seeds',
+      directory: [
+        './src/core/db/seeds/bootstrap',
+        './src/core/db/seeds/demo',
+        './src/user/extensions/db/seeds',
+      ],
       extension: 'ts',
       loadExtensions: ['.ts'],
+      recursive: true,
+      sortDirsSeparately: true,
     },
   },
 };
