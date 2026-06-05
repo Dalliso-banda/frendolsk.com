@@ -44,8 +44,7 @@ async function runMigrations() {
     migrations: {
       directory: migrationDirs,
       tableName: 'knex_migrations',
-      // Load only compiled JS files in production
-      loadExtensions: ['.js'],
+      loadExtensions: ['.ts', '.js'],
     },
   });
 
