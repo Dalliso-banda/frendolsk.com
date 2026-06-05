@@ -24,6 +24,13 @@ export default async function AdminLayout({ children }: AdminLayoutProps) {
     // auth DB unavailable — force login route instead of rendering broken admin shell
   }
 
+  // Middleware enforces auth/role protection for admin routes and explicitly
+  // excludes /admin/login. Avoid redirecting here so login RSC requests don't
+  // get trapped in a self-redirect loop.
+  if (!session?.user) {
+    return <>{children}</>;
+  }
+
   const roles = Array.isArray(session?.user?.roles) ? session.user.roles : [];
   const hasAdminAccess =
     session?.user?.isAdmin === true ||
@@ -31,10 +38,6 @@ export default async function AdminLayout({ children }: AdminLayoutProps) {
     session?.user?.role === 'superadmin' ||
     roles.includes('admin') ||
     roles.includes('superadmin');
-
-  if (!session?.user) {
-    redirect('/admin/login');
-  }
 
   if (!hasAdminAccess) {
     redirect('/');
