@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import {
   Box,
@@ -81,7 +81,7 @@ interface AvailableProvider {
 // Profile Page Component
 // =============================================================================
 
-export default function ProfilePage() {
+function ProfilePageInner() {
   const searchParams = useSearchParams();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -924,5 +924,13 @@ export default function ProfilePage() {
         </Alert>
       </Snackbar>
     </Box>
+  );
+}
+
+export default function ProfilePage() {
+  return (
+    <Suspense fallback={<Box sx={{ p: 3 }} />}>
+      <ProfilePageInner />
+    </Suspense>
   );
 }
