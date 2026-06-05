@@ -16,7 +16,12 @@ interface AdminLayoutProps {
 }
 
 export default async function AdminLayout({ children }: AdminLayoutProps) {
-  const session = await auth();
+  let session = null;
+  try {
+    session = await auth();
+  } catch {
+    // auth DB unavailable — render shell without session
+  }
 
   return (
     <SessionProvider session={session}>

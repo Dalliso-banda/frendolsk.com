@@ -7,13 +7,14 @@ interface LoginLayoutProps {
 }
 
 export default async function LoginLayout({ children }: LoginLayoutProps) {
-  // Check if already logged in
-  const session = await auth();
-
-  if (session?.user?.isAdmin) {
-    redirect('/admin');
+  try {
+    const session = await auth();
+    if (session?.user?.isAdmin) {
+      redirect('/admin');
+    }
+  } catch {
+    // auth DB unavailable — still render the login page
   }
 
-  // Login page renders without the admin shell
   return <>{children}</>;
 }

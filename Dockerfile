@@ -39,6 +39,30 @@ ENV HUSKY=0
 # Build the application
 RUN pnpm build
 
+# Compile TypeScript migrations to JavaScript so they can run in production
+# without requiring tsx or ts-node in the final image.
+RUN node_modules/.bin/tsc \
+  --target ES2022 \
+  --module CommonJS \
+  --moduleResolution Node \
+  --outDir /app/migrations-compiled \
+  --esModuleInterop \
+  --skipLibCheck \
+  --noEmit false \
+  /app/src/core/db/migrations/*.ts 2>/dev/null || true && \
+  # Also compile user extension migrations if they exist \
+  if ls /app/src/user/extensions/db/migrations/*.ts 2>/dev/null; then \
+    node_modules/.bin/tsc \
+      --target ES2022 \
+      --module CommonJS \
+      --moduleResolution Node \
+      --outDir /app/migrations-compiled/user \
+      --esModuleInterop \
+      --skipLibCheck \
+      --noEmit false \
+      /app/src/user/extensions/db/migrations/*.ts 2>/dev/null || true; \
+  fi
+
 # Create a flat production deployment for migrations (resolves pnpm symlink issues)
 # The --legacy flag is required for pnpm v10 compatibility
 RUN pnpm deploy --filter=. --prod --legacy --config.strict-dep-builds=false /app/deploy
@@ -67,9 +91,8 @@ COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 
-# Copy migration infrastructure
-COPY --from=builder /app/src/core/db/migrations ./migrations
-COPY --from=builder /app/src/user/extensions/db/migrations ./migrations/user
+# Copy migration infrastructure (pre-compiled JS from builder stage)
+COPY --from=builder /app/migrations-compiled ./migrations
 COPY --from=builder /app/scripts/migrate.js ./migrate.js
 COPY --from=builder /app/scripts/seed-admin.js ./seed-admin.js
 

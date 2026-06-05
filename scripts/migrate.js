@@ -1,11 +1,11 @@
 /**
  * Standalone Migration Runner
  * ===========================
- * 
+ *
  * Runs Knex migrations without requiring the full knex CLI.
  * Designed to work in the minimal production Docker image.
- * 
- * Handles TypeScript migrations by using tsx/ts-node or 
+ *
+ * Handles TypeScript migrations by using tsx/ts-node or
  * falling back to requiring them directly (Node 22+ can handle simple TS).
  */
 
@@ -16,7 +16,7 @@ const fs = require('fs');
 
 async function runMigrations() {
   const databaseUrl = process.env.DATABASE_URL;
-  
+
   if (!databaseUrl) {
     console.error('❌ DATABASE_URL environment variable is required');
     process.exit(1);
@@ -27,10 +27,9 @@ async function runMigrations() {
   // to /app/migrations/user. Both must be scanned so historical ledgers and
   // extension migrations stay valid across upgrades.
   const migrationDirs = fs.existsSync(path.join(__dirname, 'migrations'))
-    ? [
-        path.join(__dirname, 'migrations'),
-        path.join(__dirname, 'migrations/user'),
-      ].filter((dir) => fs.existsSync(dir))
+    ? [path.join(__dirname, 'migrations'), path.join(__dirname, 'migrations/user')].filter((dir) =>
+        fs.existsSync(dir)
+      )
     : [
         path.join(__dirname, '../src/core/db/migrations'),
         path.join(__dirname, '../src/user/extensions/db/migrations'),
@@ -45,28 +44,28 @@ async function runMigrations() {
     migrations: {
       directory: migrationDirs,
       tableName: 'knex_migrations',
-      // Support both .ts and .js files
-      loadExtensions: ['.ts', '.js'],
+      // Load only compiled JS files in production
+      loadExtensions: ['.js'],
     },
   });
 
   try {
     console.log('🔍 Checking pending migrations...');
-    
+
     const [, pending] = await db.migrate.list();
 
     if (pending.length === 0) {
       console.log('✅ Database is up to date (no pending migrations)');
     } else {
       console.log(`📦 Found ${pending.length} pending migration(s):`);
-      pending.forEach(m => console.log(`   - ${m.name || m.file || m}`));
-      
+      pending.forEach((m) => console.log(`   - ${m.name || m.file || m}`));
+
       console.log('⏳ Applying migrations...');
       const [batchNo, applied] = await db.migrate.latest();
-      
+
       if (applied.length > 0) {
         console.log(`✅ Batch ${batchNo} applied ${applied.length} migration(s):`);
-        applied.forEach(m => console.log(`   ✓ ${m}`));
+        applied.forEach((m) => console.log(`   ✓ ${m}`));
       }
     }
 

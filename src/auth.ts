@@ -65,11 +65,19 @@ interface User {
 }
 
 async function buildOAuthProviders() {
-  const [googleConfig, githubConfig, discordConfig] = await Promise.all([
-    getProviderCredentialSet('google'),
-    getProviderCredentialSet('github'),
-    getProviderCredentialSet('discord'),
-  ]);
+  let googleConfig = null;
+  let githubConfig = null;
+  let discordConfig = null;
+
+  try {
+    [googleConfig, githubConfig, discordConfig] = await Promise.all([
+      getProviderCredentialSet('google').catch(() => null),
+      getProviderCredentialSet('github').catch(() => null),
+      getProviderCredentialSet('discord').catch(() => null),
+    ]);
+  } catch {
+    // DB unavailable or tables not yet created — continue with no OAuth providers
+  }
 
   const providers = [];
 
@@ -243,28 +251,45 @@ export const { handlers, signIn, signOut, auth } = NextAuth(async () => ({
       return true;
     },
     async jwt({ token, user }) {
-      if (user) {
-        token.id = user.id ?? '';
-        token.role = (user as User).role;
-        token.roles = (user as User).roles ?? [];
-        token.permissions = (user as User).permissions ?? [];
-        token.isAdmin = (user as User).isAdmin ?? false;
-        token.installCompleted = (user as User).installCompleted ?? true;
-      } else if (token.id) {
-        const [subject, authSettings] = await Promise.all([
-          getAuthSubjectForUser(token.id as string),
-          getAuthSettings(),
-        ]);
-        if (subject) {
-          token.role = subject.primaryRole;
-          token.roles = subject.roles;
-          token.permissions = subject.permissions;
-          token.isAdmin = subject.isAdmin;
+      try {
+        if (user) {
+          token.id = user.id ?? '';
+          token.role = (user as User).role;
+          token.roles = (user as User).roles ?? [];
+          token.permissions = (user as User).permissions ?? [];
+          token.isAdmin = (user as User).isAdmin ?? false;
+          token.installCompleted = (user as User).installCompleted ?? true;
+        } else if (token.id) {
+          const [subject, authSettings] = await Promise.all([
+            getAuthSubjectForUser(token.id as string).catch(() => null),
+            getAuthSettings().catch(() => ({
+              registrationEnabled: false,
+              accountLinkingEnabled: true,
+              installCompleted: true,
+              setupBannerDismissed: false,
+            })),
+          ]);
+          if (subject) {
+            token.role = subject.primaryRole;
+            token.roles = subject.roles;
+            token.permissions = subject.permissions;
+            token.isAdmin = subject.isAdmin;
+          }
+          token.installCompleted = authSettings.installCompleted;
+        } else {
+          const authSettings = await getAuthSettings().catch(() => ({
+            registrationEnabled: false,
+            accountLinkingEnabled: true,
+            installCompleted: true,
+            setupBannerDismissed: false,
+          }));
+          token.installCompleted = authSettings.installCompleted;
         }
-        token.installCompleted = authSettings.installCompleted;
-      } else {
-        const authSettings = await getAuthSettings();
-        token.installCompleted = authSettings.installCompleted;
+      } catch {
+        // DB unavailable — preserve existing token fields, assume install completed
+        if (token.installCompleted === undefined) {
+          token.installCompleted = true;
+        }
       }
       return token;
     },
