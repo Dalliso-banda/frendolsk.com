@@ -24,15 +24,21 @@ const config = {
       max: 10,
     },
     migrations: {
-      directory: './src/db/migrations',
+      directory: ['./src/core/db/migrations', './src/user/extensions/db/migrations'],
       tableName: 'knex_migrations',
       extension: 'ts',
       loadExtensions: ['.ts'],
     },
     seeds: {
-      directory: './src/db/seeds',
+      directory: [
+        './src/core/db/seeds/bootstrap',
+        './src/core/db/seeds/demo',
+        './src/user/extensions/db/seeds',
+      ],
       extension: 'ts',
       loadExtensions: ['.ts'],
+      recursive: true,
+      sortDirsSeparately: true,
     },
   },
   production: {
@@ -50,15 +56,21 @@ const config = {
       max: 10,
     },
     migrations: {
-      directory: './src/db/migrations',
+      directory: ['./src/core/db/migrations', './src/user/extensions/db/migrations'],
       tableName: 'knex_migrations',
       extension: 'ts',
       loadExtensions: ['.ts'],
     },
     seeds: {
-      directory: './src/db/seeds',
+      directory: [
+        './src/core/db/seeds/bootstrap',
+        './src/core/db/seeds/demo',
+        './src/user/extensions/db/seeds',
+      ],
       extension: 'ts',
       loadExtensions: ['.ts'],
+      recursive: true,
+      sortDirsSeparately: true,
     },
   },
 };
