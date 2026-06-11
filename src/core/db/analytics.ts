@@ -309,7 +309,7 @@ export async function getAnalyticsSummary(
     .where('is_bot', false)
     .select(
       db.raw(`
-        CASE 
+        CASE
           WHEN utm_source IS NOT NULL THEN utm_source
           WHEN referrer_domain IS NOT NULL THEN referrer_domain
           ELSE 'direct'
