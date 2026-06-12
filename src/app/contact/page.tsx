@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import ContactPageClient from './ContactPageClient';
+import ContactView from '@core/views/contact/ContactView';
 import { siteConfig } from '@/config';
 import { fetchSiteSettings } from '@/lib/fetchSiteSettings';
 
@@ -27,5 +27,5 @@ export const metadata: Metadata = {
 export default async function ContactPage() {
   const settings = await fetchSiteSettings();
 
-  return <ContactPageClient settings={settings} />;
+  return <ContactView settings={settings} />;
 }

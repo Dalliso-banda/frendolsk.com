@@ -42,9 +42,12 @@ import {
   Description,
   FolderOpen,
   Build,
+  Group,
 } from '@mui/icons-material';
 import Link from '@/components/common/Link';
 import { useTheme as useAppTheme } from '@/theme/ThemeProvider';
+import config from '@config';
+import type { AdminNavPosition } from '@core/types/extensions';
 
 // Type for profile data from API
 interface ProfileData {
@@ -67,7 +70,7 @@ interface NavItem {
   icon: ReactNode;
 }
 
-const navItems: NavItem[] = [
+const CORE_NAV_ITEMS: NavItem[] = [
   { label: 'Dashboard', href: '/admin', icon: <Dashboard /> },
   { label: 'Blog Posts', href: '/admin/posts', icon: <Article /> },
   { label: 'Projects', href: '/admin/projects', icon: <FolderOpen /> },
@@ -76,8 +79,50 @@ const navItems: NavItem[] = [
   { label: 'Messages', href: '/admin/inbox', icon: <Inbox /> },
   { label: 'Media', href: '/admin/media', icon: <ImageIcon /> },
   { label: 'Analytics', href: '/admin/analytics', icon: <Analytics /> },
+  { label: 'Users', href: '/admin/users', icon: <Group /> },
   { label: 'Settings', href: '/admin/settings', icon: <Settings /> },
 ];
+
+/**
+ * Merge user-registered admin extension nav items into the core nav list.
+ * Items with no position are appended before 'Settings'.
+ */
+function buildNavItems(): NavItem[] {
+  const extensions = config.extensions?.admin ?? [];
+  if (!extensions.length) return CORE_NAV_ITEMS;
+
+  const items = [...CORE_NAV_ITEMS];
+
+  for (const ext of extensions) {
+    const { navItem } = ext;
+    const position: AdminNavPosition | undefined = navItem.position;
+
+    if (!position || position === 'before:dashboard') {
+      items.unshift({ label: navItem.label, href: navItem.href, icon: navItem.icon });
+      continue;
+    }
+
+    const afterSegment = position.startsWith('after:') ? position.slice('after:'.length) : null;
+    if (afterSegment) {
+      const idx = items.findIndex((i) => i.href.endsWith(afterSegment));
+      const insertAt = idx !== -1 ? idx + 1 : items.length - 1; // before Settings fallback
+      items.splice(insertAt, 0, { label: navItem.label, href: navItem.href, icon: navItem.icon });
+      continue;
+    }
+
+    // Fallback: insert before Settings
+    const settingsIdx = items.findIndex((i) => i.href === '/admin/settings');
+    items.splice(settingsIdx !== -1 ? settingsIdx : items.length, 0, {
+      label: navItem.label,
+      href: navItem.href,
+      icon: navItem.icon,
+    });
+  }
+
+  return items;
+}
+
+const navItems = buildNavItems();
 
 interface AdminLayoutClientProps {
   children: ReactNode;

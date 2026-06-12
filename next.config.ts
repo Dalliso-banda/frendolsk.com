@@ -1,6 +1,15 @@
 import type { NextConfig } from 'next';
+import { version } from './package.json';
+
+// Derive upload limit from the same env var used in src/core/config/env.ts
+const uploadMaxSizeMb = parseInt(process.env.UPLOAD_MAX_SIZE_MB || '50', 10);
 
 const nextConfig: NextConfig = {
+  // Bake the package.json version into the client bundle
+  env: {
+    NEXT_PUBLIC_APP_VERSION: version,
+  },
+
   // Enable React strict mode for better development experience
   reactStrictMode: true,
 
@@ -76,18 +85,13 @@ const nextConfig: NextConfig = {
   experimental: {
     // Enable server actions
     serverActions: {
-      bodySizeLimit: '2mb',
+      bodySizeLimit: `${uploadMaxSizeMb}mb`,
     },
   },
 
   // Server external packages - these won't be bundled
   // Required for Knex and database drivers
-  serverExternalPackages: [
-    'knex',
-    'pg',
-    'pg-query-stream',
-    'bcryptjs',
-  ],
+  serverExternalPackages: ['knex', 'pg', 'pg-query-stream', 'bcryptjs'],
 };
 
 export default nextConfig;
