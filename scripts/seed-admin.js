@@ -14,6 +14,9 @@ async function seedAdmin() {
   const databaseUrl = process.env.DATABASE_URL;
   const adminEmail = process.env.ADMIN_EMAIL;
   const adminPassword = process.env.ADMIN_PASSWORD;
+  const forcePasswordReset = ['1', 'true', 'yes'].includes(
+    String(process.env.FORCE_ADMIN_PASSWORD_RESET || '').toLowerCase()
+  );
 
   if (!databaseUrl) {
     console.error('❌ DATABASE_URL environment variable is required');
@@ -35,7 +38,22 @@ async function seedAdmin() {
     const existing = await db('admin_users').where('email', adminEmail).first();
 
     if (existing) {
-      console.log(`✅ Admin user ${adminEmail} already exists`);
+      const passwordMatches = await bcrypt.compare(adminPassword, existing.password_hash);
+      if (!passwordMatches) {
+        if (forcePasswordReset) {
+          const passwordHash = await bcrypt.hash(adminPassword, 12);
+          await db('admin_users')
+            .where('id', existing.id)
+            .update({ password_hash: passwordHash, updated_at: new Date() });
+          console.log(`✅ Admin user ${adminEmail} password reset via FORCE_ADMIN_PASSWORD_RESET`);
+        } else {
+          console.log(
+            `🔒 Admin user ${adminEmail} exists and password differs; skipped update (set FORCE_ADMIN_PASSWORD_RESET=true to override)`
+          );
+        }
+      } else {
+        console.log(`✅ Admin user ${adminEmail} already exists`);
+      }
     } else {
       // Hash password and create admin
       const passwordHash = await bcrypt.hash(adminPassword, 12);
@@ -44,6 +62,7 @@ async function seedAdmin() {
         email: adminEmail,
         password_hash: passwordHash,
         display_name: 'Admin',
+        totp_enabled: false,
         created_at: new Date(),
         updated_at: new Date(),
       });
