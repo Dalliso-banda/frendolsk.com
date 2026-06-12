@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import BlogPostClient from './BlogPostClient';
+import BlogPostView from '@core/views/blog/post/BlogPostView';
 import { siteConfig } from '@/config';
 import { getPostBySlug } from '@/db/posts';
 
@@ -9,7 +9,7 @@ type Props = {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const post = await getPostBySlug(slug);
+  const post = await getPostBySlug(slug).catch(() => null);
 
   if (!post) {
     return {
@@ -24,7 +24,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: post.title,
     description: post.excerpt || post.metaDescription || '',
-    keywords: post.tags.map(t => t.name),
+    keywords: post.tags.map((t) => t.name),
     authors: [{ name: siteConfig.author.name }],
     openGraph: {
       title: post.metaTitle || post.title,
@@ -33,7 +33,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       type: 'article',
       publishedTime: publishedAt,
       authors: [siteConfig.author.name],
-      tags: post.tags.map(t => t.name),
+      tags: post.tags.map((t) => t.name),
       siteName: siteConfig.name,
       images: [
         {
@@ -58,5 +58,5 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default function BlogPostPage() {
-  return <BlogPostClient />;
+  return <BlogPostView />;
 }

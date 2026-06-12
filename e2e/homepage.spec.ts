@@ -4,8 +4,9 @@ test.describe('Homepage', () => {
   test('loads successfully', async ({ page }) => {
     await page.goto('/');
 
-    // Check page title contains the site name
-    await expect(page).toHaveTitle(/.+/);
+    // Check page has a real document title
+    const title = await page.title();
+    expect(title.trim().length).toBeGreaterThan(0);
 
     // Check that header is present
     await expect(page.locator('header')).toBeVisible();
@@ -17,11 +18,12 @@ test.describe('Homepage', () => {
   test('has navigation links', async ({ page }) => {
     await page.goto('/');
 
-    // Check main navigation links exist (scoped to header to avoid footer duplicates)
-    const header = page.locator('header');
-    await expect(header.getByRole('link', { name: /home/i })).toBeVisible();
-    await expect(header.getByRole('link', { name: /about/i })).toBeVisible();
-    await expect(header.getByRole('link', { name: /blog/i })).toBeVisible();
+    const mainNavigation = page.getByRole('navigation', { name: /main navigation/i });
+
+    // Check main navigation links exist
+    await expect(mainNavigation.getByRole('link', { name: /^home$/i })).toBeVisible();
+    await expect(mainNavigation.getByRole('link', { name: /^about$/i })).toBeVisible();
+    await expect(mainNavigation.getByRole('link', { name: /^blog$/i })).toBeVisible();
   });
 
   test('has skip to main content link', async ({ page }) => {

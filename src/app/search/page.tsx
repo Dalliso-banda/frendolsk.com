@@ -1,6 +1,6 @@
 import { Suspense } from 'react';
 import { Metadata } from 'next';
-import SearchPageClient from './SearchPageClient';
+import SearchView from '@core/views/search/SearchView';
 
 export const metadata: Metadata = {
   title: 'Search',
@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 export default function SearchPage() {
   return (
     <Suspense fallback={<div>Loading...</div>}>
-      <SearchPageClient />
+      <SearchView />
     </Suspense>
   );
 }

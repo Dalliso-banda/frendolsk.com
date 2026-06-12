@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import BlogPageClient from './BlogPageClient';
+import BlogView from '@core/views/blog/BlogView';
 import { siteConfig } from '@/config';
 import { getPublishedPosts, getAllTags } from '@/db/posts';
 
@@ -29,10 +29,13 @@ export const metadata: Metadata = {
 };
 
 export default async function BlogPage() {
-  const [postsData, tags] = await Promise.all([getPublishedPosts(1, 10), getAllTags()]);
+  const [postsData, tags] = await Promise.all([
+    getPublishedPosts(1, 10).catch(() => ({ posts: [], totalPages: 0, total: 0 })),
+    getAllTags().catch(() => []),
+  ]);
 
   return (
-    <BlogPageClient
+    <BlogView
       initialPosts={postsData.posts}
       initialTotalPages={postsData.totalPages}
       initialTotalPosts={postsData.total}
