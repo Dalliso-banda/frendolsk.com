@@ -70,7 +70,10 @@ export async function PATCH(request: NextRequest) {
       );
     }
 
-    const user = await updateAuthUserAccess(parsed.data);
+    const user = await updateAuthUserAccess({
+      ...parsed.data,
+      actingUserId: (authResult.token.sub as string | undefined) ?? undefined,
+    });
     if (!user) {
       return NextResponse.json(
         { error: 'User not found' },

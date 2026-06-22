@@ -1090,6 +1090,7 @@ async function countSuperadmins(trx = getDb()) {
 
 export async function updateAuthUserAccess(input: {
   userId: string;
+  actingUserId?: string;
   roleSlugs?: string[];
   isActive?: boolean;
 }): Promise<AuthManagementUser | null> {
@@ -1138,7 +1139,25 @@ export async function updateAuthUserAccess(input: {
     }
 
     if (typeof input.isActive === 'boolean') {
+      if (!input.isActive) {
+        const totalUserResult = await trx('site_users')
+          .count<{ count: string }[]>('id as count')
+          .first();
+        const totalUsers = Number(totalUserResult?.count ?? 0);
+        if (totalUsers <= 1) {
+          throw new Error('Cannot deactivate the only user account');
+        }
+
+        if (input.actingUserId && input.actingUserId === input.userId) {
+          throw new Error('You cannot deactivate your own account');
+        }
+      }
+
       const nextRoles = input.roleSlugs ?? currentRoles;
+      if (!input.isActive && nextRoles.includes('superadmin')) {
+        throw new Error('Superadmin accounts cannot be deactivated');
+      }
+
       const keepsAdminAccess = nextRoles.some((role) => ADMIN_ROLE_SLUGS.has(role));
       if (!input.isActive && keepsAdminAccess) {
         const activeAdminCount = await countActiveAdminUsers(trx);

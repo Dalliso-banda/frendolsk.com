@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import { useSession } from 'next-auth/react';
 import {
   Alert,
   Avatar,
@@ -90,6 +91,7 @@ interface InvitationRow {
 }
 
 export default function AdminUsersPage() {
+  const { data: session } = useSession();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -141,6 +143,15 @@ export default function AdminUsersPage() {
     [selectedUserId, users]
   );
 
+  const currentUserId = (session?.user as { id?: string } | undefined)?.id ?? null;
+  const isSingleUserSystem = users.length <= 1;
+  const selectedIsSelf = Boolean(
+    selectedUser && currentUserId && selectedUser.id === currentUserId
+  );
+  const selectedIsSuperadmin = Boolean(selectedUser?.roles.includes('superadmin'));
+  const canToggleSelectedUserActive =
+    Boolean(selectedUser) && !isSingleUserSystem && !selectedIsSelf && !selectedIsSuperadmin;
+
   const adminCount = users.filter((user) => user.isAdmin && user.isActive).length;
   const linkedAccountsCount = users.reduce((count, user) => count + user.linkedAccounts.length, 0);
   const pendingInvites = invitations.filter((invitation) => invitation.status === 'pending').length;
@@ -156,7 +167,7 @@ export default function AdminUsersPage() {
   };
 
   const handleToggleActive = async (checked: boolean) => {
-    if (!selectedUser) return;
+    if (!selectedUser || !canToggleSelectedUserActive) return;
     await saveUserUpdate(selectedUser.id, { isActive: checked });
   };
 
@@ -524,17 +535,37 @@ export default function AdminUsersPage() {
                     </Box>
                   </Stack>
 
-                  <FormControlLabel
-                    control={
-                      <Switch
-                        checked={selectedUser.isActive}
-                        onChange={(e) => void handleToggleActive(e.target.checked)}
-                        disabled={saving}
-                      />
-                    }
-                    label="Account active"
-                    sx={{ mb: 2 }}
-                  />
+                  {!isSingleUserSystem ? (
+                    <FormControlLabel
+                      control={
+                        <Switch
+                          checked={selectedUser.isActive}
+                          onChange={(e) => void handleToggleActive(e.target.checked)}
+                          disabled={saving || !canToggleSelectedUserActive}
+                        />
+                      }
+                      label="Account active"
+                      sx={{ mb: 2 }}
+                    />
+                  ) : null}
+
+                  {isSingleUserSystem ? (
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                      Account deactivation is unavailable while only one user exists.
+                    </Typography>
+                  ) : null}
+
+                  {selectedIsSelf ? (
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                      You cannot deactivate your own account.
+                    </Typography>
+                  ) : null}
+
+                  {selectedIsSuperadmin ? (
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                      Superadmin accounts cannot be deactivated.
+                    </Typography>
+                  ) : null}
 
                   <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
                     Roles
