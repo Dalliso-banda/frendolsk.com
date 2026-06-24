@@ -43,6 +43,7 @@ import {
   FolderOpen,
   Build,
   Group,
+  SystemUpdateAlt,
 } from '@mui/icons-material';
 import Link from '@/components/common/Link';
 import { useTheme as useAppTheme } from '@/theme/ThemeProvider';
@@ -79,6 +80,7 @@ const CORE_NAV_ITEMS: NavItem[] = [
   { label: 'Messages', href: '/admin/inbox', icon: <Inbox /> },
   { label: 'Media', href: '/admin/media', icon: <ImageIcon /> },
   { label: 'Analytics', href: '/admin/analytics', icon: <Analytics /> },
+  { label: 'Updates', href: '/admin/updates', icon: <SystemUpdateAlt /> },
   { label: 'Users', href: '/admin/users', icon: <Group /> },
   { label: 'Settings', href: '/admin/settings', icon: <Settings /> },
 ];
@@ -139,6 +141,8 @@ export default function AdminLayoutClient({ children }: AdminLayoutClientProps) 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [initialLoadComplete, setInitialLoadComplete] = useState(false);
+  const appVersion = process.env.NEXT_PUBLIC_APP_VERSION || '0.0.0-dev';
+  const buildSha = process.env.NEXT_PUBLIC_BUILD_SHA || '';
 
   // Track when initial session check is complete to prevent flash on navigation
   useEffect(() => {
@@ -321,7 +325,8 @@ export default function AdminLayoutClient({ children }: AdminLayoutClientProps) 
             variant="caption"
             sx={{ display: 'block', mt: 1.5, textAlign: 'center', color: 'text.disabled' }}
           >
-            v{process.env.NEXT_PUBLIC_APP_VERSION}
+            v{appVersion}
+            {buildSha ? ` (${buildSha.slice(0, 7)})` : ''}
           </Typography>
         )}
       </Box>

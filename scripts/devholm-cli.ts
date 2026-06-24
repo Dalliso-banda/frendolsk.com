@@ -13,13 +13,20 @@
  *   new:seed <name>       Create a new user DB seed file
  *   list:slots            Print all available extension slot names
  *   status                Print framework structure summary
- *   sync:check            Check if local changes are upstream-sync friendly
+ *   sync:check            Check if local and committed changes are upstream-sync friendly
  */
 
 import { readdir, copyFile, mkdir, writeFile, stat } from 'fs/promises';
-import { existsSync } from 'fs';
+import { existsSync, readFileSync } from 'fs';
 import path from 'path';
 import { execSync } from 'child_process';
+import {
+  classifyDownstreamBoundary,
+  downstreamBoundaryPolicy,
+  parseAllowlistPatterns,
+  parseNameOnlyChangedFiles,
+  parsePorcelainChangedFiles,
+} from '../src/core/lib/sync-policy';
 
 const ROOT = path.resolve(__dirname, '..');
 const CORE_VIEWS = path.join(ROOT, 'src/core/views');
@@ -27,6 +34,7 @@ const USER_VIEWS = path.join(ROOT, 'src/user/views');
 const USER_EXTENSIONS = path.join(ROOT, 'src/user/extensions');
 const USER_DB_MIGRATIONS = path.join(ROOT, 'src/user/extensions/db/migrations');
 const USER_DB_SEEDS = path.join(ROOT, 'src/user/extensions/db/seeds');
+const SYNC_ALLOWLIST_FILE = path.join(ROOT, '.devholm', 'sync-allowlist.txt');
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -175,15 +183,19 @@ export default function ${componentName}() {
   log(`    src/user/extensions/admin/${name}/${componentName}.tsx`);
   log('');
   log('Next steps:');
-  log('  1. Add a route: src/app/admin/${name}/page.tsx');
-  log(`     import ${componentName} from '@user/extensions/admin/${name}/${componentName}';`);
-  log('     export default function Page() { return <${componentName} />; }');
-  log('');
-  log('  2. Register in src/user/extensions/admin/index.tsx:');
-  log("     import { YourIcon } from '@mui/icons-material';");
+  log('  1. Register nav in src/user/extensions/admin/index.tsx:');
   log(
     "     { navItem: { label: '...', href: '/admin/${name}', icon: <YourIcon />, position: 'after:analytics' } }"
   );
+  log('');
+  log('  2. Register page module in src/user/extensions/admin/pages.tsx:');
+  log('     {');
+  log("       href: '/admin/${name}',");
+  log(`       loadPage: () => import('./${name}/${componentName}'),`);
+  log("       getMetadata: () => ({ title: '...', description: '...' }),");
+  log('     }');
+  log('');
+  log('  3. Open /admin/${name} (handled by src/app/admin/[...slug]/page.tsx).');
 }
 
 /**
@@ -369,25 +381,39 @@ async function cmdStatus() {
 }
 
 /**
- * sync:check
+ * sync:check [--against <ref>] [--working-tree-only]
  *
- * Reports whether local edits are inside user-owned boundaries, which keeps
- * downstream repos easy to update from upstream DevHolm.
+ * Reports whether local edits and committed drift stay inside user-owned
+ * boundaries, which keeps downstream repos easy to update from upstream.
  */
-async function cmdSyncCheck() {
-  const SAFE_PREFIXES = ['src/user/', '.github/', 'nginx/'];
-  const SAFE_EXACT = new Set([
-    'devholm.config.ts',
-    'Dockerfile',
-    'docker-compose.yml',
-    'docker-entrypoint.sh',
-    'README.md',
-    'DEPLOYMENT.md',
-    'GITHUB_SECRETS.md',
-  ]);
+async function cmdSyncCheck(args: string[] = []) {
+  let againstRef: string | null = null;
+  let workingTreeOnly = false;
 
-  function isSafePath(filePath: string): boolean {
-    return SAFE_EXACT.has(filePath) || SAFE_PREFIXES.some((prefix) => filePath.startsWith(prefix));
+  for (let i = 0; i < args.length; i += 1) {
+    const arg = args[i];
+
+    if (arg === '--working-tree-only') {
+      workingTreeOnly = true;
+      continue;
+    }
+
+    if (arg === '--against') {
+      const nextValue = args[i + 1];
+      if (!nextValue) {
+        error('Usage: pnpm devholm sync:check --against <git-ref>');
+      }
+      againstRef = nextValue;
+      i += 1;
+      continue;
+    }
+
+    if (arg.startsWith('--against=')) {
+      againstRef = arg.slice('--against='.length);
+      continue;
+    }
+
+    error(`Unknown sync:check option "${arg}".`);
   }
 
   let remotes = '';
@@ -397,7 +423,21 @@ async function cmdSyncCheck() {
     error('Not inside a git repository, cannot run sync:check.');
   }
 
-  const hasUpstream = remotes.split(/\s+/).includes('upstream');
+  const remoteList = remotes ? remotes.split(/\s+/).filter(Boolean) : [];
+  const hasUpstream = remoteList.includes('upstream');
+  const hasTemplate = remoteList.includes('template');
+
+  const selectedBaselineRef = workingTreeOnly
+    ? null
+    : againstRef ?? (hasTemplate ? 'template/main' : hasUpstream ? 'upstream/main' : null);
+
+  if (againstRef) {
+    try {
+      execSync(`git rev-parse --verify --quiet ${againstRef}`, { encoding: 'utf8' });
+    } catch {
+      error(`Invalid --against ref "${againstRef}".`);
+    }
+  }
 
   let statusOutput = '';
   try {
@@ -406,13 +446,61 @@ async function cmdSyncCheck() {
     error('Unable to read git status.');
   }
 
-  const changedFiles = statusOutput
-    .split('\n')
-    .map((line) => line.trim())
-    .filter(Boolean)
-    .map((line) => line.replace(/^..\s+/, '').replace(/^"|"$/g, ''));
+  const allowlistPatterns = existsSync(SYNC_ALLOWLIST_FILE)
+    ? parseAllowlistPatterns(readFileSync(SYNC_ALLOWLIST_FILE, 'utf8'))
+    : [];
 
-  const unsafeFiles = changedFiles.filter((filePath) => !isSafePath(filePath));
+  const workingTreeFiles = parsePorcelainChangedFiles(statusOutput);
+  const { safeFiles: safeWorkingTreeFiles, unsafeFiles: unsafeWorkingTreeFiles } =
+    classifyDownstreamBoundary(workingTreeFiles, allowlistPatterns);
+
+  let baselineFiles: string[] = [];
+  let safeBaselineFiles: string[] = [];
+  let unsafeBaselineFiles: string[] = [];
+
+  if (selectedBaselineRef) {
+    try {
+      let baselineDiff = '';
+      try {
+        baselineDiff = execSync(
+          `git diff --name-only --diff-filter=ACMR ${selectedBaselineRef}...HEAD`,
+          { encoding: 'utf8', stdio: ['pipe', 'pipe', 'pipe'] }
+        );
+      } catch (mergeBaseError) {
+        const details =
+          mergeBaseError instanceof Error
+            ? mergeBaseError.message.toLowerCase()
+            : String(mergeBaseError);
+
+        if (!details.includes('no merge base')) {
+          throw mergeBaseError;
+        }
+
+        log(
+          `warning: no merge base with ${selectedBaselineRef}; falling back to direct diff (${selectedBaselineRef}..HEAD).`
+        );
+        baselineDiff = execSync(
+          `git diff --name-only --diff-filter=ACMR ${selectedBaselineRef}..HEAD`,
+          { encoding: 'utf8' }
+        );
+      }
+
+      baselineFiles = parseNameOnlyChangedFiles(baselineDiff);
+      const classified = classifyDownstreamBoundary(baselineFiles, allowlistPatterns);
+      safeBaselineFiles = classified.safeFiles;
+      unsafeBaselineFiles = classified.unsafeFiles;
+    } catch {
+      if (!againstRef) {
+        log(
+          `warning: unable to diff against ${selectedBaselineRef}; running working-tree-only checks.`
+        );
+      } else {
+        error(`Unable to diff against --against ref "${selectedBaselineRef}".`);
+      }
+    }
+  }
+
+  const hasUnsafe = unsafeWorkingTreeFiles.length > 0 || unsafeBaselineFiles.length > 0;
 
   log('DevHolm Upstream Sync Check');
   log('==========================');
@@ -421,25 +509,66 @@ async function cmdSyncCheck() {
   if (!hasUpstream) {
     log('  add it with: git remote add upstream https://github.com/devholm/devholm.com.git');
   }
-  log(`changed files: ${changedFiles.length}`);
+  log(`template remote: ${hasTemplate ? 'configured' : 'missing'}`);
+  if (!hasTemplate) {
+    log('  add it with: git remote add template https://github.com/devholm/devholm.com.git');
+  }
+  log(`baseline ref: ${selectedBaselineRef ?? 'none (working-tree-only)'}`);
+  log(`allowlist: ${allowlistPatterns.length > 0 ? '.devholm/sync-allowlist.txt' : 'none'}`);
+  log(`working tree changes: ${workingTreeFiles.length}`);
+  if (selectedBaselineRef) {
+    log(`committed changes vs ${selectedBaselineRef}: ${baselineFiles.length}`);
+  }
   log('');
 
-  if (changedFiles.length === 0) {
-    log('Working tree is clean. You are ready to pull from upstream.');
+  if (workingTreeFiles.length === 0 && baselineFiles.length === 0) {
+    log('No downstream changes detected outside baseline. You are ready to pull from upstream.');
     return;
   }
 
-  if (unsafeFiles.length === 0) {
-    log('All local changes are in downstream-safe boundaries.');
-    log('Pull/merge from upstream should stay low-conflict.');
+  if (!hasUnsafe) {
+    log('All checked changes are in downstream-safe boundaries.');
+    log('Pull/merge from upstream should stay low-conflict if migrations are applied.');
     return;
   }
 
-  log('Found local edits outside downstream-safe boundaries:');
-  for (const filePath of unsafeFiles) {
-    log(`  - ${filePath}`);
-  }
+  log('Downstream-safe boundaries:');
+  log(`  prefixes: ${downstreamBoundaryPolicy.safePrefixes.join(', ')}`);
+  log(`  exact files: ${downstreamBoundaryPolicy.safeExact.join(', ')}`);
   log('');
+
+  if (unsafeWorkingTreeFiles.length > 0) {
+    log('Found working-tree edits outside downstream-safe boundaries:');
+    for (const filePath of unsafeWorkingTreeFiles) {
+      log(`  - ${filePath}`);
+    }
+    log('');
+  }
+
+  if (unsafeBaselineFiles.length > 0) {
+    log(`Found committed drift outside downstream-safe boundaries vs ${selectedBaselineRef}:`);
+    for (const filePath of unsafeBaselineFiles) {
+      log(`  - ${filePath}`);
+    }
+    log('');
+  }
+
+  if (safeWorkingTreeFiles.length > 0) {
+    log('Working-tree edits inside safe boundaries:');
+    for (const filePath of safeWorkingTreeFiles) {
+      log(`  + ${filePath}`);
+    }
+    log('');
+  }
+
+  if (safeBaselineFiles.length > 0) {
+    log(`Committed changes inside safe boundaries vs ${selectedBaselineRef}:`);
+    for (const filePath of safeBaselineFiles) {
+      log(`  + ${filePath}`);
+    }
+    log('');
+  }
+
   log(
     'Recommendation: move site-specific customization into src/user/ or devholm.config.ts before syncing upstream.'
   );
@@ -463,7 +592,9 @@ async function main() {
     log('  new:seed <name>       Create a new user DB seed file');
     log('  list:slots            Print all available extension slot names');
     log('  status                Print framework structure summary');
-    log('  sync:check            Check if local changes are upstream-sync friendly');
+    log('  sync:check            Check local + committed changes for upstream sync safety');
+    log('    --against <ref>     Compare committed drift against git ref (e.g. template/main)');
+    log('    --working-tree-only Skip committed drift comparison');
     return;
   }
 
@@ -491,7 +622,7 @@ async function main() {
       await cmdStatus();
       break;
     case 'sync:check':
-      await cmdSyncCheck();
+      await cmdSyncCheck(args);
       break;
     default:
       error(`Unknown command "${command}". Run "pnpm devholm --help" for usage.`);

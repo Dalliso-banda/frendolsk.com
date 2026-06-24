@@ -140,6 +140,14 @@ pnpm devholm new:seed <name>
 
 Use the CLI to stay inside the framework conventions instead of inventing custom file shapes.
 
+Before pulling framework updates in a downstream site, run:
+
+```bash
+pnpm devholm sync:check --against template/main
+```
+
+Use `--against upstream/main` if your repo uses an upstream remote name, or `--working-tree-only` for a local pre-commit quick check.
+
 ## How to decide where code belongs
 
 Use this test:

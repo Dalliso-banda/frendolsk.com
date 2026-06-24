@@ -12,14 +12,14 @@ Slots are named injection points inside core page views. Register a React compon
 
 Run `pnpm devholm list:slots` to see all available slot names. Key examples:
 
-| Slot | Location |
-|---|---|
-| `home.hero.below` | Below the hero section on the homepage |
-| `home.sidebar.top` | Top of the right sidebar |
-| `home.sidebar.bottom` | Bottom of the right sidebar |
-| `blog.sidebar.top` | Top of blog sidebar |
-| `blog.post.belowContent` | Below a blog post |
-| `admin.dashboard.top` | Top of admin dashboard |
+| Slot                     | Location                               |
+| ------------------------ | -------------------------------------- |
+| `home.hero.below`        | Below the hero section on the homepage |
+| `home.sidebar.top`       | Top of the right sidebar               |
+| `home.sidebar.bottom`    | Bottom of the right sidebar            |
+| `blog.sidebar.top`       | Top of blog sidebar                    |
+| `blog.post.belowContent` | Below a blog post                      |
+| `admin.dashboard.top`    | Top of admin dashboard                 |
 
 ### Registering a slot
 
@@ -50,9 +50,7 @@ Add custom pages to the admin sidebar without editing `AdminLayoutClient.tsx`.
 
 1. Scaffold with the CLI: `pnpm devholm new:extension my-feature`
 
-2. Add a route at `src/app/admin/my-feature/page.tsx`
-
-3. Register in `src/user/extensions/admin/index.tsx`:
+2. Register nav in `src/user/extensions/admin/index.tsx`:
 
 ```tsx
 import { MyIcon } from '@mui/icons-material';
@@ -64,8 +62,25 @@ export const adminExtensions: AdminExtension[] = [
       label: 'My Feature',
       href: '/admin/my-feature',
       icon: <MyIcon />,
-      position: 'after:analytics',  // See AdminNavPosition
+      position: 'after:analytics', // See AdminNavPosition
     },
+  },
+];
+```
+
+3. Register the page module in `src/user/extensions/admin/pages.tsx`:
+
+```tsx
+import type { AdminPageExtension } from '@core/types/extensions.server';
+
+export const adminPageExtensions: AdminPageExtension[] = [
+  {
+    href: '/admin/my-feature',
+    loadPage: () => import('./my-feature/MyFeatureDashboard'),
+    getMetadata: () => ({
+      title: 'My Feature | Admin',
+      description: 'Manage my feature',
+    }),
   },
 ];
 ```
@@ -78,13 +93,16 @@ import { adminExtensions } from './src/user/extensions/admin/index';
 extensions: { admin: adminExtensions },
 ```
 
+5. Open `/admin/my-feature`.
+   The dynamic route at `src/app/admin/[...slug]/page.tsx` resolves the page from your extension registry.
+
 ### `position` values
 
-| Value | Behavior |
-|---|---|
-| `'before:dashboard'` | Insert before Dashboard |
-| `'after:<segment>'` | Insert after the item whose href ends with `/<segment>` |
-| _(omitted)_ | Insert before Settings |
+| Value                | Behavior                                                |
+| -------------------- | ------------------------------------------------------- |
+| `'before:dashboard'` | Insert before Dashboard                                 |
+| `'after:<segment>'`  | Insert after the item whose href ends with `/<segment>` |
+| _(omitted)_          | Insert before Settings                                  |
 
 ---
 

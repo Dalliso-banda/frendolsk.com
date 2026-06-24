@@ -7,7 +7,8 @@ const uploadMaxSizeMb = parseInt(process.env.UPLOAD_MAX_SIZE_MB || '50', 10);
 const nextConfig: NextConfig = {
   // Bake the package.json version into the client bundle
   env: {
-    NEXT_PUBLIC_APP_VERSION: version,
+    NEXT_PUBLIC_APP_VERSION: process.env.npm_package_version || version,
+    NEXT_PUBLIC_BUILD_SHA: process.env.GITHUB_SHA || process.env.COMMIT_SHA || '',
   },
 
   // Enable React strict mode for better development experience

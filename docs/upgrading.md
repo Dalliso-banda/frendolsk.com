@@ -14,10 +14,18 @@ The framework code lives in `src/core/` and `src/app/`, which is updated by DevH
 Before merging upstream changes, run:
 
 ```bash
-pnpm devholm sync:check
+pnpm devholm sync:check --against template/main
 ```
 
-This command verifies your local edits stay inside downstream-safe boundaries (`src/user/**`, `devholm.config.ts`, and deploy/config files). If it reports edits in `src/core/**` or framework routing files, expect higher merge risk and move those customizations into `src/user/**` when possible.
+If your downstream repo uses an `upstream` remote instead of `template`, use:
+
+```bash
+pnpm devholm sync:check --against upstream/main
+```
+
+This command verifies both working-tree edits and committed drift stay inside downstream-safe boundaries (`src/user/**`, `devholm.config.ts`, and deploy/config files). If it reports edits in `src/core/**` or framework routing files, expect higher merge risk and move those customizations into `src/user/**` when possible.
+
+For the full allowlist and policy rationale, see [Downstream Boundary Policy](./downstream-boundaries.md).
 
 ### 1. Fetch the latest framework changes
 

@@ -2,6 +2,8 @@
 
 This guide gets a new DevHolm site running locally and points you to the docs you need for deployment.
 
+For the complete onboarding runbook from first clone to production readiness, start with [First-Time Setup Path](./first-time-setup-path.md).
+
 ## Prerequisites
 
 - Node.js 20+
@@ -135,6 +137,9 @@ When you are ready to deploy with GitHub Actions:
 
 ## Next docs
 
+- [Documentation Wiki](./wiki.md)
+- [First-Time Setup Path](./first-time-setup-path.md)
+- [CI and Secrets Runbook](./ci-secrets-runbook.md)
 - [Developer Guide](./developer-guide.md)
 - [Architecture](./architecture.md)
 - [Configuration](./configuration.md)
