@@ -20,6 +20,7 @@ import {
   Switch,
   FormControlLabel,
   Chip,
+  MenuItem,
 } from '@mui/material';
 import {
   Save,
@@ -33,6 +34,7 @@ import {
   Instagram,
   YouTube,
   Security,
+  SmartToy,
 } from '@mui/icons-material';
 import { SvgIcon } from '@mui/material';
 
@@ -121,6 +123,35 @@ interface AuthProviderFormState extends AuthProviderSummary {
   scopesInput: string;
 }
 
+interface AutomationAgentAuthor {
+  id: string;
+  name: string;
+  email: string;
+}
+
+interface AutomationAgentData {
+  enabled: boolean;
+  postsEnabled: boolean;
+  messagesReadEnabled: boolean;
+  messagesWriteEnabled: boolean;
+  allowCustomAuthor: boolean;
+  defaultAuthorId: string | null;
+  tokenConfigured: boolean;
+  tokenHint: string | null;
+  tokenUpdatedAt: string | null;
+  availableAuthors: AutomationAgentAuthor[];
+}
+
+interface AutomationAgentFormData {
+  enabled: boolean;
+  postsEnabled: boolean;
+  messagesReadEnabled: boolean;
+  messagesWriteEnabled: boolean;
+  allowCustomAuthor: boolean;
+  defaultAuthorId: string | null;
+  rotateToken: boolean;
+}
+
 // =============================================================================
 // Tab Panel Component
 // =============================================================================
@@ -163,11 +194,16 @@ export default function SettingsPage() {
   const [settings, setSettings] = useState<SettingsData | null>(null);
   const [authSettings, setAuthSettings] = useState<AuthSettingsData | null>(null);
   const [authProviders, setAuthProviders] = useState<AuthProviderFormState[]>([]);
+  const [automationSettings, setAutomationSettings] = useState<AutomationAgentData | null>(null);
+  const [automationGeneratedToken, setAutomationGeneratedToken] = useState<string | null>(null);
 
   // Form state (separate from saved state to track changes)
   const [formData, setFormData] = useState<SettingsData | null>(null);
   const [authFormData, setAuthFormData] = useState<AuthSettingsData | null>(null);
   const [authProviderFormData, setAuthProviderFormData] = useState<AuthProviderFormState[]>([]);
+  const [automationFormData, setAutomationFormData] = useState<AutomationAgentFormData | null>(
+    null
+  );
 
   // =============================================================================
   // Data Fetching
@@ -178,18 +214,20 @@ export default function SettingsPage() {
     setError(null);
 
     try {
-      const [settingsResponse, authResponse] = await Promise.all([
+      const [settingsResponse, authResponse, automationResponse] = await Promise.all([
         fetch('/api/admin/settings'),
         fetch('/api/admin/auth/config'),
+        fetch('/api/admin/automation-agent'),
       ]);
 
-      if (!settingsResponse.ok || !authResponse.ok) {
+      if (!settingsResponse.ok || !authResponse.ok || !automationResponse.ok) {
         throw new Error('Failed to fetch settings');
       }
 
-      const [settingsResult, authResult] = await Promise.all([
+      const [settingsResult, authResult, automationResult] = await Promise.all([
         settingsResponse.json(),
         authResponse.json(),
+        automationResponse.json(),
       ]);
 
       const normalizedProviders = (authResult.data.providers as AuthProviderSummary[]).map(
@@ -207,6 +245,16 @@ export default function SettingsPage() {
       setAuthFormData(authResult.data.settings);
       setAuthProviders(normalizedProviders);
       setAuthProviderFormData(normalizedProviders);
+      setAutomationSettings(automationResult.data);
+      setAutomationFormData({
+        enabled: Boolean(automationResult.data.enabled),
+        postsEnabled: Boolean(automationResult.data.postsEnabled),
+        messagesReadEnabled: Boolean(automationResult.data.messagesReadEnabled),
+        messagesWriteEnabled: Boolean(automationResult.data.messagesWriteEnabled),
+        allowCustomAuthor: Boolean(automationResult.data.allowCustomAuthor),
+        defaultAuthorId: automationResult.data.defaultAuthorId || null,
+        rotateToken: false,
+      });
     } catch (err) {
       console.error('Error fetching settings:', err);
       setError(err instanceof Error ? err.message : 'Failed to load settings');
@@ -288,6 +336,18 @@ export default function SettingsPage() {
     setHasChanges(true);
   };
 
+  const updateAutomationField = (
+    field: keyof AutomationAgentFormData,
+    value: boolean | string | null
+  ) => {
+    if (!automationFormData) return;
+    setAutomationFormData({
+      ...automationFormData,
+      [field]: value,
+    } as AutomationAgentFormData);
+    setHasChanges(true);
+  };
+
   // =============================================================================
   // Save Handler
   // =============================================================================
@@ -341,6 +401,7 @@ export default function SettingsPage() {
       }
 
       let authResultData = null;
+      let automationResultData = null;
       if (authFormData) {
         const authResponse = await fetch('/api/admin/auth/config', {
           method: 'PATCH',
@@ -370,6 +431,29 @@ export default function SettingsPage() {
         authResultData = await authResponse.json();
       }
 
+      if (automationFormData) {
+        const automationResponse = await fetch('/api/admin/automation-agent', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            enabled: automationFormData.enabled,
+            postsEnabled: automationFormData.postsEnabled,
+            messagesReadEnabled: automationFormData.messagesReadEnabled,
+            messagesWriteEnabled: automationFormData.messagesWriteEnabled,
+            allowCustomAuthor: automationFormData.allowCustomAuthor,
+            defaultAuthorId: automationFormData.defaultAuthorId,
+            rotateToken: automationFormData.rotateToken,
+          }),
+        });
+
+        if (!automationResponse.ok) {
+          const data = await automationResponse.json();
+          throw new Error(data.error || 'Failed to save automation settings');
+        }
+
+        automationResultData = await automationResponse.json();
+      }
+
       const result = await settingsResponse.json();
       const normalizedProviders = authResultData
         ? (authResultData.data.providers as AuthProviderSummary[]).map((provider) => ({
@@ -387,6 +471,19 @@ export default function SettingsPage() {
         setAuthFormData(authResultData.data.settings);
         setAuthProviders(normalizedProviders);
         setAuthProviderFormData(normalizedProviders);
+      }
+      if (automationResultData) {
+        setAutomationSettings(automationResultData.data);
+        setAutomationFormData({
+          enabled: Boolean(automationResultData.data.enabled),
+          postsEnabled: Boolean(automationResultData.data.postsEnabled),
+          messagesReadEnabled: Boolean(automationResultData.data.messagesReadEnabled),
+          messagesWriteEnabled: Boolean(automationResultData.data.messagesWriteEnabled),
+          allowCustomAuthor: Boolean(automationResultData.data.allowCustomAuthor),
+          defaultAuthorId: automationResultData.data.defaultAuthorId || null,
+          rotateToken: false,
+        });
+        setAutomationGeneratedToken(automationResultData.data.generatedToken || null);
       }
       setHasChanges(false);
       setSuccess('Settings saved successfully');
@@ -411,6 +508,18 @@ export default function SettingsPage() {
           clientSecret: '',
         }))
       );
+    }
+    if (automationSettings) {
+      setAutomationFormData({
+        enabled: automationSettings.enabled,
+        postsEnabled: automationSettings.postsEnabled,
+        messagesReadEnabled: automationSettings.messagesReadEnabled,
+        messagesWriteEnabled: automationSettings.messagesWriteEnabled,
+        allowCustomAuthor: automationSettings.allowCustomAuthor,
+        defaultAuthorId: automationSettings.defaultAuthorId,
+        rotateToken: false,
+      });
+      setAutomationGeneratedToken(null);
     }
     setHasChanges(false);
   };
@@ -510,6 +619,7 @@ export default function SettingsPage() {
           <Tab icon={<Share />} label="Social" iconPosition="start" />
           <Tab icon={<SearchIcon />} label="SEO" iconPosition="start" />
           <Tab icon={<Security />} label="Auth" iconPosition="start" />
+          <Tab icon={<SmartToy />} label="Automation" iconPosition="start" />
         </Tabs>
       </Paper>
 
@@ -580,6 +690,143 @@ export default function SettingsPage() {
                   helperText="URL to your site favicon"
                   slotProps={{ inputLabel: { shrink: true } }}
                 />
+              </CardContent>
+            </Card>
+          </Grid>
+        </Grid>
+      </TabPanel>
+
+      <TabPanel value={activeTab} index={5}>
+        <Grid container spacing={3}>
+          <Grid size={{ xs: 12, md: 6 }}>
+            <Card>
+              <CardContent>
+                <Typography variant="h6" gutterBottom>
+                  Agent Access
+                </Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                  Off by default. Enable only if you want external bots or AI agents to call API
+                  endpoints with a bearer token.
+                </Typography>
+                <Divider sx={{ mb: 2 }} />
+
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={Boolean(automationFormData?.enabled)}
+                      onChange={(e) => updateAutomationField('enabled', e.target.checked)}
+                    />
+                  }
+                  label="Enable automation API"
+                  sx={{ display: 'flex', mb: 1 }}
+                />
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={Boolean(automationFormData?.postsEnabled)}
+                      onChange={(e) => updateAutomationField('postsEnabled', e.target.checked)}
+                    />
+                  }
+                  label="Allow post creation and publishing"
+                  sx={{ display: 'flex', mb: 1 }}
+                />
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={Boolean(automationFormData?.messagesReadEnabled)}
+                      onChange={(e) =>
+                        updateAutomationField('messagesReadEnabled', e.target.checked)
+                      }
+                    />
+                  }
+                  label="Allow inbox message retrieval"
+                  sx={{ display: 'flex', mb: 1 }}
+                />
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={Boolean(automationFormData?.messagesWriteEnabled)}
+                      onChange={(e) =>
+                        updateAutomationField('messagesWriteEnabled', e.target.checked)
+                      }
+                    />
+                  }
+                  label="Allow inbox moderation actions"
+                  sx={{ display: 'flex', mb: 2 }}
+                />
+
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={Boolean(automationFormData?.allowCustomAuthor)}
+                      onChange={(e) => updateAutomationField('allowCustomAuthor', e.target.checked)}
+                    />
+                  }
+                  label="Allow API caller to pick author"
+                  sx={{ display: 'flex', mb: 2 }}
+                />
+
+                <TextField
+                  select
+                  fullWidth
+                  label="Default Post Author"
+                  value={automationFormData?.defaultAuthorId || ''}
+                  onChange={(e) => updateAutomationField('defaultAuthorId', e.target.value || null)}
+                  helperText="Used when custom author selection is disabled or not provided."
+                  sx={{ mb: 2 }}
+                >
+                  <MenuItem value="">Auto-select first admin user</MenuItem>
+                  {(automationSettings?.availableAuthors || []).map((author) => (
+                    <MenuItem key={author.id} value={author.id}>
+                      {author.name} ({author.email})
+                    </MenuItem>
+                  ))}
+                </TextField>
+
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={Boolean(automationFormData?.rotateToken)}
+                      onChange={(e) => updateAutomationField('rotateToken', e.target.checked)}
+                    />
+                  }
+                  label="Rotate bearer token on next save"
+                  sx={{ display: 'flex' }}
+                />
+              </CardContent>
+            </Card>
+          </Grid>
+
+          <Grid size={{ xs: 12, md: 6 }}>
+            <Card>
+              <CardContent>
+                <Typography variant="h6" gutterBottom>
+                  Token Status
+                </Typography>
+                <Divider sx={{ mb: 2 }} />
+                <Typography variant="body2" sx={{ mb: 1 }}>
+                  Configured: {automationSettings?.tokenConfigured ? 'Yes' : 'No'}
+                </Typography>
+                <Typography variant="body2" sx={{ mb: 1 }}>
+                  Token hint: {automationSettings?.tokenHint || 'Not generated yet'}
+                </Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                  Last rotated:{' '}
+                  {automationSettings?.tokenUpdatedAt
+                    ? new Date(automationSettings.tokenUpdatedAt).toLocaleString()
+                    : 'Never'}
+                </Typography>
+
+                {automationGeneratedToken && (
+                  <Alert severity="warning" sx={{ mb: 2 }}>
+                    New token (shown once): <strong>{automationGeneratedToken}</strong>
+                  </Alert>
+                )}
+
+                <Alert severity="info">
+                  Send this token as Authorization: Bearer &lt;token&gt; to call /api/agent/posts
+                  and /api/agent/messages.
+                </Alert>
               </CardContent>
             </Card>
           </Grid>

@@ -89,6 +89,7 @@ See [docs/cli.md](docs/cli.md).
 | [Developer Guide](docs/developer-guide.md)                             | Local workflow, boundaries, seeds, and extension rules |
 | [Architecture](docs/architecture.md)                                   | Layer model, directory structure, aliases              |
 | [Configuration](docs/configuration.md)                                 | Full `devholm.config.ts` reference                     |
+| [Automation Agent API](docs/automation-agent.md)                       | Secure bot/AI endpoints for posts and inbox moderation |
 | [Extensions](docs/extensions.md)                                       | Slots, admin extensions, view overrides, migrations    |
 | [CLI](docs/cli.md)                                                     | All CLI commands                                       |
 | [Upgrading](docs/upgrading.md)                                         | How to update DevHolm safely                           |
