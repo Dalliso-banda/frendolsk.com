@@ -446,66 +446,66 @@ jobs:
             } > "$state_file"
             chmod 600 "$state_file"
 
-            cat > "$template_dir/nginx-${PROJECT_NAME}.conf" << EOF
-            server {
-                listen 80;
-                listen [::]:80;
-                server_name ${site_domain} www.${site_domain};
+            {
+              printf '%s\n' 'server {'
+              printf '%s\n' '    listen 80;'
+              printf '%s\n' '    listen [::]:80;'
+              printf '    server_name %s www.%s;\n' "$site_domain" "$site_domain"
+              printf '%s\n' ''
+              printf '%s\n' '    location / {'
+              printf '%s\n' '        return 301 https://$host$request_uri;'
+              printf '%s\n' '    }'
+              printf '%s\n' '}'
+              printf '%s\n' ''
+              printf '%s\n' 'server {'
+              printf '%s\n' '    listen 443 ssl http2;'
+              printf '%s\n' '    listen [::]:443 ssl http2;'
+              printf '    server_name %s www.%s;\n' "$site_domain" "$site_domain"
+              printf '%s\n' ''
+              printf '%s\n' '    # Update certificate paths for your host.'
+              printf '    ssl_certificate /etc/letsencrypt/live/%s/fullchain.pem;\n' "$site_domain"
+              printf '    ssl_certificate_key /etc/letsencrypt/live/%s/privkey.pem;\n' "$site_domain"
+              printf '%s\n' ''
+              printf '%s\n' '    location / {'
+              printf '        proxy_pass http://127.0.0.1:%s;\n' "$chosen_port"
+              printf '%s\n' '        proxy_http_version 1.1;'
+              printf '%s\n' '        proxy_set_header Upgrade $http_upgrade;'
+              printf '%s\n' '        proxy_set_header Connection "upgrade";'
+              printf '%s\n' '        proxy_set_header Host $host;'
+              printf '%s\n' '        proxy_set_header X-Real-IP $remote_addr;'
+              printf '%s\n' '        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;'
+              printf '%s\n' '        proxy_set_header X-Forwarded-Proto $scheme;'
+              printf '%s\n' '        proxy_read_timeout 86400;'
+              printf '%s\n' '    }'
+              printf '%s\n' '}'
+            } > "$template_dir/nginx-${PROJECT_NAME}.conf"
 
-                location / {
-                    return 301 https://\$host\$request_uri;
-                }
-            }
-
-            server {
-                listen 443 ssl http2;
-                listen [::]:443 ssl http2;
-                server_name ${site_domain} www.${site_domain};
-
-                # Update certificate paths for your host.
-                ssl_certificate /etc/letsencrypt/live/${site_domain}/fullchain.pem;
-                ssl_certificate_key /etc/letsencrypt/live/${site_domain}/privkey.pem;
-
-                location / {
-                    proxy_pass http://127.0.0.1:${chosen_port};
-                    proxy_http_version 1.1;
-                    proxy_set_header Upgrade \$http_upgrade;
-                    proxy_set_header Connection "upgrade";
-                    proxy_set_header Host \$host;
-                    proxy_set_header X-Real-IP \$remote_addr;
-                    proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-                    proxy_set_header X-Forwarded-Proto \$scheme;
-                    proxy_read_timeout 86400;
-                }
-            }
-            EOF
-
-            cat > "$template_dir/apache-${PROJECT_NAME}.conf" << EOF
-            <VirtualHost *:80>
-                ServerName ${site_domain}
-                ServerAlias www.${site_domain}
-                Redirect permanent / https://${site_domain}/
-            </VirtualHost>
-
-            <IfModule mod_ssl.c>
-            <VirtualHost *:443>
-                ServerName ${site_domain}
-                ServerAlias www.${site_domain}
-
-                # Update certificate paths for your host.
-                SSLEngine on
-                SSLCertificateFile /etc/letsencrypt/live/${site_domain}/fullchain.pem
-                SSLCertificateKeyFile /etc/letsencrypt/live/${site_domain}/privkey.pem
-
-                ProxyPreserveHost On
-                ProxyPass / http://127.0.0.1:${chosen_port}/
-                ProxyPassReverse / http://127.0.0.1:${chosen_port}/
-
-                RequestHeader set X-Forwarded-Proto "https"
-                RequestHeader set X-Forwarded-Port "443"
-            </VirtualHost>
-            </IfModule>
-            EOF
+            {
+              printf '%s\n' '<VirtualHost *:80>'
+              printf '    ServerName %s\n' "$site_domain"
+              printf '    ServerAlias www.%s\n' "$site_domain"
+              printf '    Redirect permanent / https://%s/\n' "$site_domain"
+              printf '%s\n' '</VirtualHost>'
+              printf '%s\n' ''
+              printf '%s\n' '<IfModule mod_ssl.c>'
+              printf '%s\n' '<VirtualHost *:443>'
+              printf '    ServerName %s\n' "$site_domain"
+              printf '    ServerAlias www.%s\n' "$site_domain"
+              printf '%s\n' ''
+              printf '%s\n' '    # Update certificate paths for your host.'
+              printf '%s\n' '    SSLEngine on'
+              printf '    SSLCertificateFile /etc/letsencrypt/live/%s/fullchain.pem\n' "$site_domain"
+              printf '    SSLCertificateKeyFile /etc/letsencrypt/live/%s/privkey.pem\n' "$site_domain"
+              printf '%s\n' ''
+              printf '%s\n' '    ProxyPreserveHost On'
+              printf '    ProxyPass / http://127.0.0.1:%s/\n' "$chosen_port"
+              printf '    ProxyPassReverse / http://127.0.0.1:%s/\n' "$chosen_port"
+              printf '%s\n' ''
+              printf '%s\n' '    RequestHeader set X-Forwarded-Proto "https"'
+              printf '%s\n' '    RequestHeader set X-Forwarded-Port "443"'
+              printf '%s\n' '</VirtualHost>'
+              printf '%s\n' '</IfModule>'
+            } > "$template_dir/apache-${PROJECT_NAME}.conf"
 
             chmod 644 "$template_dir/nginx-${PROJECT_NAME}.conf" "$template_dir/apache-${PROJECT_NAME}.conf"
 
