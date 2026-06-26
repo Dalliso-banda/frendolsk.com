@@ -299,6 +299,19 @@ jobs:
         run: |
           echo "name=${GITHUB_REPOSITORY,,}" >> "$GITHUB_OUTPUT"
 
+      - name: Normalize deploy inputs
+        id: deploy_inputs
+        run: |
+          SITE_URL_RAW='${{ secrets.SITE_URL }}'
+          SITE_URL_CLEAN="$(printf '%s' "$SITE_URL_RAW" | tr -d '\r\n' | sed -E 's#/*$##')"
+
+          if [ -z "$SITE_URL_CLEAN" ]; then
+            echo "SITE_URL is empty after normalization"
+            exit 1
+          fi
+
+          echo "site_url=$SITE_URL_CLEAN" >> "$GITHUB_OUTPUT"
+
       - name: Setup SSH
         uses: webfactory/ssh-agent@v0.9.0
         with:
@@ -317,7 +330,7 @@ jobs:
           REQUESTED_PORT="${APP_PORT_SECRET}"
           TARGET_CONTAINER='${{ secrets.PROJECT_NAME }}-app'
           PROJECT_NAME='${{ secrets.PROJECT_NAME }}'
-          SITE_URL='${{ secrets.SITE_URL }}'
+          SITE_URL='${{ steps.deploy_inputs.outputs.site_url }}'
           DEPLOY_PATH='${{ secrets.DEPLOY_PATH }}'
 
           REMOTE_OUT=$(ssh -o StrictHostKeyChecking=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} "REQUESTED_PORT='${REQUESTED_PORT}' TARGET_CONTAINER='${TARGET_CONTAINER}' PROJECT_NAME='${PROJECT_NAME}' SITE_URL='${SITE_URL}' DEPLOY_PATH='${DEPLOY_PATH}' bash -s" << 'ENDSSH'
@@ -572,7 +585,7 @@ jobs:
                 - "${APP_PORT_VALUE}:3000"
               environment:
                 - NODE_ENV=production
-                - NEXT_PUBLIC_APP_URL=${{ secrets.SITE_URL }}
+                - NEXT_PUBLIC_APP_URL=${{ steps.deploy_inputs.outputs.site_url }}
                 - NEXT_PUBLIC_SITE_NAME=${{ secrets.SITE_NAME }}
                 - DATABASE_URL=postgresql://${{ secrets.POSTGRES_USER }}:${{ secrets.POSTGRES_PASSWORD }}@host.docker.internal:5432/${{ secrets.POSTGRES_DB }}
                 - DATABASE_HOST=host.docker.internal
@@ -580,7 +593,7 @@ jobs:
                 - DATABASE_NAME=${{ secrets.POSTGRES_DB }}
                 - DATABASE_USER=${{ secrets.POSTGRES_USER }}
                 - DATABASE_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
-                - NEXTAUTH_URL=${{ secrets.SITE_URL }}
+                - NEXTAUTH_URL=${{ steps.deploy_inputs.outputs.site_url }}
                 - NEXTAUTH_SECRET=${{ secrets.NEXTAUTH_SECRET }}
                 - AUTH_SECRET=${{ secrets.NEXTAUTH_SECRET }}
                 - ADMIN_EMAIL=${{ secrets.ADMIN_EMAIL }}
@@ -668,7 +681,7 @@ jobs:
           echo "🔍 Verifying deployment..."
           MAX_ATTEMPTS=10
           ATTEMPT=0
-          HEALTH_URL="${{ secrets.SITE_URL }}/api/health"
+          HEALTH_URL="${{ steps.deploy_inputs.outputs.site_url }}/api/health"
           until [ $ATTEMPT -ge $MAX_ATTEMPTS ]; do
             HTTP_STATUS=$(curl -sS --max-time 10 -o /tmp/health-body.txt -w "%{http_code}" "$HEALTH_URL" || true)
             if [ "$HTTP_STATUS" = "200" ]; then
@@ -696,7 +709,7 @@ jobs:
           echo "🩺 Collecting post-failure diagnostics..."
 
           echo "External health endpoint response:"
-          curl -sS -i --max-time 10 "${{ secrets.SITE_URL }}/api/health" | head -n 80 || true
+          curl -sS -i --max-time 10 "${{ steps.deploy_inputs.outputs.site_url }}/api/health" | head -n 80 || true
 
           APP_PORT_VALUE='${{ steps.port.outputs.app_port }}'
           TARGET_CONTAINER='${{ secrets.PROJECT_NAME }}-app'
@@ -705,6 +718,14 @@ jobs:
             set +e
             APP_PORT_VALUE="$APP_PORT_VALUE"
             TARGET_CONTAINER="$TARGET_CONTAINER"
+
+            run_root() {
+              if command -v sudo >/dev/null 2>&1 && sudo -n true >/dev/null 2>&1; then
+                sudo -n "$@"
+              else
+                "$@"
+              fi
+            }
 
             echo "\n=== docker compose ps ==="
             cd ${{ secrets.DEPLOY_PATH }} && docker compose ps
@@ -716,10 +737,10 @@ jobs:
             curl -sS -i --max-time 10 "http://127.0.0.1:${APP_PORT_VALUE}/api/health" | head -n 80 || true
 
             echo "\n=== nginx active config excerpt ==="
-            sudo nginx -T 2>/dev/null | grep -E "server_name|proxy_pass|upstream|listen" -n | head -n 120 || true
+            run_root nginx -T 2>/dev/null | grep -E "server_name|proxy_pass|upstream|listen" -n | head -n 120 || true
 
             echo "\n=== nginx error log tail ==="
-            sudo tail -n 120 /var/log/nginx/error.log || true
+            run_root tail -n 120 /var/log/nginx/error.log || true
           ENDSSH
 
   # ===========================================================================
