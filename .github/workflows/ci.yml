@@ -415,6 +415,11 @@ jobs:
               fi
             fi
 
+            if [ -n "$chosen_port" ] && [ -n "$existing_port" ] && [ "$chosen_port" != "$existing_port" ]; then
+              echo "Detected APP_PORT drift (state=$chosen_port, running=$existing_port). Using running container port for stability." >&2
+              chosen_port="$existing_port"
+            fi
+
             if [ -z "$chosen_port" ] && [ -n "$existing_port" ]; then
               chosen_port="$existing_port"
               first_install="1"
