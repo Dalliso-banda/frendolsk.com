@@ -97,6 +97,20 @@ export function getTheme(mode: 'light' | 'dark'): Theme {
         fontWeight: 600,
       },
     },
+    components: {
+      MuiAppBar: {
+        styleOverrides: {
+          root: {
+            backgroundColor: `${zambia.black[800]} !important`,
+            backgroundImage: `linear-gradient(180deg, ${alpha(zambia.black[700], 0.6)} 0%, ${zambia.black[800]} 100%)`,
+            color: '#F3F7ED',
+            borderBottom: `1px solid ${alpha(zambia.orange.main, 0.28)}`,
+            boxShadow: `0 10px 24px ${alpha(zambia.black[900], 0.4)}`,
+            backdropFilter: 'blur(8px)',
+          },
+        },
+      },
+    },
   };
 
   const lightThemeOptions: ThemeOptions = {
@@ -141,6 +155,18 @@ export function getTheme(mode: 'light' | 'dark'): Theme {
       },
     },
     components: {
+      MuiAppBar: {
+        styleOverrides: {
+          root: {
+            backgroundColor: `${zambia.cream[100]} !important`,
+            backgroundImage: `linear-gradient(180deg, ${alpha('#FFFFFF', 0.92)} 0%, ${zambia.cream[100]} 100%)`,
+            color: '#1D2517',
+            borderBottom: `1px solid ${alpha(zambia.green.dark, 0.28)}`,
+            boxShadow: `0 8px 22px ${alpha(zambia.black[700], 0.14)}`,
+            backdropFilter: 'blur(8px)',
+          },
+        },
+      },
       MuiButton: {
         styleOverrides: {
           containedPrimary: {
