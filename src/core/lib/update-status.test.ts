@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import {
   compareVersions,
+  fetchLatestTag,
   fetchLatestRelease,
   getUpdateStatus,
   normalizeVersion,
@@ -9,6 +10,7 @@ import {
 describe('update-status', () => {
   it('normalizes version strings', () => {
     expect(normalizeVersion('v2.1.0')).toBe('2.1.0');
+    expect(normalizeVersion('2.0.0+f6c8b6f')).toBe('2.0.0');
     expect(normalizeVersion(' 1.0.0 ')).toBe('1.0.0');
     expect(normalizeVersion(undefined)).toBe('0.0.0');
   });
@@ -42,6 +44,24 @@ describe('update-status', () => {
     });
   });
 
+  it('falls back to the latest tag when no release exists', async () => {
+    const fakeFetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => [{ name: 'v2.4.1' }],
+    });
+
+    const latest = await fetchLatestTag('chrishacia/devholm', fakeFetch);
+
+    expect(latest).toEqual({
+      repo: 'chrishacia/devholm',
+      tagName: 'v2.4.1',
+      version: '2.4.1',
+      name: 'v2.4.1',
+      url: 'https://github.com/chrishacia/devholm/tree/v2.4.1',
+      publishedAt: '',
+    });
+  });
+
   it('computes update availability from current and latest versions', async () => {
     vi.stubEnv('NEXT_PUBLIC_APP_VERSION', '2.0.0');
     const fakeFetch = vi.fn().mockResolvedValue({
@@ -57,6 +77,26 @@ describe('update-status', () => {
     const status = await getUpdateStatus('devholm/devholm.com', fakeFetch);
     expect(status.updateAvailable).toBe(true);
     expect(status.latest?.version).toBe('2.1.0');
+
+    vi.unstubAllEnvs();
+  });
+
+  it('falls back to tag metadata when releases are unavailable', async () => {
+    vi.stubEnv('NEXT_PUBLIC_APP_VERSION', '2.0.0+abc1234');
+
+    const fakeFetch = vi
+      .fn()
+      .mockResolvedValueOnce({ ok: false })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => [{ name: 'v2.0.1' }],
+      });
+
+    const status = await getUpdateStatus('chrishacia/devholm', fakeFetch);
+
+    expect(status.current.version).toBe('2.0.0');
+    expect(status.latest?.version).toBe('2.0.1');
+    expect(status.updateAvailable).toBe(true);
 
     vi.unstubAllEnvs();
   });

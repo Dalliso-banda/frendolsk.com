@@ -34,7 +34,8 @@ export function normalizeVersion(value: string | null | undefined): string {
 
   const trimmed = value.trim();
   const withoutPrefix = trimmed.startsWith('v') ? trimmed.slice(1) : trimmed;
-  return withoutPrefix || '0.0.0';
+  const withoutBuild = withoutPrefix.split('+')[0]?.trim() ?? '';
+  return withoutBuild || '0.0.0';
 }
 
 export function compareVersions(a: string, b: string): number {
@@ -101,6 +102,41 @@ export async function fetchLatestRelease(
   };
 }
 
+export async function fetchLatestTag(
+  repo: string,
+  fetchImpl: FetchLike = fetch
+): Promise<LatestReleaseInfo | null> {
+  const endpoint = `https://api.github.com/repos/${repo}/tags?per_page=1`;
+  const response = await fetchImpl(endpoint, {
+    headers: {
+      Accept: 'application/vnd.github+json',
+      'User-Agent': 'devholm-update-checker',
+    },
+    cache: 'no-store',
+  });
+
+  if (!response.ok) {
+    return null;
+  }
+
+  const payload = (await response.json()) as Array<Record<string, unknown>>;
+  const firstTag = payload[0];
+  const tagName = typeof firstTag?.name === 'string' ? firstTag.name : '';
+
+  if (!tagName) {
+    return null;
+  }
+
+  return {
+    repo,
+    tagName,
+    version: normalizeVersion(tagName),
+    name: tagName,
+    url: `https://github.com/${repo}/tree/${encodeURIComponent(tagName)}`,
+    publishedAt: '',
+  };
+}
+
 export async function getUpdateStatus(
   sourceRepo: string,
   fetchImpl: FetchLike = fetch
@@ -108,7 +144,10 @@ export async function getUpdateStatus(
   const current = getCurrentBuildInfo();
 
   try {
-    const latest = await fetchLatestRelease(sourceRepo, fetchImpl);
+    const latest =
+      (await fetchLatestRelease(sourceRepo, fetchImpl)) ??
+      (await fetchLatestTag(sourceRepo, fetchImpl));
+
     return {
       sourceRepo,
       current,
@@ -116,7 +155,7 @@ export async function getUpdateStatus(
       updateAvailable: latest ? compareVersions(current.version, latest.version) < 0 : null,
       ...(latest
         ? {}
-        : { warning: 'Unable to determine latest release metadata for source repository.' }),
+        : { warning: 'Unable to determine latest release or tag metadata for source repository.' }),
     };
   } catch (error) {
     return {
