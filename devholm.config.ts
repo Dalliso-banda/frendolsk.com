@@ -24,7 +24,7 @@ import type { DevHolmConfig } from './src/core/types/config';
 // ── Uncomment as you set up each section ──────────────────────────
 
 // Phase 1: Theme (after creating src/user/theme/theme.ts)
-// import { getTheme } from './src/user/theme/theme';
+import { getTheme } from './src/user/theme/theme';
 
 // Phase 1: Content
 import { aboutContent } from './src/user/content/about';
@@ -37,7 +37,7 @@ import { nowContent } from './src/user/content/now';
 // ─────────────────────────────────────────────────────────────────
 
 const config: DevHolmConfig = {
-  // theme: getTheme,
+  theme: getTheme,
 
   content: {
     about: aboutContent,
