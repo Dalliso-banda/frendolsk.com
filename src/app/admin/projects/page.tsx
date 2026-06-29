@@ -398,13 +398,23 @@ export default function ProjectsListPage() {
               <TableBody>
                 <TableRow>
                   <TableCell colSpan={6} align="center" sx={{ py: 8 }}>
-                    <FolderOpen sx={{ fontSize: 64, color: 'text.disabled', mb: 2 }} />
-                    <Typography variant="h6" color="text.secondary">
-                      No projects found
-                    </Typography>
-                    <Typography variant="body2" color="text.disabled">
-                      {search ? 'Try a different search term' : 'Create your first project'}
-                    </Typography>
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        width: '100%',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      <FolderOpen sx={{ fontSize: 64, color: 'text.disabled', mb: 2 }} />
+                      <Typography variant="h6" color="text.secondary">
+                        No projects found
+                      </Typography>
+                      <Typography variant="body2" color="text.disabled">
+                        {search ? 'Try a different search term' : 'Create your first project'}
+                      </Typography>
+                    </Box>
                   </TableCell>
                 </TableRow>
               </TableBody>

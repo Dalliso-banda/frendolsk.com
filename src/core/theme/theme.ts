@@ -9,7 +9,7 @@ import { createTheme, ThemeOptions, alpha, Theme } from '@mui/material/styles';
 const palette = {
   // Primary: GitHub Blue - links, buttons, interactive elements
   blue: {
-    main: '#0969DA',      // GitHub blue
+    main: '#0969DA', // GitHub blue
     light: '#218BFF',
     dark: '#0550AE',
     muted: '#54AEFF',
@@ -64,16 +64,16 @@ const palette = {
 // GitHub Dark Mode Colors
 const darkColors = {
   canvas: {
-    default: '#0D1117',     // Main background
-    overlay: '#161B22',     // Overlays, dropdowns
-    inset: '#010409',       // Inset backgrounds
-    subtle: '#161B22',      // Subtle backgrounds
+    default: '#0D1117', // Main background
+    overlay: '#161B22', // Overlays, dropdowns
+    inset: '#010409', // Inset backgrounds
+    subtle: '#161B22', // Subtle backgrounds
   },
   fg: {
-    default: '#E6EDF3',     // Primary text
-    muted: '#8D96A0',       // Secondary text
-    subtle: '#6E7681',      // Tertiary text
-    onEmphasis: '#FFFFFF',  // Text on colored backgrounds
+    default: '#E6EDF3', // Primary text
+    muted: '#8D96A0', // Secondary text
+    subtle: '#6E7681', // Tertiary text
+    onEmphasis: '#FFFFFF', // Text on colored backgrounds
   },
   border: {
     default: '#30363D',
@@ -91,16 +91,16 @@ const darkColors = {
 // GitHub Light Mode Colors
 const lightColors = {
   canvas: {
-    default: '#FFFFFF',     // Main background
-    overlay: '#FFFFFF',     // Overlays, dropdowns
-    inset: '#F6F8FA',       // Inset backgrounds
-    subtle: '#F6F8FA',      // Subtle backgrounds
+    default: '#FFFFFF', // Main background
+    overlay: '#FFFFFF', // Overlays, dropdowns
+    inset: '#F6F8FA', // Inset backgrounds
+    subtle: '#F6F8FA', // Subtle backgrounds
   },
   fg: {
-    default: '#1F2328',     // Primary text
-    muted: '#636C76',       // Secondary text
-    subtle: '#6E7681',      // Tertiary text
-    onEmphasis: '#FFFFFF',  // Text on colored backgrounds
+    default: '#1F2328', // Primary text
+    muted: '#636C76', // Secondary text
+    subtle: '#6E7681', // Tertiary text
+    onEmphasis: '#FFFFFF', // Text on colored backgrounds
   },
   border: {
     default: '#D0D7DE',
@@ -171,7 +171,8 @@ const darkThemeOptions: ThemeOptions = {
     },
   },
   typography: {
-    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif',
+    fontFamily:
+      '-apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif',
     h1: {
       fontWeight: 600,
       fontSize: '2.5rem',
@@ -460,6 +461,25 @@ const darkThemeOptions: ThemeOptions = {
         },
       },
     },
+    MuiInputLabel: {
+      defaultProps: {
+        shrink: true,
+      },
+      styleOverrides: {
+        root: {
+          color: darkColors.fg.muted,
+          '&.Mui-focused': {
+            color: palette.blue.main,
+          },
+          '&.MuiInputLabel-shrink': {
+            backgroundColor: darkColors.canvas.default,
+            borderRadius: 999,
+            paddingInline: 6,
+            marginLeft: -6,
+          },
+        },
+      },
+    },
     MuiTextField: {
       styleOverrides: {
         root: {
@@ -475,12 +495,6 @@ const darkThemeOptions: ThemeOptions = {
               borderColor: palette.blue.main,
               borderWidth: 2,
               boxShadow: `0 0 0 3px ${alpha(palette.blue.main, 0.3)}`,
-            },
-          },
-          '& .MuiInputLabel-root': {
-            color: darkColors.fg.muted,
-            '&.Mui-focused': {
-              color: palette.blue.main,
             },
           },
         },
@@ -894,6 +908,25 @@ const lightThemeOptions: ThemeOptions = {
         },
       },
     },
+    MuiInputLabel: {
+      defaultProps: {
+        shrink: true,
+      },
+      styleOverrides: {
+        root: {
+          color: lightColors.fg.muted,
+          '&.Mui-focused': {
+            color: palette.blue.main,
+          },
+          '&.MuiInputLabel-shrink': {
+            backgroundColor: lightColors.canvas.default,
+            borderRadius: 999,
+            paddingInline: 6,
+            marginLeft: -6,
+          },
+        },
+      },
+    },
     MuiTextField: {
       styleOverrides: {
         root: {
@@ -909,12 +942,6 @@ const lightThemeOptions: ThemeOptions = {
               borderColor: palette.blue.main,
               borderWidth: 2,
               boxShadow: `0 0 0 3px ${alpha(palette.blue.main, 0.15)}`,
-            },
-          },
-          '& .MuiInputLabel-root': {
-            color: lightColors.fg.muted,
-            '&.Mui-focused': {
-              color: palette.blue.main,
             },
           },
         },

@@ -117,6 +117,10 @@ export default function UpdatesPage() {
                 <Typography variant="body2" color="text.secondary">
                   Build SHA: {status.current.buildSha ? status.current.buildSha.slice(0, 7) : 'n/a'}
                 </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Semantic version is sourced from package metadata; the commit hash is build
+                  metadata only.
+                </Typography>
               </Stack>
             </CardContent>
           </Card>
@@ -134,6 +138,9 @@ export default function UpdatesPage() {
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
                   Source: {status.sourceRepo}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Falls back to the newest Git tag when no GitHub Release exists.
                 </Typography>
                 {latestPublished ? (
                   <Typography variant="body2" color="text.secondary">
@@ -158,6 +165,12 @@ export default function UpdatesPage() {
               Use <strong>pnpm devholm sync:check --against template/main</strong> before pulling
               framework updates. If your repository uses an upstream remote name, use{' '}
               <strong>--against upstream/main</strong>.
+            </Typography>
+
+            <Typography color="text.secondary">
+              Conventional commits do not bump versions by themselves. The semver number advances
+              when <strong>pnpm release</strong> runs <strong>release-it</strong> and creates the
+              next tag.
             </Typography>
 
             <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>

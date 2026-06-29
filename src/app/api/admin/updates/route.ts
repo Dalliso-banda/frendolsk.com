@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  const sourceRepo = process.env.DEVHOLM_TEMPLATE_REPO || 'devholm/devholm.com';
+  const sourceRepo = process.env.DEVHOLM_TEMPLATE_REPO || 'chrishacia/devholm';
   const status = await getUpdateStatus(sourceRepo);
 
   return NextResponse.json({ data: status }, { headers: rateLimitHeaders(rateLimit) });
