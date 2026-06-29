@@ -1,8 +1,9 @@
 import type { Metadata } from 'next';
 import ResumeView from '@core/views/resume/ResumeView';
-import { siteConfig } from '@/config';
 import { getFullResume } from '@/db/resume';
 import { fetchSiteSettings } from '@/lib/fetchSiteSettings';
+import SeoExtensionJsonLd from '@/components/seo/SeoExtensionJsonLd';
+import { buildExtendedPageMetadata, getSeoSiteSettings } from '@/lib/seo/metadata';
 import { readdir } from 'fs/promises';
 import path from 'path';
 
@@ -12,58 +13,70 @@ async function getResumeFileInfo(): Promise<{ url: string; filename: string } | 
     const files = await readdir(resumeDir);
     const resumeFile = files.find((f) => f.startsWith('resume.'));
     if (resumeFile) return { url: `/uploads/resume/${resumeFile}`, filename: resumeFile };
-  } catch { /* directory doesn't exist */ }
+  } catch {
+    /* directory doesn't exist */
+  }
   return null;
+}
+
+function toIsoString(value: Date | string | null | undefined): string | null {
+  if (!value) return null;
+  return value instanceof Date ? value.toISOString() : new Date(value).toISOString();
+}
+
+function toRequiredIsoString(value: Date | string): string {
+  return value instanceof Date ? value.toISOString() : new Date(value).toISOString();
 }
 
 export const dynamic = 'force-dynamic';
 
-export const metadata: Metadata = {
-  title: 'Resume',
-  description:
-    'Professional resume - Full Stack Developer with experience in React, Next.js, TypeScript, Node.js, and more.',
-  openGraph: {
-    title: `Resume | ${siteConfig.name}`,
-    description: 'Professional resume and work experience.',
-    url: `${siteConfig.url}/resume`,
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: `Resume | ${siteConfig.name}`,
-    description: 'Professional resume and work experience.',
-  },
-  alternates: {
-    canonical: `${siteConfig.url}/resume`,
-  },
-  robots: {
-    index: true,
-    follow: true,
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getSeoSiteSettings();
+  return buildExtendedPageMetadata(settings, {
+    title: 'Resume',
+    description:
+      'Professional resume - Full Stack Developer with experience in React, Next.js, TypeScript, Node.js, and more.',
+    path: '/resume',
+    robots: {
+      index: true,
+      follow: true,
+    },
+  });
+}
 
 export default async function ResumePage() {
   const [resumeData, settings, resumeFile] = await Promise.all([
-    getFullResume().catch(() => ({ skills: {} as Record<string, never>, experiences: [], education: [], certifications: [] })),
+    getFullResume().catch(() => ({
+      skills: {} as Record<string, never>,
+      experiences: [],
+      education: [],
+      certifications: [],
+    })),
     fetchSiteSettings(),
     getResumeFileInfo().catch(() => null),
   ]);
 
   // Serialize Date objects to strings for the client component
   const serializedResume = {
-    skills: resumeData.skills,
-    experiences: resumeData.experiences.map((exp) => ({
+    skills: resumeData.skills ?? {},
+    experiences: (resumeData.experiences ?? []).map((exp) => ({
       ...exp,
-      start_date: exp.start_date.toISOString(),
-      end_date: exp.end_date ? exp.end_date.toISOString() : null,
+      start_date: toRequiredIsoString(exp.start_date),
+      end_date: toIsoString(exp.end_date),
     })),
-    education: resumeData.education.map((edu) => ({
+    education: (resumeData.education ?? []).map((edu) => ({
       ...edu,
-      start_date: edu.start_date ? edu.start_date.toISOString() : null,
-      end_date: edu.end_date ? edu.end_date.toISOString() : null,
+      start_date: toIsoString(edu.start_date),
+      end_date: toIsoString(edu.end_date),
     })),
-    certifications: resumeData.certifications,
+    certifications: resumeData.certifications ?? [],
     resumeFile,
   };
 
-  return <ResumeView resume={serializedResume} settings={settings} />;
+  return (
+    <>
+      <SeoExtensionJsonLd path="/resume" />
+      <ResumeView resume={serializedResume} settings={settings} />
+    </>
+  );
 }
