@@ -1,0 +1,8 @@
+# Intentional downstream drift (tracked and reviewed)
+
+# Local sync policy configuration directory
+.devholm/**
+
+# Release automation artifacts can differ per downstream repository
+package.json
+CHANGELOG.md
