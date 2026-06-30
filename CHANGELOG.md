@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [4.3.0](https://github.com///compare/v4.2.0...v4.3.0) (2026-06-30)
+
+### Features
+
+- **admin:** add DB-backed PAT setup for update automation ([dc4d2e3](https://github.com///commit/dc4d2e387fa8f52449710892477dda6593832598))
+
 ## [4.2.0](https://github.com///compare/v4.1.0...v4.2.0) (2026-06-30)
 
 ### Features
