@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [4.0.3](https://github.com///compare/v4.0.2...v4.0.3) (2026-06-30)
+
+### Bug Fixes
+
+- **admin:** surface framework version in deploy + footer ([ef5037f](https://github.com///commit/ef5037f68f21a3e1412034ea3664a1ed9b5bbdaf))
+
 ## [4.0.2](https://github.com///compare/v4.0.1...v4.0.2) (2026-06-30)
 
 ### Bug Fixes
