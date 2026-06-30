@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [4.3.1](https://github.com///compare/v4.3.0...v4.3.1) (2026-06-30)
+
+### Code Refactoring
+
+- **admin:** improve updates UI messaging and token UX ([f6a36d7](https://github.com///commit/f6a36d726e5a82848ad211acf3f75d0312fb4f9a))
+
 ## [4.3.0](https://github.com///compare/v4.2.0...v4.3.0) (2026-06-30)
 
 ### Features
