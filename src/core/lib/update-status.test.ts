@@ -129,10 +129,16 @@ describe('update-status', () => {
   });
 
   it('returns a clear warning when repo metadata is unavailable without a token', async () => {
+    vi.stubEnv('DEVHOLM_TEMPLATE_GITHUB_TOKEN', '');
+    vi.stubEnv('GITHUB_TOKEN', '');
+    vi.stubEnv('GH_TOKEN', '');
+
     const fakeFetch = vi.fn().mockResolvedValue({ ok: false });
 
     const status = await getUpdateStatus('chrishacia/devholm', fakeFetch);
 
     expect(status.warning).toContain('DEVHOLM_TEMPLATE_GITHUB_TOKEN');
+
+    vi.unstubAllEnvs();
   });
 });
