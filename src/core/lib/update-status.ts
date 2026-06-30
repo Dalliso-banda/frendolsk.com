@@ -22,7 +22,12 @@ export interface UpdateStatus {
 
 type FetchLike = (input: string, init?: RequestInit) => Promise<Response>;
 
-function getGithubApiToken(): string {
+function getGithubApiToken(explicitToken?: string | null): string {
+  const explicit = (explicitToken || '').trim();
+  if (explicit) {
+    return explicit;
+  }
+
   return (
     process.env.DEVHOLM_TEMPLATE_GITHUB_TOKEN ||
     process.env.GITHUB_TOKEN ||
@@ -31,8 +36,8 @@ function getGithubApiToken(): string {
   ).trim();
 }
 
-function buildGithubHeaders(): HeadersInit {
-  const token = getGithubApiToken();
+function buildGithubHeaders(explicitToken?: string | null): HeadersInit {
+  const token = getGithubApiToken(explicitToken);
 
   return {
     Accept: 'application/vnd.github+json',
@@ -85,11 +90,12 @@ export function getCurrentBuildInfo(): BuildInfo {
 
 export async function fetchLatestRelease(
   repo: string,
-  fetchImpl: FetchLike = fetch
+  fetchImpl: FetchLike = fetch,
+  explicitToken?: string | null
 ): Promise<LatestReleaseInfo | null> {
   const endpoint = `https://api.github.com/repos/${repo}/releases/latest`;
   const response = await fetchImpl(endpoint, {
-    headers: buildGithubHeaders(),
+    headers: buildGithubHeaders(explicitToken),
     cache: 'no-store',
   });
 
@@ -119,11 +125,12 @@ export async function fetchLatestRelease(
 
 export async function fetchLatestTag(
   repo: string,
-  fetchImpl: FetchLike = fetch
+  fetchImpl: FetchLike = fetch,
+  explicitToken?: string | null
 ): Promise<LatestReleaseInfo | null> {
   const endpoint = `https://api.github.com/repos/${repo}/tags?per_page=1`;
   const response = await fetchImpl(endpoint, {
-    headers: buildGithubHeaders(),
+    headers: buildGithubHeaders(explicitToken),
     cache: 'no-store',
   });
 
@@ -151,16 +158,17 @@ export async function fetchLatestTag(
 
 export async function getUpdateStatus(
   sourceRepo: string,
-  fetchImpl: FetchLike = fetch
+  fetchImpl: FetchLike = fetch,
+  explicitToken?: string | null
 ): Promise<UpdateStatus> {
   const current = getCurrentBuildInfo();
-  const hasGithubToken = Boolean(getGithubApiToken());
+  const hasGithubToken = Boolean(getGithubApiToken(explicitToken));
   const hasExplicitFrameworkVersion = current.version !== 'unknown';
 
   try {
     const latest =
-      (await fetchLatestRelease(sourceRepo, fetchImpl)) ??
-      (await fetchLatestTag(sourceRepo, fetchImpl));
+      (await fetchLatestRelease(sourceRepo, fetchImpl, explicitToken)) ??
+      (await fetchLatestTag(sourceRepo, fetchImpl, explicitToken));
 
     const warnings: string[] = [];
     if (!hasExplicitFrameworkVersion) {

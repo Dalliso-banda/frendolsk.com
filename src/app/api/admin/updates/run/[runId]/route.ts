@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { checkRateLimit, getClientIp, rateLimitHeaders, RateLimits } from '@/lib/rate-limiter';
 import { verifyAdmin } from '@/lib/auth-helpers';
 import { fetchWorkflowJobs, fetchWorkflowRun } from '@/lib/github-actions';
+import { getGithubUpdatesTokenFromDb } from '@/lib/github-updates-config';
 
 function getSiteRepo(): string {
   return (process.env.DEVHOLM_SITE_REPO || process.env.GITHUB_REPOSITORY || '').trim();
@@ -48,7 +49,9 @@ export async function GET(
     );
   }
 
-  const run = await fetchWorkflowRun(siteRepo, runId);
+  const dbToken = await getGithubUpdatesTokenFromDb();
+
+  const run = await fetchWorkflowRun(siteRepo, runId, fetch, dbToken);
 
   if (!run) {
     return NextResponse.json(
@@ -57,7 +60,7 @@ export async function GET(
     );
   }
 
-  const jobs = await fetchWorkflowJobs(siteRepo, runId);
+  const jobs = await fetchWorkflowJobs(siteRepo, runId, fetch, dbToken);
   const activeJob = jobs.find((job) => job.status === 'in_progress');
   const failedJob = jobs.find((job) => job.conclusion === 'failure');
 

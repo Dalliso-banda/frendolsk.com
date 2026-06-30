@@ -9,8 +9,13 @@ import {
   CardContent,
   Chip,
   CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   Grid2 as Grid,
   Stack,
+  TextField,
   Typography,
 } from '@mui/material';
 import { OpenInNew, Sync } from '@mui/icons-material';
@@ -39,6 +44,11 @@ type UpdateStatus = {
     repoPrivate: boolean | null;
     canTriggerUpdate: boolean;
     warning?: string;
+    token?: {
+      tokenConfigured: boolean;
+      tokenHint: string | null;
+      tokenUpdatedAt: string | null;
+    };
   };
 };
 
@@ -74,6 +84,10 @@ export default function UpdatesPage() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [triggering, setTriggering] = useState(false);
+  const [savingToken, setSavingToken] = useState(false);
+  const [patModalOpen, setPatModalOpen] = useState(false);
+  const [confirmUpdateOpen, setConfirmUpdateOpen] = useState(false);
+  const [patValue, setPatValue] = useState('');
   const [runStatus, setRunStatus] = useState<WorkflowRunStatus | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [status, setStatus] = useState<UpdateStatus | null>(null);
@@ -127,6 +141,7 @@ export default function UpdatesPage() {
   }, [runStatus]);
 
   const triggerUpdate = async () => {
+    setConfirmUpdateOpen(false);
     setTriggering(true);
     setError(null);
 
@@ -157,6 +172,39 @@ export default function UpdatesPage() {
       setError(err instanceof Error ? err.message : 'Failed to trigger update workflow');
     } finally {
       setTriggering(false);
+    }
+  };
+
+  const savePat = async () => {
+    if (!patValue.trim()) {
+      setError('Please paste a GitHub token first.');
+      return;
+    }
+
+    setSavingToken(true);
+    setError(null);
+
+    try {
+      const response = await fetch('/api/admin/updates/token', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ token: patValue.trim() }),
+      });
+
+      if (!response.ok) {
+        const payload = (await response.json().catch(() => null)) as { error?: string } | null;
+        throw new Error(payload?.error || 'Failed to save GitHub token');
+      }
+
+      setPatModalOpen(false);
+      setPatValue('');
+      await fetchStatus();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to save GitHub token');
+    } finally {
+      setSavingToken(false);
     }
   };
 
@@ -196,15 +244,20 @@ export default function UpdatesPage() {
           Updates
         </Typography>
         {status.latest?.url ? (
-          <Button
-            variant="outlined"
-            href={status.latest.url}
-            target="_blank"
-            rel="noreferrer"
-            startIcon={<OpenInNew />}
-          >
-            Latest Version Notes
-          </Button>
+          <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+            <Button variant="outlined" onClick={() => setPatModalOpen(true)}>
+              {status.automation?.token?.tokenConfigured ? 'Change GitHub PAT' : 'Set GitHub PAT'}
+            </Button>
+            <Button
+              variant="outlined"
+              href={status.latest.url}
+              target="_blank"
+              rel="noreferrer"
+              startIcon={<OpenInNew />}
+            >
+              Latest Version Notes
+            </Button>
+          </Box>
         ) : null}
       </Box>
 
@@ -218,6 +271,10 @@ export default function UpdatesPage() {
           your plan.
         </Alert>
       ) : null}
+      <Alert severity={status.automation?.token?.tokenConfigured ? 'success' : 'info'}>
+        GitHub PAT: {status.automation?.token?.tokenConfigured ? 'Configured' : 'Not configured'}
+        {status.automation?.token?.tokenHint ? ` (${status.automation.token.tokenHint})` : ''}
+      </Alert>
 
       {runStatus ? (
         <Alert severity={runStatus.run.conclusion === 'failure' ? 'error' : 'info'}>
@@ -328,7 +385,7 @@ export default function UpdatesPage() {
                     <Button
                       size="small"
                       variant="contained"
-                      onClick={triggerUpdate}
+                      onClick={() => setConfirmUpdateOpen(true)}
                       disabled={triggering || !status.automation?.canTriggerUpdate}
                     >
                       {triggering ? 'Starting...' : 'Run Update'}
@@ -340,6 +397,73 @@ export default function UpdatesPage() {
           </Card>
         </Grid>
       </Grid>
+
+      <Dialog open={patModalOpen} onClose={() => setPatModalOpen(false)} fullWidth maxWidth="sm">
+        <DialogTitle>
+          {status.automation?.token?.tokenConfigured ? 'Change GitHub PAT' : 'Set GitHub PAT'}
+        </DialogTitle>
+        <DialogContent>
+          <Stack spacing={2} sx={{ pt: 1 }}>
+            <Typography variant="body2" color="text.secondary">
+              Use a GitHub Personal Access Token with repository access (read contents) and Actions
+              permissions (read + write) for the site repository.
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              For public repos this may be low/no cost; private repos can consume Actions minutes.
+            </Typography>
+            <TextField
+              label="GitHub Personal Access Token"
+              type="password"
+              value={patValue}
+              onChange={(e) => setPatValue(e.target.value)}
+              fullWidth
+              autoComplete="off"
+              placeholder="ghp_..."
+            />
+            <Typography variant="caption" color="text.secondary">
+              Token values are encrypted at rest and never shown again after saving.
+            </Typography>
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setPatModalOpen(false)} disabled={savingToken}>
+            Cancel
+          </Button>
+          <Button variant="contained" onClick={savePat} disabled={savingToken || !patValue.trim()}>
+            {savingToken ? 'Saving...' : 'Save Token'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog
+        open={confirmUpdateOpen}
+        onClose={() => setConfirmUpdateOpen(false)}
+        fullWidth
+        maxWidth="sm"
+      >
+        <DialogTitle>Run Framework Update</DialogTitle>
+        <DialogContent>
+          <Stack spacing={1.5} sx={{ pt: 1 }}>
+            <Typography variant="body2" color="text.secondary">
+              This will trigger your repository workflow to check, build, and deploy updates.
+            </Typography>
+            {status.automation?.repoPrivate ? (
+              <Alert severity="info">
+                This repository is private. Running this action may consume billable GitHub Actions
+                minutes.
+              </Alert>
+            ) : null}
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setConfirmUpdateOpen(false)} disabled={triggering}>
+            Cancel
+          </Button>
+          <Button variant="contained" onClick={triggerUpdate} disabled={triggering}>
+            {triggering ? 'Starting...' : 'Confirm & Run'}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Stack>
   );
 }
