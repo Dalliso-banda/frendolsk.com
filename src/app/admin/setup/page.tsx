@@ -20,7 +20,7 @@ import {
   FormControlLabel,
   Paper,
 } from '@mui/material';
-import { RocketLaunch, Security, SettingsSuggest, VerifiedUser } from '@mui/icons-material';
+import { RocketLaunch, SettingsSuggest, VerifiedUser } from '@mui/icons-material';
 import { useRouter } from 'next/navigation';
 
 interface WizardProvider {

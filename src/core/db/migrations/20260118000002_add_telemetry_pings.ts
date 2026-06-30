@@ -7,12 +7,10 @@
  * newer installs continue to use the user-layer migration implementation.
  */
 
-import type { Knex } from 'knex';
-
-export async function up(_knex: Knex): Promise<void> {
+export async function up(): Promise<void> {
   // Intentionally empty.
 }
 
-export async function down(_knex: Knex): Promise<void> {
+export async function down(): Promise<void> {
   // Intentionally empty.
 }
