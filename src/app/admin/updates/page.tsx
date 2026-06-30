@@ -109,17 +109,16 @@ export default function UpdatesPage() {
             <CardContent>
               <Stack spacing={1.5}>
                 <Typography variant="overline" color="text.secondary">
-                  Current Build
+                  Current DevHolm Version
                 </Typography>
                 <Typography variant="h5" fontWeight={700}>
-                  v{status.current.version}
+                  {status.current.version === 'unknown' ? 'Unknown' : `v${status.current.version}`}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
                   Build SHA: {status.current.buildSha ? status.current.buildSha.slice(0, 7) : 'n/a'}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  Semantic version is sourced from package metadata; the commit hash is build
-                  metadata only.
+                  This value is sourced only from DEVHOLM_FRAMEWORK_VERSION.
                 </Typography>
               </Stack>
             </CardContent>

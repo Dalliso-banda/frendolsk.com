@@ -73,13 +73,12 @@ export function compareVersions(a: string, b: string): number {
 }
 
 export function getCurrentBuildInfo(): BuildInfo {
+  const configuredFrameworkVersion = (process.env.DEVHOLM_FRAMEWORK_VERSION || '').trim();
   const buildSha =
     process.env.GITHUB_SHA || process.env.COMMIT_SHA || process.env.NEXT_PUBLIC_BUILD_SHA || '';
 
   return {
-    version: normalizeVersion(
-      process.env.NEXT_PUBLIC_APP_VERSION || process.env.npm_package_version
-    ),
+    version: configuredFrameworkVersion ? normalizeVersion(configuredFrameworkVersion) : 'unknown',
     buildSha,
   };
 }
@@ -156,24 +155,36 @@ export async function getUpdateStatus(
 ): Promise<UpdateStatus> {
   const current = getCurrentBuildInfo();
   const hasGithubToken = Boolean(getGithubApiToken());
+  const hasExplicitFrameworkVersion = current.version !== 'unknown';
 
   try {
     const latest =
       (await fetchLatestRelease(sourceRepo, fetchImpl)) ??
       (await fetchLatestTag(sourceRepo, fetchImpl));
 
+    const warnings: string[] = [];
+    if (!hasExplicitFrameworkVersion) {
+      warnings.push(
+        'Current DevHolm framework version is unknown. Set DEVHOLM_FRAMEWORK_VERSION in your deployment environment to compare the installed framework version against upstream.'
+      );
+    }
+    if (!latest) {
+      warnings.push(
+        hasGithubToken
+          ? 'Unable to determine latest release or tag metadata for source repository.'
+          : 'Source repository metadata is unavailable. If the template repo is private, configure DEVHOLM_TEMPLATE_GITHUB_TOKEN for the deployed app to read releases and tags.'
+      );
+    }
+
     return {
       sourceRepo,
       current,
       latest,
-      updateAvailable: latest ? compareVersions(current.version, latest.version) < 0 : null,
-      ...(latest
-        ? {}
-        : {
-            warning: hasGithubToken
-              ? 'Unable to determine latest release or tag metadata for source repository.'
-              : 'Source repository metadata is unavailable. If the template repo is private, configure DEVHOLM_TEMPLATE_GITHUB_TOKEN for the deployed app to read releases and tags.',
-          }),
+      updateAvailable:
+        latest && hasExplicitFrameworkVersion
+          ? compareVersions(current.version, latest.version) < 0
+          : null,
+      warning: warnings.length > 0 ? warnings.join(' ') : undefined,
     };
   } catch (error) {
     return {

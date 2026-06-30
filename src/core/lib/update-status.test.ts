@@ -90,7 +90,7 @@ describe('update-status', () => {
   });
 
   it('computes update availability from current and latest versions', async () => {
-    vi.stubEnv('NEXT_PUBLIC_APP_VERSION', '2.0.0');
+    vi.stubEnv('DEVHOLM_FRAMEWORK_VERSION', '2.0.0');
     const fakeFetch = vi.fn().mockResolvedValue({
       ok: true,
       json: async () => ({
@@ -104,12 +104,57 @@ describe('update-status', () => {
     const status = await getUpdateStatus('devholm/devholm.com', fakeFetch);
     expect(status.updateAvailable).toBe(true);
     expect(status.latest?.version).toBe('2.1.0');
+    expect(status.current.version).toBe('2.0.0');
+
+    vi.unstubAllEnvs();
+  });
+
+  it('returns unknown and null availability when framework version is unset', async () => {
+    vi.stubEnv('DEVHOLM_FRAMEWORK_VERSION', '');
+
+    const fakeFetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        tag_name: 'v3.1.1',
+        name: 'DevHolm 3.1.1',
+        html_url: 'https://example.com/release',
+        published_at: '2026-06-10T00:00:00.000Z',
+      }),
+    });
+
+    const status = await getUpdateStatus('chrishacia/devholm', fakeFetch);
+
+    expect(status.current.version).toBe('unknown');
+    expect(status.updateAvailable).toBeNull();
+    expect(status.warning).toContain('DEVHOLM_FRAMEWORK_VERSION');
+
+    vi.unstubAllEnvs();
+  });
+
+  it('uses explicit framework version when configured', async () => {
+    vi.stubEnv('DEVHOLM_FRAMEWORK_VERSION', '3.1.0');
+
+    const fakeFetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        tag_name: 'v3.1.1',
+        name: 'DevHolm 3.1.1',
+        html_url: 'https://example.com/release',
+        published_at: '2026-06-10T00:00:00.000Z',
+      }),
+    });
+
+    const status = await getUpdateStatus('chrishacia/devholm', fakeFetch);
+
+    expect(status.current.version).toBe('3.1.0');
+    expect(status.updateAvailable).toBe(true);
+    expect(status.warning).toBeUndefined();
 
     vi.unstubAllEnvs();
   });
 
   it('falls back to tag metadata when releases are unavailable', async () => {
-    vi.stubEnv('NEXT_PUBLIC_APP_VERSION', '2.0.0+abc1234');
+    vi.stubEnv('DEVHOLM_FRAMEWORK_VERSION', '2.0.0+abc1234');
 
     const fakeFetch = vi
       .fn()
