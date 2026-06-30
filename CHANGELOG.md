@@ -2,6 +2,8 @@
 
 All notable changes to this project will be documented in this file.
 
+## [4.3.2](https://github.com///compare/v4.3.1...v4.3.2) (2026-06-30)
+
 ## [4.3.1](https://github.com///compare/v4.3.0...v4.3.1) (2026-06-30)
 
 ### Code Refactoring
