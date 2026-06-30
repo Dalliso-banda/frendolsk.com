@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.0.1](https://github.com/chrishacia/devholm/compare/v3.0.0...v3.0.1) (2026-06-30)
+
+### Bug Fixes
+
+- **ci:** deploy release commits automatically ([ff147a4](https://github.com/chrishacia/devholm/commit/ff147a48f6a9bcf2a289996b365358ae6c383470))
+- **ci:** serialize production deploy jobs ([7e7a79e](https://github.com/chrishacia/devholm/commit/7e7a79e5824fae6cc2d0c9fb0d15b6f19a992e28))
+
 ## 3.0.0 (2026-06-30)
 
 ### ⚠ BREAKING CHANGES
