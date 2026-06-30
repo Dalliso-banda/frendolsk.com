@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [4.1.0](https://github.com///compare/v4.0.3...v4.1.0) (2026-06-30)
+
+### Features
+
+- **admin:** simplify updates dashboard UX ([1d8a7a0](https://github.com///commit/1d8a7a0ffaf46ff35e7d0bf3ac03a794075cfedf))
+
 ## [4.0.3](https://github.com///compare/v4.0.2...v4.0.3) (2026-06-30)
 
 ### Bug Fixes
