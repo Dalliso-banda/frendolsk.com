@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.1.1](https://github.com/chrishacia/devholm/compare/v3.1.0...v3.1.1) (2026-06-30)
+
+### Bug Fixes
+
+- **cms:** avoid function sx in catch-all pages ([d436927](https://github.com/chrishacia/devholm/commit/d436927d5fc7e427fee793096504277249d73179))
+
 ## [3.1.0](https://github.com/chrishacia/devholm/compare/v3.0.1...v3.1.0) (2026-06-30)
 
 ### Features
