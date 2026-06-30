@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [4.0.2](https://github.com///compare/v4.0.1...v4.0.2) (2026-06-30)
+
+### Bug Fixes
+
+- **ci:** allow release artifacts in sync policy ([b53e197](https://github.com///commit/b53e197870a45ad08ba1012f0480b2308b76855b))
+
 ## [4.0.1](https://github.com///compare/v4.0.0...v4.0.1) (2026-06-30)
 
 ### Bug Fixes
