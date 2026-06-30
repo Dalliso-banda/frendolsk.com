@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [4.0.1](https://github.com///compare/v4.0.0...v4.0.1) (2026-06-30)
+
+### Bug Fixes
+
+- **updates:** compare explicit framework version only ([668d791](https://github.com///commit/668d7917fda6d12d0b55092d9d0a29401b9f89e1))
+
 ## 4.0.0 (2026-06-30)
 
 ### ⚠ BREAKING CHANGES
