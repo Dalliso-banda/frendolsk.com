@@ -8,6 +8,11 @@ import {
   fetchLatestDispatchedRun,
   hasGithubApiToken,
 } from '@/lib/github-actions';
+import {
+  getGithubUpdatesConfig,
+  getGithubUpdatesTokenFromDb,
+  toPublicGithubUpdatesConfig,
+} from '@/lib/github-updates-config';
 
 function getTemplateRepo(): string {
   return process.env.DEVHOLM_TEMPLATE_REPO || 'chrishacia/devholm';
@@ -49,11 +54,15 @@ export async function GET(request: NextRequest) {
   const siteRepo = getSiteRepo();
   const workflowFile = getUpdateWorkflowFile();
   const workflowRef = getUpdateWorkflowRef();
-  const status = await getUpdateStatus(sourceRepo);
-  const siteRepoInfo = siteRepo ? await fetchGithubRepoInfo(siteRepo) : null;
+  const tokenConfig = await getGithubUpdatesConfig();
+  const dbToken = await getGithubUpdatesTokenFromDb();
+  const tokenForGithub = dbToken;
 
-  const canTriggerUpdate = Boolean(siteRepoInfo && hasGithubApiToken());
-  const capabilityWarning = !hasGithubApiToken()
+  const status = await getUpdateStatus(sourceRepo, fetch, tokenForGithub);
+  const siteRepoInfo = siteRepo ? await fetchGithubRepoInfo(siteRepo, fetch, tokenForGithub) : null;
+
+  const canTriggerUpdate = Boolean(siteRepoInfo && hasGithubApiToken(tokenForGithub));
+  const capabilityWarning = !hasGithubApiToken(tokenForGithub)
     ? 'GitHub API token is not configured for update actions.'
     : !siteRepo
       ? 'Site repository is not configured (set DEVHOLM_SITE_REPO to enable one-click updates).'
@@ -72,6 +81,7 @@ export async function GET(request: NextRequest) {
           repoPrivate: siteRepoInfo?.isPrivate ?? null,
           canTriggerUpdate,
           warning: capabilityWarning,
+          token: toPublicGithubUpdatesConfig(tokenConfig),
         },
       },
     },
@@ -102,6 +112,7 @@ export async function POST(request: NextRequest) {
   const siteRepo = getSiteRepo();
   const workflowFile = getUpdateWorkflowFile();
   const workflowRef = getUpdateWorkflowRef();
+  const dbToken = await getGithubUpdatesTokenFromDb();
 
   if (!siteRepo) {
     return NextResponse.json(
@@ -110,14 +121,14 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  if (!hasGithubApiToken()) {
+  if (!hasGithubApiToken(dbToken)) {
     return NextResponse.json(
       { error: 'GitHub API token is not configured for update actions.' },
       { status: 400, headers: rateLimitHeaders(rateLimit) }
     );
   }
 
-  const dispatched = await dispatchWorkflow(siteRepo, workflowFile, workflowRef);
+  const dispatched = await dispatchWorkflow(siteRepo, workflowFile, workflowRef, fetch, dbToken);
 
   if (!dispatched) {
     return NextResponse.json(
@@ -126,7 +137,13 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const latestRun = await fetchLatestDispatchedRun(siteRepo, workflowFile, workflowRef);
+  const latestRun = await fetchLatestDispatchedRun(
+    siteRepo,
+    workflowFile,
+    workflowRef,
+    fetch,
+    dbToken
+  );
 
   return NextResponse.json(
     {
