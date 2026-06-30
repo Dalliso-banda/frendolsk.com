@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import { Box, Dialog, DialogContent, IconButton, Stack, Typography } from '@mui/material';
 import { Close } from '@mui/icons-material';
 
@@ -82,11 +83,15 @@ export default function GalleryClient({ items }: GalleryClientProps) {
                 }}
               >
                 {isImage ? (
-                  <img
+                  <Image
                     src={item.media.publicUrl}
                     alt={item.media.altText || item.title || item.media.filename}
+                    unoptimized
+                    width={1600}
+                    height={900}
+                    sizes="(max-width: 600px) 100vw, (max-width: 900px) 50vw, 33vw"
                     loading="lazy"
-                    style={{ width: '100%', display: 'block' }}
+                    style={{ width: '100%', height: 'auto', display: 'block' }}
                   />
                 ) : isVideo ? (
                   <video
@@ -125,10 +130,14 @@ export default function GalleryClient({ items }: GalleryClientProps) {
 
           {selected?.kind === 'media' && selected.media?.publicUrl ? (
             selected.media.mimeType.startsWith('image/') ? (
-              <img
+              <Image
                 src={selected.media.publicUrl}
                 alt={selected.media.altText || selected.title || selected.media.filename}
-                style={{ width: '100%', display: 'block' }}
+                unoptimized
+                width={1920}
+                height={1080}
+                sizes="100vw"
+                style={{ width: '100%', height: 'auto', display: 'block' }}
               />
             ) : (
               <video

@@ -68,9 +68,7 @@ function getDefaultImage(settings: SiteSettings) {
 function normalizeImages(
   settings: SiteSettings,
   images?: PageMetadataInput['images']
-): Metadata['openGraph'] extends infer _T
-  ? Array<string | URL | { url: string | URL; width?: number; height?: number; alt?: string }>
-  : never {
+): Array<string | URL | { url: string | URL; width?: number; height?: number; alt?: string }> {
   const source = images && images.length > 0 ? images : [getDefaultImage(settings)];
   return source.map((image) => {
     if (typeof image === 'string') {
