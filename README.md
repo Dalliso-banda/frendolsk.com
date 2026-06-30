@@ -7,7 +7,7 @@
 [![Material UI](https://img.shields.io/badge/Material%20UI-6-007FFF?logo=mui&logoColor=white)](https://mui.com/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?logo=postgresql&logoColor=white)](https://www.postgresql.org/)
 [![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?logo=docker&logoColor=white)](https://www.docker.com/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![License: MPL 2.0](https://img.shields.io/badge/License-MPL%202.0-orange.svg)](LICENSE)
 
 A modern **personal website framework** built with **Next.js 15**, **React 19**, **TypeScript**, **Material UI**, and **PostgreSQL**. DevHolm uses a layered architecture that separates the framework engine from your personalizations — making upgrades safe and non-destructive.
 
@@ -481,7 +481,9 @@ Contributions are welcome! Please:
 
 ## 📄 License
 
-This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details.
+This project is licensed under the **Mozilla Public License 2.0 (MPL-2.0)** — see the [LICENSE](LICENSE) file for details.
+
+Third-party dependency notices are listed in [THIRD_PARTY_LICENSES.md](THIRD_PARTY_LICENSES.md).
 
 ---
 

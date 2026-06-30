@@ -3,7 +3,7 @@
   "version": "4.3.1",
   "description": "A modern, feature-rich personal website template built with Next.js 15, React 19, TypeScript, and Material UI",
   "author": "DevHolm",
-  "license": "MIT",
+  "license": "MPL-2.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/chrishacia/devholm"
