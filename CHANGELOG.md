@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [4.2.0](https://github.com///compare/v4.1.0...v4.2.0) (2026-06-30)
+
+### Features
+
+- **admin:** add one-click update trigger and run monitor ([d4e946d](https://github.com///commit/d4e946dd73843091bde6f207bb0152a42f9d6097))
+
 ## [4.1.0](https://github.com///compare/v4.0.3...v4.1.0) (2026-06-30)
 
 ### Features
