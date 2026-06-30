@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.4.0](https://github.com/chrishacia/devholm/compare/v3.3.0...v3.4.0) (2026-06-30)
+
+### Features
+
+- **admin:** add DB-backed PAT setup for update automation ([dc4d2e3](https://github.com/chrishacia/devholm/commit/dc4d2e387fa8f52449710892477dda6593832598))
+
 ## [3.3.0](https://github.com/chrishacia/devholm/compare/v3.2.0...v3.3.0) (2026-06-30)
 
 ### Features
