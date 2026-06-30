@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.1.2](https://github.com/chrishacia/devholm/compare/v3.1.1...v3.1.2) (2026-06-30)
+
+### Bug Fixes
+
+- **updates:** compare explicit framework version only ([668d791](https://github.com/chrishacia/devholm/commit/668d7917fda6d12d0b55092d9d0a29401b9f89e1))
+
 ## [3.1.1](https://github.com/chrishacia/devholm/compare/v3.1.0...v3.1.1) (2026-06-30)
 
 ### Bug Fixes
