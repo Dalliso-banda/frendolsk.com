@@ -95,7 +95,9 @@ export default async function CatchAllPage({ params }: Props) {
             '& p': { mb: 2, lineHeight: 1.8 },
             '& ul, & ol': { pl: 3, mb: 2 },
             '& blockquote': {
-              borderLeft: (theme) => `4px solid ${theme.palette.divider}`,
+              borderLeftWidth: 4,
+              borderLeftStyle: 'solid',
+              borderColor: 'divider',
               pl: 2,
               ml: 0,
               color: 'text.secondary',
