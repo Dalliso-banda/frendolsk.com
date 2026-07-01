@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [4.3.3](https://github.com///compare/v4.3.2...v4.3.3) (2026-07-01)
+
+### Bug Fixes
+
+- **admin:** persist project drag order and image drop upload ([0de35ab](https://github.com///commit/0de35ab87c772af2c68372b18d94a86ae2b78cae))
+
 ## [4.3.2](https://github.com///compare/v4.3.1...v4.3.2) (2026-06-30)
 
 ## [4.3.1](https://github.com///compare/v4.3.0...v4.3.1) (2026-06-30)
