@@ -16,13 +16,7 @@ import {
   alpha,
   useTheme,
 } from '@mui/material';
-import {
-  Search as SearchIcon,
-  AccessTime,
-  Article,
-  TrendingUp,
-  Clear,
-} from '@mui/icons-material';
+import { Search as SearchIcon, AccessTime, Article, TrendingUp, Clear } from '@mui/icons-material';
 import { format } from 'date-fns';
 import Link from '@/components/common/Link';
 
@@ -170,11 +164,7 @@ export default function SearchPageClient() {
               ),
               endAdornment: query && (
                 <InputAdornment position="end">
-                  <Button
-                    size="small"
-                    onClick={handleClear}
-                    sx={{ minWidth: 'auto', p: 0.5 }}
-                  >
+                  <Button size="small" onClick={handleClear} sx={{ minWidth: 'auto', p: 0.5 }}>
                     <Clear />
                   </Button>
                 </InputAdornment>
@@ -235,7 +225,9 @@ export default function SearchPageClient() {
               {total === 0 ? (
                 <>No results found for &quot;{initialQuery}&quot;</>
               ) : (
-                <>Found {total} result{total !== 1 ? 's' : ''} for &quot;{initialQuery}&quot;</>
+                <>
+                  Found {total} result{total !== 1 ? 's' : ''} for &quot;{initialQuery}&quot;
+                </>
               )}
             </Typography>
           </Box>

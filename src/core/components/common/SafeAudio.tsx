@@ -2,10 +2,10 @@
 
 import { useState, useCallback, useRef } from 'react';
 import { Box, IconButton, SxProps, Theme, Typography } from '@mui/material';
-import { 
-  PlayArrow, 
-  Pause, 
-  VolumeUp, 
+import {
+  PlayArrow,
+  Pause,
+  VolumeUp,
   VolumeOff,
   MusicNote,
   ErrorOutline,
@@ -22,12 +22,12 @@ interface SafeAudioProps {
 /**
  * SafeAudio Component
  * ===================
- * 
+ *
  * A wrapper around audio that gracefully handles:
  * - Missing/broken audio files (shows placeholder)
  * - Null/undefined src values
  * - Network errors
- * 
+ *
  * Usage:
  * <SafeAudio src={track.audioUrl} title={track.name} />
  */

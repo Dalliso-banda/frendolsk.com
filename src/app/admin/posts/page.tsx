@@ -84,10 +84,18 @@ function LoadingSkeleton() {
     <TableBody>
       {[1, 2, 3, 4, 5].map((i) => (
         <TableRow key={i}>
-          <TableCell><Skeleton width="80%" /></TableCell>
-          <TableCell><Skeleton width={80} /></TableCell>
-          <TableCell><Skeleton width={100} /></TableCell>
-          <TableCell><Skeleton width={40} /></TableCell>
+          <TableCell>
+            <Skeleton width="80%" />
+          </TableCell>
+          <TableCell>
+            <Skeleton width={80} />
+          </TableCell>
+          <TableCell>
+            <Skeleton width={100} />
+          </TableCell>
+          <TableCell>
+            <Skeleton width={40} />
+          </TableCell>
         </TableRow>
       ))}
     </TableBody>
@@ -180,12 +188,30 @@ export default function PostsListPage() {
   return (
     <Box sx={{ maxWidth: '100%', overflow: 'hidden' }}>
       {/* Header */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: { xs: 2, sm: 4 }, flexWrap: 'wrap', gap: 2 }}>
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'flex-start',
+          mb: { xs: 2, sm: 4 },
+          flexWrap: 'wrap',
+          gap: 2,
+        }}
+      >
         <Box>
-          <Typography variant="h4" fontWeight={700} gutterBottom sx={{ fontSize: { xs: '1.25rem', sm: '1.75rem', md: '2.125rem' } }}>
+          <Typography
+            variant="h4"
+            fontWeight={700}
+            gutterBottom
+            sx={{ fontSize: { xs: '1.25rem', sm: '1.75rem', md: '2.125rem' } }}
+          >
             Blog Posts
           </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}
+          >
             Manage your blog posts and content
           </Typography>
         </Box>
@@ -202,7 +228,15 @@ export default function PostsListPage() {
 
       {/* Filters and Search */}
       <Card sx={{ mb: 3 }}>
-        <Box sx={{ p: { xs: 1.5, sm: 2 }, display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
+        <Box
+          sx={{
+            p: { xs: 1.5, sm: 2 },
+            display: 'flex',
+            gap: 2,
+            alignItems: 'center',
+            flexWrap: 'wrap',
+          }}
+        >
           <TextField
             placeholder="Search posts..."
             value={search}
@@ -267,7 +301,9 @@ export default function PostsListPage() {
                 <TableCell sx={{ maxWidth: { xs: 150, sm: 300 } }}>Title</TableCell>
                 <TableCell>Status</TableCell>
                 <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>Date</TableCell>
-                <TableCell align="right" sx={{ width: 50 }}>Actions</TableCell>
+                <TableCell align="right" sx={{ width: 50 }}>
+                  Actions
+                </TableCell>
               </TableRow>
             </TableHead>
             {loading ? (
@@ -279,7 +315,7 @@ export default function PostsListPage() {
                     key={post.id}
                     hover
                     sx={{ cursor: 'pointer' }}
-                    onClick={() => window.location.href = `/admin/posts/${post.id}/edit`}
+                    onClick={() => (window.location.href = `/admin/posts/${post.id}/edit`)}
                   >
                     <TableCell sx={{ maxWidth: { xs: 150, sm: 250, md: 350 }, overflow: 'hidden' }}>
                       <Box sx={{ overflow: 'hidden' }}>
@@ -304,8 +340,7 @@ export default function PostsListPage() {
                               sx={{
                                 height: 20,
                                 fontSize: '0.7rem',
-                                bgcolor: (theme) =>
-                                  alpha(theme.palette.primary.main, 0.1),
+                                bgcolor: (theme) => alpha(theme.palette.primary.main, 0.1),
                               }}
                             />
                           ))}
@@ -331,15 +366,12 @@ export default function PostsListPage() {
                         {post.status === 'scheduled' && post.publishedAt
                           ? `Scheduled: ${format(new Date(post.publishedAt), 'MMM d, yyyy')}`
                           : post.publishedAt
-                          ? format(new Date(post.publishedAt), 'MMM d, yyyy')
-                          : `Updated: ${format(new Date(post.updatedAt), 'MMM d, yyyy')}`}
+                            ? format(new Date(post.publishedAt), 'MMM d, yyyy')
+                            : `Updated: ${format(new Date(post.updatedAt), 'MMM d, yyyy')}`}
                       </Typography>
                     </TableCell>
                     <TableCell align="right" onClick={(e) => e.stopPropagation()}>
-                      <IconButton
-                        size="small"
-                        onClick={(e) => handleMenuOpen(e, post)}
-                      >
+                      <IconButton size="small" onClick={(e) => handleMenuOpen(e, post)}>
                         <MoreVert />
                       </IconButton>
                     </TableCell>
@@ -348,7 +380,14 @@ export default function PostsListPage() {
                 {posts.length === 0 && (
                   <TableRow>
                     <TableCell colSpan={4} align="center" sx={{ py: 8 }}>
-                      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }}
+                      >
                         <Article sx={{ fontSize: 48, color: 'text.disabled', mb: 2 }} />
                         <Typography variant="h6" color="text.secondary">
                           No posts found
@@ -376,11 +415,7 @@ export default function PostsListPage() {
       </Card>
 
       {/* Actions Menu */}
-      <Menu
-        anchorEl={anchorEl}
-        open={Boolean(anchorEl)}
-        onClose={handleMenuClose}
-      >
+      <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose}>
         <MenuItem
           component={Link}
           href={`/admin/posts/${selectedPost?.id}/edit`}
@@ -407,22 +442,29 @@ export default function PostsListPage() {
       </Menu>
 
       {/* Delete Confirmation Dialog */}
-      <Dialog open={deleteDialogOpen} onClose={() => {
-        setDeleteDialogOpen(false);
-        setSelectedPost(null);
-      }}>
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={() => {
+          setDeleteDialogOpen(false);
+          setSelectedPost(null);
+        }}
+      >
         <DialogTitle>Delete Post</DialogTitle>
         <DialogContent>
           <Typography>
-            Are you sure you want to delete &quot;{selectedPost?.title}&quot;? This action
-            cannot be undone.
+            Are you sure you want to delete &quot;{selectedPost?.title}&quot;? This action cannot be
+            undone.
           </Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => {
-            setDeleteDialogOpen(false);
-            setSelectedPost(null);
-          }}>Cancel</Button>
+          <Button
+            onClick={() => {
+              setDeleteDialogOpen(false);
+              setSelectedPost(null);
+            }}
+          >
+            Cancel
+          </Button>
           <Button onClick={handleDeleteConfirm} color="error" variant="contained">
             Delete
           </Button>

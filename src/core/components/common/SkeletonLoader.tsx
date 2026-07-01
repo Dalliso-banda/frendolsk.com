@@ -1,14 +1,6 @@
 'use client';
 
-import {
-  Box,
-  Container,
-  Skeleton,
-  Card,
-  CardContent,
-  useTheme,
-  alpha,
-} from '@mui/material';
+import { Box, Container, Skeleton, Card, CardContent, useTheme, alpha } from '@mui/material';
 
 interface SkeletonLoaderProps {
   variant?: 'text' | 'card' | 'post' | 'list' | 'page';

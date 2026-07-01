@@ -28,7 +28,12 @@ export async function up(knex: Knex): Promise<void> {
   // Experience highlights (bullet points)
   await knex.schema.createTable('experience_highlights', (table) => {
     table.uuid('id').primary().defaultTo(knex.fn.uuid());
-    table.uuid('experience_id').notNullable().references('id').inTable('experiences').onDelete('CASCADE');
+    table
+      .uuid('experience_id')
+      .notNullable()
+      .references('id')
+      .inTable('experiences')
+      .onDelete('CASCADE');
     table.text('highlight').notNullable();
     table.integer('sort_order').defaultTo(0);
     table.timestamps(true, true);
@@ -37,7 +42,12 @@ export async function up(knex: Knex): Promise<void> {
   // Experience technologies (skills used at this job)
   await knex.schema.createTable('experience_technologies', (table) => {
     table.uuid('id').primary().defaultTo(knex.fn.uuid());
-    table.uuid('experience_id').notNullable().references('id').inTable('experiences').onDelete('CASCADE');
+    table
+      .uuid('experience_id')
+      .notNullable()
+      .references('id')
+      .inTable('experiences')
+      .onDelete('CASCADE');
     table.string('technology').notNullable();
     table.integer('sort_order').defaultTo(0);
     table.timestamps(true, true);

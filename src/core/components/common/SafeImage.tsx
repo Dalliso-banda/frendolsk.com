@@ -18,12 +18,12 @@ interface SafeImageProps {
 /**
  * SafeImage Component
  * ===================
- * 
+ *
  * A wrapper around img that gracefully handles:
  * - Missing/broken images (shows placeholder)
  * - Null/undefined src values
  * - Network errors
- * 
+ *
  * Usage:
  * <SafeImage src={post.coverImage} alt={post.title} />
  */

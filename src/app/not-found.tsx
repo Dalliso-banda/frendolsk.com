@@ -12,7 +12,7 @@ export default function NotFound() {
       <Suspense fallback={null}>
         <AnalyticsTracker statusCode={404} />
       </Suspense>
-      
+
       <Box
         sx={{
           display: 'flex',
@@ -42,21 +42,13 @@ export default function NotFound() {
           404
         </Typography>
 
-        <Typography
-          variant="h4"
-          component="h1"
-          sx={{ mb: 2, fontWeight: 600 }}
-        >
+        <Typography variant="h4" component="h1" sx={{ mb: 2, fontWeight: 600 }}>
           Page Not Found
         </Typography>
 
-        <Typography
-          variant="body1"
-          color="text.secondary"
-          sx={{ mb: 4, maxWidth: 400 }}
-        >
-          The page you&apos;re looking for doesn&apos;t exist or has been moved.
-          Let&apos;s get you back on track.
+        <Typography variant="body1" color="text.secondary" sx={{ mb: 4, maxWidth: 400 }}>
+          The page you&apos;re looking for doesn&apos;t exist or has been moved. Let&apos;s get you
+          back on track.
         </Typography>
 
         <Button

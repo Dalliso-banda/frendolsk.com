@@ -101,7 +101,8 @@ export async function seed(knex: Knex): Promise<void> {
       created_at: new Date(now.getTime() - 4 * oneDay),
       read_at: new Date(now.getTime() - 3 * oneDay),
       ip_address: '104.28.231.45',
-      user_agent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/119.0',
+      user_agent:
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/119.0',
     },
   ];
 

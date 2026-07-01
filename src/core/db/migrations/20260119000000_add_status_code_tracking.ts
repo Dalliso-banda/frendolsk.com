@@ -1,7 +1,7 @@
 /**
  * Add Status Code Tracking
  * ========================
- * 
+ *
  * Adds status_code field to track 404s and other HTTP status codes.
  */
 

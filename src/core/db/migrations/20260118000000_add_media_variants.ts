@@ -7,7 +7,12 @@ export async function up(knex: Knex): Promise<void> {
   // Create media_variants table for storing image variants
   await knex.schema.createTable('media_variants', (table) => {
     table.uuid('id').primary().defaultTo(knex.fn.uuid());
-    table.uuid('media_asset_id').notNullable().references('id').inTable('media_assets').onDelete('CASCADE');
+    table
+      .uuid('media_asset_id')
+      .notNullable()
+      .references('id')
+      .inTable('media_assets')
+      .onDelete('CASCADE');
     table.string('variant_name', 50).notNullable(); // thumbnail, small, medium, large, xlarge
     table.string('filename', 255).notNullable();
     table.string('storage_path', 500).notNullable();

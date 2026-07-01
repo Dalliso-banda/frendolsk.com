@@ -93,16 +93,18 @@ function RightSidebar({ tags, sidebarAboutText }: { tags: TagData[]; sidebarAbou
               No tags yet
             </Typography>
           ) : (
-            tags.slice(0, 8).map((tag) => (
-              <Chip
-                key={tag.id}
-                label={tag.name}
-                size="small"
-                component={Link}
-                href={`/blog/tag/${tag.slug}`}
-                clickable
-              />
-            ))
+            tags
+              .slice(0, 8)
+              .map((tag) => (
+                <Chip
+                  key={tag.id}
+                  label={tag.name}
+                  size="small"
+                  component={Link}
+                  href={`/blog/tag/${tag.slug}`}
+                  clickable
+                />
+              ))
           )}
         </Box>
       </SidebarWidget>
@@ -267,9 +269,7 @@ export default function HomeView({ settings, initialPosts, initialTags, content 
                     >
                       {post.excerpt}
                     </Typography>
-                    <Box
-                      sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}
-                    >
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
                       {post.tags.slice(0, 3).map((tag) => (
                         <Chip key={tag.id} label={tag.name} size="small" variant="outlined" />
                       ))}

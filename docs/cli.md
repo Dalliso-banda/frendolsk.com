@@ -37,6 +37,7 @@ pnpm devholm new:extension analytics-pro
 ```
 
 Creates:
+
 - `src/user/extensions/admin/analytics-pro/AnalyticsProDashboard.tsx`
 
 Prints instructions for creating the route and registering in `devholm.config.ts`.
@@ -52,6 +53,7 @@ pnpm devholm new:migration add_subscribers_table
 ```
 
 Creates:
+
 - `src/user/extensions/db/migrations/u_<timestamp>_add_subscribers_table.ts`
 
 ---

@@ -159,10 +159,12 @@ export function CodeBlock({ code, language, showLineNumbers = true }: CodeBlockP
  * This function parses markdown content and extracts code blocks,
  * returning an array of elements (strings for regular content, CodeBlock for code)
  */
-export function parseCodeBlocks(content: string): Array<{ type: 'text' | 'code'; content: string; language?: string }> {
+export function parseCodeBlocks(
+  content: string
+): Array<{ type: 'text' | 'code'; content: string; language?: string }> {
   const parts: Array<{ type: 'text' | 'code'; content: string; language?: string }> = [];
   const codeBlockRegex = /```(\w+)?\n([\s\S]*?)```/g;
-  
+
   let lastIndex = 0;
   let match;
 
@@ -203,7 +205,10 @@ export function renderMarkdownText(text: string): string {
   return text
     .replace(/^### (.*$)/gim, '<h3>$1</h3>')
     .replace(/^## (.*)/gm, (_, title) => {
-      const id = title.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '');
+      const id = title
+        .toLowerCase()
+        .replace(/\s+/g, '-')
+        .replace(/[^\w-]/g, '');
       return `<h2 id="${id}">${title}</h2>`;
     })
     .replace(/^# (.*$)/gim, '<h1>$1</h1>')

@@ -3,8 +3,7 @@ import { siteConfig } from '@/config';
 
 export const metadata: Metadata = {
   title: 'About',
-  description:
-    `Learn more about ${siteConfig.name} - a full stack developer passionate about building modern web applications with React, Next.js, TypeScript, and Node.js.`,
+  description: `Learn more about ${siteConfig.name} - a full stack developer passionate about building modern web applications with React, Next.js, TypeScript, and Node.js.`,
   openGraph: {
     title: `About | ${siteConfig.name}`,
     description:

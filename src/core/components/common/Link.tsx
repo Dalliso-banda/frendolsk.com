@@ -3,16 +3,16 @@
 /**
  * Custom Link Component
  * =====================
- * 
+ *
  * A wrapper around Next.js Link that:
  * 1. Works with MUI's component prop (required for Next.js 16)
  * 2. Disables prefetch by default to prevent excessive API calls
- * 
+ *
  * The default Next.js behavior prefetches all visible links, which causes
  * dozens of RSC requests on page load (one for each nav link in header/footer).
- * 
+ *
  * To enable prefetch for specific links, pass prefetch={true} explicitly.
- * 
+ *
  * See: https://mui.com/material-ui/integrations/nextjs/#next-js-v16-client-component-restriction
  */
 

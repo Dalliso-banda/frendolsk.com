@@ -118,27 +118,26 @@ export default function SearchDialog() {
   }, [query]);
 
   // Get items to display
-  const displayItems = query.length >= 2
-    ? results.map((r) => ({
-        id: r.id,
-        title: r.title,
-        subtitle: r.publishedAt ? format(new Date(r.publishedAt), 'MMM d, yyyy') : undefined,
-        href: `/blog/${r.slug}`,
-        icon: <Article />,
-        type: 'result' as const,
-      }))
-    : quickLinks
-        .filter((link) =>
-          link.title.toLowerCase().includes(query.toLowerCase())
-        )
-        .map((link) => ({
-          id: link.href,
-          title: link.title,
-          subtitle: 'Quick link',
-          href: link.href,
-          icon: link.icon,
-          type: 'link' as const,
-        }));
+  const displayItems =
+    query.length >= 2
+      ? results.map((r) => ({
+          id: r.id,
+          title: r.title,
+          subtitle: r.publishedAt ? format(new Date(r.publishedAt), 'MMM d, yyyy') : undefined,
+          href: `/blog/${r.slug}`,
+          icon: <Article />,
+          type: 'result' as const,
+        }))
+      : quickLinks
+          .filter((link) => link.title.toLowerCase().includes(query.toLowerCase()))
+          .map((link) => ({
+            id: link.href,
+            title: link.title,
+            subtitle: 'Quick link',
+            href: link.href,
+            icon: link.icon,
+            type: 'link' as const,
+          }));
 
   // Handle navigation
   const handleSelect = (href: string) => {
@@ -221,9 +220,7 @@ export default function SearchDialog() {
       <List sx={{ py: 1, maxHeight: 400, overflow: 'auto' }}>
         {displayItems.length === 0 && query.length >= 2 && !loading ? (
           <Box sx={{ py: 4, textAlign: 'center' }}>
-            <Typography color="text.secondary">
-              No results found for &quot;{query}&quot;
-            </Typography>
+            <Typography color="text.secondary">No results found for &quot;{query}&quot;</Typography>
           </Box>
         ) : displayItems.length === 0 && query.length < 2 ? (
           <>
@@ -246,10 +243,7 @@ export default function SearchDialog() {
                   }}
                 >
                   <ListItemIcon sx={{ minWidth: 40 }}>{link.icon}</ListItemIcon>
-                  <ListItemText
-                    primary={link.title}
-                    primaryTypographyProps={{ fontWeight: 500 }}
-                  />
+                  <ListItemText primary={link.title} primaryTypographyProps={{ fontWeight: 500 }} />
                   <ArrowForward sx={{ color: 'text.secondary', fontSize: 18 }} />
                 </ListItemButton>
               </ListItem>

@@ -72,17 +72,15 @@ export function ThemeContextProvider({ children, defaultMode = 'dark' }: ThemePr
   // During SSR/build, just render children without interactive theme state
   if (!mounted) {
     return (
-      <ThemeContext.Provider value={{ mode: defaultMode, toggleTheme: () => {}, setMode: () => {} }}>
+      <ThemeContext.Provider
+        value={{ mode: defaultMode, toggleTheme: () => {}, setMode: () => {} }}
+      >
         {children}
       </ThemeContext.Provider>
     );
   }
 
-  return (
-    <ThemeContext.Provider value={contextValue}>
-      {children}
-    </ThemeContext.Provider>
-  );
+  return <ThemeContext.Provider value={contextValue}>{children}</ThemeContext.Provider>;
 }
 
 /**
@@ -137,7 +135,9 @@ export function ThemeProvider({ children, defaultMode = 'dark' }: ThemeProviderP
   // Prevent flash of wrong theme - always render with a theme
   if (!mounted) {
     return (
-      <ThemeContext.Provider value={{ mode: defaultMode, toggleTheme: () => {}, setMode: () => {} }}>
+      <ThemeContext.Provider
+        value={{ mode: defaultMode, toggleTheme: () => {}, setMode: () => {} }}
+      >
         <MuiThemeProvider theme={getTheme(defaultMode)}>
           <CssBaseline />
           {children}

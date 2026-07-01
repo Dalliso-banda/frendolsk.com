@@ -47,7 +47,7 @@ export async function GET(
   { params }: { params: Promise<{ path: string[] }> }
 ) {
   const { path: pathSegments } = await params;
-  
+
   // Reconstruct the file path
   const relativePath = pathSegments.join('/');
   const uploadDir = path.join(process.cwd(), 'public', 'uploads');
@@ -64,7 +64,7 @@ export async function GET(
     // Return placeholder for images
     const ext = path.extname(filePath).toLowerCase();
     const isImage = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg'].includes(ext);
-    
+
     if (isImage) {
       return new NextResponse(PLACEHOLDER_SVG, {
         status: 200, // Return 200 so image renders
@@ -75,12 +75,9 @@ export async function GET(
         },
       });
     }
-    
+
     // For non-images, return 404
-    return NextResponse.json(
-      { error: 'File not found' },
-      { status: 404 }
-    );
+    return NextResponse.json({ error: 'File not found' }, { status: 404 });
   }
 
   try {
@@ -101,9 +98,6 @@ export async function GET(
     return new NextResponse(fileBuffer, { status: 200, headers });
   } catch (error) {
     console.error('Error serving media:', error);
-    return NextResponse.json(
-      { error: 'Failed to serve file' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to serve file' }, { status: 500 });
   }
 }

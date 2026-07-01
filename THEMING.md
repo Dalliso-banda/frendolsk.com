@@ -23,12 +23,14 @@ This document explains how to customize the color scheme and visual appearance o
 The theme system follows MUI's standard theming approach using `createTheme()`. The current design is called **"Arcane"** — inspired by the League of Legends animated series, featuring deep blues, glowing cyans, and vibrant magentas that evoke the contrast between Piltover's pristine technology and Zaun's gritty undercity.
 
 **Key features:**
+
 - System-aware dark/light mode detection
 - Manual toggle via UI
 - Persistent preference (saved to localStorage)
 - Comprehensive component overrides for consistent styling
 
 **Color Inspiration:**
+
 - **Dark Mode (Zaun/Undercity):** Deep navy blues with glowing hextech cyan accents
 - **Light Mode (Piltover):** Clean, cool grays with deeper teal-cyan accents
 
@@ -54,7 +56,9 @@ src/app/globals.css    # Base styles, focus outlines, theme flash prevention
 ---
 
 ## Quick Start: Changing Colors
+
 f
+
 ### Changing the Primary Color
 
 Open `src/theme/theme.ts` and find the `palette` object near the top (around line 11):
@@ -63,10 +67,10 @@ Open `src/theme/theme.ts` and find the `palette` object near the top (around lin
 const palette = {
   // Primary: Hextech Cyan - the glow of arcane magic and hextech
   arcane: {
-    main: '#7DD4EA',      // ← Change this for primary color
-    light: '#A8E4F4',     // ← Lighter variant
-    dark: '#4ABCD8',      // ← Darker variant
-    glow: '#B8F0FF',      // ← Used for glow effects
+    main: '#7DD4EA', // ← Change this for primary color
+    light: '#A8E4F4', // ← Lighter variant
+    dark: '#4ABCD8', // ← Darker variant
+    glow: '#B8F0FF', // ← Used for glow effects
     contrastText: '#0A1628',
   },
   // ...
@@ -97,15 +101,15 @@ arcane: {
 
 The custom palette uses semantic color names that map to MUI's standard palette:
 
-| Custom Name | MUI Mapping | Purpose |
-|-------------|-------------|---------|
-| `arcane` | `primary` | Primary actions, links, highlights (Hextech cyan) |
-| `shimmer` | `secondary` | Secondary actions, accents (Shimmer magenta-pink) |
-| `undercity` | `info` | Informational elements (Steel blue-gray) |
-| `ember` | `error` | Errors, destructive actions (Chemtech red-pink) |
-| `verdant` | `success` | Success states, confirmations (Teal-green) |
-| `void` | Background colors | Dark mode backgrounds (Deep blues) |
-| `ink` | Text colors | Dark mode typography (Cool blue-whites) |
+| Custom Name | MUI Mapping       | Purpose                                           |
+| ----------- | ----------------- | ------------------------------------------------- |
+| `arcane`    | `primary`         | Primary actions, links, highlights (Hextech cyan) |
+| `shimmer`   | `secondary`       | Secondary actions, accents (Shimmer magenta-pink) |
+| `undercity` | `info`            | Informational elements (Steel blue-gray)          |
+| `ember`     | `error`           | Errors, destructive actions (Chemtech red-pink)   |
+| `verdant`   | `success`         | Success states, confirmations (Teal-green)        |
+| `void`      | Background colors | Dark mode backgrounds (Deep blues)                |
+| `ink`       | Text colors       | Dark mode typography (Cool blue-whites)           |
 
 ### Color Relationships
 
@@ -167,25 +171,25 @@ Light mode settings start around line 700 in `theme.ts`:
 ```typescript
 const lightPalette = {
   background: {
-    default: '#F0F4F8',  // Cool light gray with blue tint (Piltover)
-    paper: '#FFFFFF',    // Cards, papers
+    default: '#F0F4F8', // Cool light gray with blue tint (Piltover)
+    paper: '#FFFFFF', // Cards, papers
     elevated: '#F8FAFC', // Elevated surfaces
   },
   text: {
-    primary: '#0A1628',   // Deep blue-black
+    primary: '#0A1628', // Deep blue-black
     secondary: '#3A4A5A', // Secondary text
-    muted: '#6A7A8A',     // Muted text
-    disabled: '#9AAABA',  // Disabled text
+    muted: '#6A7A8A', // Muted text
+    disabled: '#9AAABA', // Disabled text
   },
   // Adjusted colors for light mode - darker for white text contrast
   arcane: {
-    main: '#1A7090',      // Darker teal-cyan for white text
+    main: '#1A7090', // Darker teal-cyan for white text
     light: '#2A8AAA',
     dark: '#0A5070',
     glow: '#4AAACA',
   },
   shimmer: {
-    main: '#8A3070',      // Darker magenta for white text
+    main: '#8A3070', // Darker magenta for white text
     light: '#A04080',
     dark: '#6A2050',
   },
@@ -205,6 +209,7 @@ MUI components are customized in the `components` section of each theme (startin
 All button color variants have explicit text colors set for proper contrast:
 
 **Dark Mode:**
+
 - Primary (cyan): Dark text (`#0A1628`) on bright cyan background
 - Secondary (pink): White text on magenta background
 - Error (red-pink): White text
@@ -213,6 +218,7 @@ All button color variants have explicit text colors set for proper contrast:
 - Warning (amber): Dark text (`#0A1628`) on bright amber
 
 **Light Mode:**
+
 - Primary (teal): Soft blue-white (`#E8F4F8`) on dark teal
 - Secondary (magenta): Soft pink-white (`#F8E8F4`) on dark magenta
 - Error: Soft pink-white (`#FFF0F2`)
@@ -370,10 +376,12 @@ function MyComponent() {
   const theme = useTheme();
 
   return (
-    <Box sx={{
-      backgroundColor: theme.palette.custom?.main,
-      // or use MUI's color prop where supported
-    }}>
+    <Box
+      sx={{
+        backgroundColor: theme.palette.custom?.main,
+        // or use MUI's color prop where supported
+      }}
+    >
       Content
     </Box>
   );
@@ -401,13 +409,13 @@ html {
 }
 
 html[data-theme='light'] {
-  background-color: #F0F4F8; /* Light mode - Piltover */
+  background-color: #f0f4f8; /* Light mode - Piltover */
   color-scheme: light;
 }
 
 /* Focus styles */
 :focus-visible {
-  outline: 2px solid var(--focus-color, #7DD4EA);
+  outline: 2px solid var(--focus-color, #7dd4ea);
   outline-offset: 2px;
 }
 ```
@@ -459,10 +467,12 @@ Use the theme toggle in the UI (usually in the header/navbar) to test both modes
 ### Check Color Contrast
 
 Ensure your colors meet WCAG accessibility guidelines:
+
 - **AA standard**: 4.5:1 contrast ratio for normal text
 - **AAA standard**: 7:1 contrast ratio for normal text
 
 Tools:
+
 - [WebAIM Contrast Checker](https://webaim.org/resources/contrastchecker/)
 - [Coolors Contrast Checker](https://coolors.co/contrast-checker)
 
@@ -480,36 +490,36 @@ Here's the complete current palette for reference:
 
 ### Dark Mode Primary Colors (Zaun/Undercity)
 
-| Name | Main | Light | Dark | Purpose |
-|------|------|-------|------|---------|
-| Arcane (Primary) | `#7DD4EA` | `#A8E4F4` | `#4ABCD8` | Hextech cyan glow |
+| Name                | Main      | Light     | Dark      | Purpose              |
+| ------------------- | --------- | --------- | --------- | -------------------- |
+| Arcane (Primary)    | `#7DD4EA` | `#A8E4F4` | `#4ABCD8` | Hextech cyan glow    |
 | Shimmer (Secondary) | `#D466A8` | `#E88BC4` | `#B04088` | Shimmer magenta-pink |
-| Undercity (Info) | `#6B8094` | `#8AA0B4` | `#4A6074` | Steel blue-gray |
-| Ember (Error) | `#E05070` | `#F07090` | `#C03050` | Chemtech red-pink |
-| Verdant (Success) | `#4A9A7A` | `#6ABAA0` | `#2A7A5A` | Teal-green |
-| Warning | `#D9943C` | `#E9A44C` | `#B9741C` | Warning amber |
+| Undercity (Info)    | `#6B8094` | `#8AA0B4` | `#4A6074` | Steel blue-gray      |
+| Ember (Error)       | `#E05070` | `#F07090` | `#C03050` | Chemtech red-pink    |
+| Verdant (Success)   | `#4A9A7A` | `#6ABAA0` | `#2A7A5A` | Teal-green           |
+| Warning             | `#D9943C` | `#E9A44C` | `#B9741C` | Warning amber        |
 
 ### Dark Mode Backgrounds
 
-| Name | Value | Usage |
-|------|-------|-------|
-| Deepest | `#060D18` | Deepest undercity |
-| Deep | `#0A1628` | App bar |
-| Mid | `#122438` | Main background |
-| Elevated | `#1A3048` | Cards, papers |
-| Muted | `#243A54` | Muted surfaces |
-| Light | `#2E4A68` | Light surfaces |
+| Name     | Value     | Usage             |
+| -------- | --------- | ----------------- |
+| Deepest  | `#060D18` | Deepest undercity |
+| Deep     | `#0A1628` | App bar           |
+| Mid      | `#122438` | Main background   |
+| Elevated | `#1A3048` | Cards, papers     |
+| Muted    | `#243A54` | Muted surfaces    |
+| Light    | `#2E4A68` | Light surfaces    |
 
 ### Light Mode Primary Colors (Piltover)
 
-| Name | Main | Light | Dark |
-|------|------|-------|------|
-| Arcane (Primary) | `#1A7090` | `#2A8AAA` | `#0A5070` |
+| Name                | Main      | Light     | Dark      |
+| ------------------- | --------- | --------- | --------- |
+| Arcane (Primary)    | `#1A7090` | `#2A8AAA` | `#0A5070` |
 | Shimmer (Secondary) | `#8A3070` | `#A04080` | `#6A2050` |
-| Error | `#C93545` | `#E95565` | `#A91525` |
-| Success | `#2A7A44` | `#4A9A64` | `#1A5A24` |
-| Info | `#1A6A7A` | `#3A8A9A` | `#0A4A5A` |
-| Warning | `#B97420` | `#D99440` | `#995400` |
+| Error               | `#C93545` | `#E95565` | `#A91525` |
+| Success             | `#2A7A44` | `#4A9A64` | `#1A5A24` |
+| Info                | `#1A6A7A` | `#3A8A9A` | `#0A4A5A` |
+| Warning             | `#B97420` | `#D99440` | `#995400` |
 
 ### Button Text Colors
 
@@ -537,10 +547,10 @@ For proper contrast, button text colors vary by mode and color:
 
 ### Light Mode Backgrounds
 
-| Name | Value |
-|------|-------|
-| Default | `#F0F4F8` |
-| Paper | `#FFFFFF` |
+| Name     | Value     |
+| -------- | --------- |
+| Default  | `#F0F4F8` |
+| Paper    | `#FFFFFF` |
 | Elevated | `#F8FAFC` |
 
 ---

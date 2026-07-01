@@ -49,7 +49,7 @@ interface AuthAwareMainLayoutProps {
  * and fetches user profile data when logged in.
  *
  * Use this component on public pages to show the proper avatar menu state.
- * 
+ *
  * OPTIMIZATION: Uses module-level caching to prevent duplicate API calls
  * across component instances and React Strict Mode double-renders.
  */
@@ -65,7 +65,7 @@ export function AuthAwareMainLayout({
   const [mounted, setMounted] = useState(false);
   const hasFetchedProfile = useRef(false);
   const hasFetchedUnreadCount = useRef(false);
-  
+
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -73,9 +73,9 @@ export function AuthAwareMainLayout({
   // Fetch profile data when authenticated (with caching & deduplication)
   const fetchProfile = useCallback(async (force = false) => {
     const now = Date.now();
-    
+
     // Use cached data if available and not expired
-    if (!force && cachedProfile && (now - lastProfileFetchTime) < PROFILE_CACHE_TTL) {
+    if (!force && cachedProfile && now - lastProfileFetchTime < PROFILE_CACHE_TTL) {
       setProfile(cachedProfile);
       return cachedProfile;
     }
@@ -113,9 +113,13 @@ export function AuthAwareMainLayout({
   // Fetch unread message count when authenticated (with caching & deduplication)
   const fetchUnreadCount = useCallback(async (force = false) => {
     const now = Date.now();
-    
+
     // Use cached data if available and not expired
-    if (!force && cachedUnreadCount !== undefined && (now - lastUnreadCountFetchTime) < UNREAD_COUNT_CACHE_TTL) {
+    if (
+      !force &&
+      cachedUnreadCount !== undefined &&
+      now - lastUnreadCountFetchTime < UNREAD_COUNT_CACHE_TTL
+    ) {
       setUnreadCount(cachedUnreadCount);
       return cachedUnreadCount;
     }
@@ -177,16 +181,22 @@ export function AuthAwareMainLayout({
   const isLoggedIn = mounted && status === 'authenticated';
 
   // Build user object for the avatar menu
-  const user = isLoggedIn && profile ? {
-    displayName: profile.displayName,
-    avatarUrl: profile.avatarUrls?.thumbnail || profile.avatarUrls?.small || profile.avatarUrl,
-    email: profile.email || session?.user?.email || '',
-  } : isLoggedIn && session?.user ? {
-    displayName: session.user.name || null,
-    // Profile not loaded yet, avatar will come from profile API
-    avatarUrl: null,
-    email: session.user.email || '',
-  } : null;
+  const user =
+    isLoggedIn && profile
+      ? {
+          displayName: profile.displayName,
+          avatarUrl:
+            profile.avatarUrls?.thumbnail || profile.avatarUrls?.small || profile.avatarUrl,
+          email: profile.email || session?.user?.email || '',
+        }
+      : isLoggedIn && session?.user
+        ? {
+            displayName: session.user.name || null,
+            // Profile not loaded yet, avatar will come from profile API
+            avatarUrl: null,
+            email: session.user.email || '',
+          }
+        : null;
 
   return (
     <MainLayout

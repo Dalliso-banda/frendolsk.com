@@ -19,7 +19,8 @@ export default function Image() {
           display: 'flex',
           flexDirection: 'column',
           backgroundColor: '#0D1117',
-          fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif',
+          fontFamily:
+            '-apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif',
         }}
       >
         {/* Background gradient overlay */}
@@ -130,7 +131,8 @@ export default function Image() {
               marginBottom: '40px',
             }}
           >
-            A modern, feature-rich personal website template built with Next.js, TypeScript, and Material UI
+            A modern, feature-rich personal website template built with Next.js, TypeScript, and
+            Material UI
           </div>
 
           {/* Tech stack pills - GitHub style */}

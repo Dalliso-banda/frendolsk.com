@@ -10,7 +10,7 @@ export const DEFAULT_NOW_CONTENT: NowContent = {
   location: 'Working remotely',
   currentProject: {
     name: 'My Current Project',
-    tagline: 'A brief description of what you\'re building',
+    tagline: "A brief description of what you're building",
     description: `This is where you can describe your main project or focus area.
 What are you building? Why is it interesting? What problems does it solve?
 
@@ -69,12 +69,5 @@ Update this section in src/user/content/now.ts to share what you're passionate a
       ],
     },
   ],
-  focus: [
-    'Web Development',
-    'Open Source',
-    'Learning',
-    'Building',
-    'Writing',
-    'Community',
-  ],
+  focus: ['Web Development', 'Open Source', 'Learning', 'Building', 'Writing', 'Community'],
 };

@@ -1,5 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getMessages, getMessageStats, markMessagesAsRead, deleteMessages, hardDeleteMessages, archiveMessages, markAsSpam, updateMessageStatus } from '@/db/messages';
+import {
+  getMessages,
+  getMessageStats,
+  markMessagesAsRead,
+  deleteMessages,
+  hardDeleteMessages,
+  archiveMessages,
+  markAsSpam,
+  updateMessageStatus,
+} from '@/db/messages';
 import { verifyAdmin } from '@/lib/auth-helpers';
 
 /**

@@ -1,7 +1,7 @@
 /**
  * Analytics Tables Migration
  * ==========================
- * 
+ *
  * Tracks page views and referrer information for traffic analysis.
  * Privacy-focused: No PII, no IP addresses stored, just aggregated metrics.
  */
@@ -28,7 +28,7 @@ export async function up(knex: Knex): Promise<void> {
     table.string('country', 2).nullable(); // Country code (from Accept-Language or Cloudflare header)
     table.boolean('is_bot').defaultTo(false); // Whether this is a bot visit
     table.timestamp('created_at').notNullable().defaultTo(knex.fn.now());
-    
+
     // Indexes for efficient querying
     table.index('session_id');
     table.index('page_path');
@@ -46,7 +46,7 @@ export async function up(knex: Knex): Promise<void> {
     table.integer('page_views').notNullable().defaultTo(0);
     table.integer('unique_visitors').notNullable().defaultTo(0);
     table.timestamp('updated_at').notNullable().defaultTo(knex.fn.now());
-    
+
     // Unique constraint for upsert operations
     table.unique(['date', 'page_path', 'referrer_domain']);
     table.index('date');
@@ -63,7 +63,7 @@ export async function up(knex: Knex): Promise<void> {
     table.integer('unique_visitors').notNullable().defaultTo(0);
     table.timestamp('first_seen_at').notNullable().defaultTo(knex.fn.now());
     table.timestamp('last_seen_at').notNullable().defaultTo(knex.fn.now());
-    
+
     table.index('total_visits');
     table.index('last_seen_at');
   });

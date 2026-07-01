@@ -84,9 +84,7 @@ export async function checkRateLimit(options: RateLimitOptions): Promise<RateLim
     }
 
     // Increment count
-    await db('rate_limits')
-      .where('key', key)
-      .increment('count', 1);
+    await db('rate_limits').where('key', key).increment('count', 1);
 
     return {
       allowed: true,
@@ -183,9 +181,7 @@ export async function cleanupExpiredRateLimits(): Promise<number> {
   const now = new Date();
 
   try {
-    const deleted = await db('rate_limits')
-      .where('expires_at', '<', now)
-      .delete();
+    const deleted = await db('rate_limits').where('expires_at', '<', now).delete();
 
     return deleted;
   } catch (error) {

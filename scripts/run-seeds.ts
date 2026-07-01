@@ -39,11 +39,7 @@ function parseArgs(argv: string[]) {
 
 function resolveDirectories(profile: SeedProfile): string[] {
   if (profile === 'all') {
-    return [
-      ...SEED_DIRECTORIES.bootstrap,
-      ...SEED_DIRECTORIES.demo,
-      ...SEED_DIRECTORIES.user,
-    ];
+    return [...SEED_DIRECTORIES.bootstrap, ...SEED_DIRECTORIES.demo, ...SEED_DIRECTORIES.user];
   }
 
   return SEED_DIRECTORIES[profile];

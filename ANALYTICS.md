@@ -25,14 +25,15 @@ This document provides a comprehensive reference for the custom, privacy-first a
 
 The analytics system consists of four layers:
 
-| Layer | Files | Responsibility |
-|---|---|---|
-| **Client** | `src/components/analytics/AnalyticsTracker.tsx` | Generates sessions, fires tracking events |
-| **API – Ingest** | `src/app/api/analytics/track/route.ts` | Validates, rate-limits, bot-filters, stores events |
-| **API – Read** | `src/app/api/analytics/route.ts` | Serves aggregated data to the admin dashboard |
-| **Database** | `src/db/analytics.ts` | All read/write query logic against PostgreSQL |
+| Layer            | Files                                           | Responsibility                                     |
+| ---------------- | ----------------------------------------------- | -------------------------------------------------- |
+| **Client**       | `src/components/analytics/AnalyticsTracker.tsx` | Generates sessions, fires tracking events          |
+| **API – Ingest** | `src/app/api/analytics/track/route.ts`          | Validates, rate-limits, bot-filters, stores events |
+| **API – Read**   | `src/app/api/analytics/route.ts`                | Serves aggregated data to the admin dashboard      |
+| **Database**     | `src/db/analytics.ts`                           | All read/write query logic against PostgreSQL      |
 
 Supporting infrastructure:
+
 - **Migrations**: `src/db/migrations/20260118000003_add_analytics.ts`, `20260119000000_*.ts`
 - **Types**: `src/types/index.ts`
 - **Rate limiter**: `src/lib/rate-limiter.ts` (DB-backed, general-purpose)
@@ -48,26 +49,26 @@ Three PostgreSQL tables handle all analytics storage. Migrations are managed via
 
 The raw event log. Every non-bot page view is inserted here.
 
-| Column | Type | Constraints | Description |
-|---|---|---|---|
-| `id` | UUID | PK, default `gen_random_uuid()` | Unique event ID |
-| `session_id` | varchar(64) | NOT NULL | Anonymous session identifier |
-| `page_path` | varchar(500) | NOT NULL | URL path visited (e.g. `/blog/my-post`) |
-| `page_title` | varchar(300) | nullable | Page `<title>` at time of visit |
-| `referrer_url` | varchar(2000) | nullable | Full referrer URL |
-| `referrer_domain` | varchar(253) | nullable | Extracted hostname of referrer |
-| `utm_source` | varchar(100) | nullable | UTM tracking parameter |
-| `utm_medium` | varchar(100) | nullable | UTM tracking parameter |
-| `utm_campaign` | varchar(100) | nullable | UTM tracking parameter |
-| `utm_term` | varchar(100) | nullable | UTM tracking parameter |
-| `utm_content` | varchar(100) | nullable | UTM tracking parameter |
-| `device_type` | varchar(20) | nullable | `desktop`, `mobile`, or `tablet` |
-| `browser` | varchar(50) | nullable | `Chrome`, `Firefox`, `Safari`, `Edge`, `Opera`, `Other` |
-| `os` | varchar(50) | nullable | `Windows`, `macOS`, `Linux`, `Android`, `iOS`, `Other` |
-| `country` | varchar(2) | nullable | ISO country code (from CDN headers or Accept-Language) |
-| `is_bot` | boolean | default `false` | Bot detection flag |
-| `status_code` | smallint | nullable | HTTP status of the response (e.g. `200`, `404`) |
-| `created_at` | timestamptz | default `now()` | Event timestamp |
+| Column            | Type          | Constraints                     | Description                                             |
+| ----------------- | ------------- | ------------------------------- | ------------------------------------------------------- |
+| `id`              | UUID          | PK, default `gen_random_uuid()` | Unique event ID                                         |
+| `session_id`      | varchar(64)   | NOT NULL                        | Anonymous session identifier                            |
+| `page_path`       | varchar(500)  | NOT NULL                        | URL path visited (e.g. `/blog/my-post`)                 |
+| `page_title`      | varchar(300)  | nullable                        | Page `<title>` at time of visit                         |
+| `referrer_url`    | varchar(2000) | nullable                        | Full referrer URL                                       |
+| `referrer_domain` | varchar(253)  | nullable                        | Extracted hostname of referrer                          |
+| `utm_source`      | varchar(100)  | nullable                        | UTM tracking parameter                                  |
+| `utm_medium`      | varchar(100)  | nullable                        | UTM tracking parameter                                  |
+| `utm_campaign`    | varchar(100)  | nullable                        | UTM tracking parameter                                  |
+| `utm_term`        | varchar(100)  | nullable                        | UTM tracking parameter                                  |
+| `utm_content`     | varchar(100)  | nullable                        | UTM tracking parameter                                  |
+| `device_type`     | varchar(20)   | nullable                        | `desktop`, `mobile`, or `tablet`                        |
+| `browser`         | varchar(50)   | nullable                        | `Chrome`, `Firefox`, `Safari`, `Edge`, `Opera`, `Other` |
+| `os`              | varchar(50)   | nullable                        | `Windows`, `macOS`, `Linux`, `Android`, `iOS`, `Other`  |
+| `country`         | varchar(2)    | nullable                        | ISO country code (from CDN headers or Accept-Language)  |
+| `is_bot`          | boolean       | default `false`                 | Bot detection flag                                      |
+| `status_code`     | smallint      | nullable                        | HTTP status of the response (e.g. `200`, `404`)         |
+| `created_at`      | timestamptz   | default `now()`                 | Event timestamp                                         |
 
 **Indexes:** `session_id`, `page_path`, `referrer_domain`, `created_at`, composite `(utm_source, utm_medium, utm_campaign)`, `status_code`
 
@@ -77,15 +78,15 @@ The raw event log. Every non-bot page view is inserted here.
 
 Pre-aggregated daily statistics for fast dashboard queries. Upserted on each page view event.
 
-| Column | Type | Constraints | Description |
-|---|---|---|---|
-| `id` | UUID | PK | Unique row ID |
-| `date` | date | NOT NULL | Aggregation date |
-| `page_path` | varchar(500) | NOT NULL | Page being aggregated |
-| `referrer_domain` | varchar(253) | NOT NULL | Referrer domain (or `''` for direct) |
-| `page_views` | integer | default 0 | Total views for this date/path/referrer combo |
-| `unique_visitors` | integer | default 0 | Distinct sessions for this combo |
-| `updated_at` | timestamptz | default `now()` | Last updated time |
+| Column            | Type         | Constraints     | Description                                   |
+| ----------------- | ------------ | --------------- | --------------------------------------------- |
+| `id`              | UUID         | PK              | Unique row ID                                 |
+| `date`            | date         | NOT NULL        | Aggregation date                              |
+| `page_path`       | varchar(500) | NOT NULL        | Page being aggregated                         |
+| `referrer_domain` | varchar(253) | NOT NULL        | Referrer domain (or `''` for direct)          |
+| `page_views`      | integer      | default 0       | Total views for this date/path/referrer combo |
+| `unique_visitors` | integer      | default 0       | Distinct sessions for this combo              |
+| `updated_at`      | timestamptz  | default `now()` | Last updated time                             |
 
 **Unique Constraint:** `(date, page_path, referrer_domain)` — enables efficient `INSERT ... ON CONFLICT DO UPDATE`.
 
@@ -97,15 +98,15 @@ Pre-aggregated daily statistics for fast dashboard queries. Upserted on each pag
 
 All-time aggregated referrer statistics. One row per unique referring domain.
 
-| Column | Type | Constraints | Description |
-|---|---|---|---|
-| `id` | UUID | PK | Unique row ID |
-| `referrer_domain` | varchar(253) | UNIQUE, NOT NULL | The referring domain |
-| `referrer_url_sample` | varchar(2000) | nullable | A sample full URL from this referrer |
-| `total_visits` | integer | default 0 | All-time visit count |
-| `unique_visitors` | integer | default 0 | All-time unique visitor count |
-| `first_seen_at` | timestamptz | default `now()` | When this referrer was first observed |
-| `last_seen_at` | timestamptz | default `now()` | Most recent visit from this referrer |
+| Column                | Type          | Constraints      | Description                           |
+| --------------------- | ------------- | ---------------- | ------------------------------------- |
+| `id`                  | UUID          | PK               | Unique row ID                         |
+| `referrer_domain`     | varchar(253)  | UNIQUE, NOT NULL | The referring domain                  |
+| `referrer_url_sample` | varchar(2000) | nullable         | A sample full URL from this referrer  |
+| `total_visits`        | integer       | default 0        | All-time visit count                  |
+| `unique_visitors`     | integer       | default 0        | All-time unique visitor count         |
+| `first_seen_at`       | timestamptz   | default `now()`  | When this referrer was first observed |
+| `last_seen_at`        | timestamptz   | default `now()`  | Most recent visit from this referrer  |
 
 **Indexes:** `total_visits` (DESC sort), `last_seen_at`
 
@@ -151,18 +152,18 @@ The component calls `useSession()` (NextAuth). If a valid session exists (i.e., 
 
 ### Data Sent Per Event
 
-| Field | Source |
-|---|---|
-| `sessionId` | `sessionStorage` value |
-| `pagePath` | `usePathname()` |
-| `pageTitle` | `document.title` |
-| `referrer` | `document.referrer` (external only — internal same-domain referrers are excluded) |
-| `utmSource` | `useSearchParams()` → `utm_source` |
-| `utmMedium` | `useSearchParams()` → `utm_medium` |
-| `utmCampaign` | `useSearchParams()` → `utm_campaign` |
-| `utmTerm` | `useSearchParams()` → `utm_term` |
-| `utmContent` | `useSearchParams()` → `utm_content` |
-| `statusCode` | Prop (default `200`, or `404` for not-found pages) |
+| Field         | Source                                                                            |
+| ------------- | --------------------------------------------------------------------------------- |
+| `sessionId`   | `sessionStorage` value                                                            |
+| `pagePath`    | `usePathname()`                                                                   |
+| `pageTitle`   | `document.title`                                                                  |
+| `referrer`    | `document.referrer` (external only — internal same-domain referrers are excluded) |
+| `utmSource`   | `useSearchParams()` → `utm_source`                                                |
+| `utmMedium`   | `useSearchParams()` → `utm_medium`                                                |
+| `utmCampaign` | `useSearchParams()` → `utm_campaign`                                              |
+| `utmTerm`     | `useSearchParams()` → `utm_term`                                                  |
+| `utmContent`  | `useSearchParams()` → `utm_content`                                               |
+| `statusCode`  | Prop (default `200`, or `404` for not-found pages)                                |
 
 ### Exported `trackPageView()` Utility
 
@@ -195,8 +196,8 @@ The component self-wraps in a `SessionProvider` if invoked outside the normal pr
 
 ```typescript
 interface TrackingPayload {
-  sessionId: string;       // Required; min 10 characters
-  pagePath: string;        // Required; non-empty
+  sessionId: string; // Required; min 10 characters
+  pagePath: string; // Required; non-empty
   pageTitle?: string;
   referrer?: string;
   utmSource?: string;
@@ -204,7 +205,7 @@ interface TrackingPayload {
   utmCampaign?: string;
   utmTerm?: string;
   utmContent?: string;
-  statusCode?: number;     // Default: 200
+  statusCode?: number; // Default: 200
 }
 ```
 
@@ -269,17 +270,17 @@ Deletes raw `analytics_page_views` rows older than `daysToKeep` days (default: *
 
 All read functions filter out bot events (`WHERE is_bot = false`) unless explicitly noted.
 
-| Function | Description |
-|---|---|
-| `getAnalyticsSummary(startDate, endDate)` | Main dashboard query. Returns totals, top pages, top referrers, daily trend, traffic sources, top 404s. |
-| `getReferrerStats(limit)` | Sorted list of all-time referrers from `analytics_referrers`. |
-| `getPageTrends(pagePath, days)` | Day-by-day view count time series for a single page path. |
-| `getReferrerDetails(domain, limit)` | Which pages were visited from a given referrer domain. |
-| `getAllPages(startDate, endDate, page, limit)` | Paginated list of all pages with view and visitor counts. |
-| `getAll404s(startDate, endDate, page, limit)` | Paginated list of 404 errors with hit counts and a referrer sample. |
-| `getAllReferrers(startDate, endDate, page, limit)` | Paginated referrer list with visit counts and last-seen timestamps. |
-| `getReferrersForPage(pagePath, startDate, endDate, page, limit)` | Drill-down: referrers that drove traffic to a specific page. |
-| `getPagesFromReferrer(domain, startDate, endDate, page, limit)` | Drill-down: pages visited by traffic from a specific referrer domain. |
+| Function                                                         | Description                                                                                             |
+| ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| `getAnalyticsSummary(startDate, endDate)`                        | Main dashboard query. Returns totals, top pages, top referrers, daily trend, traffic sources, top 404s. |
+| `getReferrerStats(limit)`                                        | Sorted list of all-time referrers from `analytics_referrers`.                                           |
+| `getPageTrends(pagePath, days)`                                  | Day-by-day view count time series for a single page path.                                               |
+| `getReferrerDetails(domain, limit)`                              | Which pages were visited from a given referrer domain.                                                  |
+| `getAllPages(startDate, endDate, page, limit)`                   | Paginated list of all pages with view and visitor counts.                                               |
+| `getAll404s(startDate, endDate, page, limit)`                    | Paginated list of 404 errors with hit counts and a referrer sample.                                     |
+| `getAllReferrers(startDate, endDate, page, limit)`               | Paginated referrer list with visit counts and last-seen timestamps.                                     |
+| `getReferrersForPage(pagePath, startDate, endDate, page, limit)` | Drill-down: referrers that drove traffic to a specific page.                                            |
+| `getPagesFromReferrer(domain, startDate, endDate, page, limit)`  | Drill-down: pages visited by traffic from a specific referrer domain.                                   |
 
 ### BigInt Handling
 
@@ -303,28 +304,28 @@ function toNumber(value: unknown, defaultValue = 0): number {
 
 ### Query Parameters
 
-| Parameter | Type | Default | Description |
-|---|---|---|---|
-| `action` | string | `summary` | Which data to fetch (see table below) |
-| `days` | number | `30` | Date range in days back from today |
-| `page` | number | `1` | Pagination page |
-| `limit` | number | `50` | Results per page |
-| `pagePath` | string | — | Page path filter (for `page-trends`, `page-referrers`) |
-| `domain` | string | — | Referrer domain filter (for `referrer-details`, `referrer-pages`) |
+| Parameter  | Type   | Default   | Description                                                       |
+| ---------- | ------ | --------- | ----------------------------------------------------------------- |
+| `action`   | string | `summary` | Which data to fetch (see table below)                             |
+| `days`     | number | `30`      | Date range in days back from today                                |
+| `page`     | number | `1`       | Pagination page                                                   |
+| `limit`    | number | `50`      | Results per page                                                  |
+| `pagePath` | string | —         | Page path filter (for `page-trends`, `page-referrers`)            |
+| `domain`   | string | —         | Referrer domain filter (for `referrer-details`, `referrer-pages`) |
 
 ### Actions
 
-| `action` Value | Calls | Response Shape |
-|---|---|---|
-| `summary` | `getAnalyticsSummary()` | `AnalyticsSummary` |
-| `referrers` | `getReferrerStats()` | `{ referrers: ReferrerStats[] }` |
-| `page-trends` | `getPageTrends()` | `{ trends: { date, views }[] }` |
-| `referrer-details` | `getReferrerDetails()` | `{ details: { pagePath, visits, lastVisit }[] }` |
-| `all-pages` | `getAllPages()` | `PaginatedPages` |
-| `all-404s` | `getAll404s()` | `Paginated404s` |
-| `all-referrers` | `getAllReferrers()` | `PaginatedReferrers` |
-| `page-referrers` | `getReferrersForPage()` | `PageReferrers` |
-| `referrer-pages` | `getPagesFromReferrer()` | `ReferrerPages` |
+| `action` Value     | Calls                    | Response Shape                                   |
+| ------------------ | ------------------------ | ------------------------------------------------ |
+| `summary`          | `getAnalyticsSummary()`  | `AnalyticsSummary`                               |
+| `referrers`        | `getReferrerStats()`     | `{ referrers: ReferrerStats[] }`                 |
+| `page-trends`      | `getPageTrends()`        | `{ trends: { date, views }[] }`                  |
+| `referrer-details` | `getReferrerDetails()`   | `{ details: { pagePath, visits, lastVisit }[] }` |
+| `all-pages`        | `getAllPages()`          | `PaginatedPages`                                 |
+| `all-404s`         | `getAll404s()`           | `Paginated404s`                                  |
+| `all-referrers`    | `getAllReferrers()`      | `PaginatedReferrers`                             |
+| `page-referrers`   | `getReferrersForPage()`  | `PageReferrers`                                  |
+| `referrer-pages`   | `getPagesFromReferrer()` | `ReferrerPages`                                  |
 
 ### `summary` Response Structure
 
@@ -376,12 +377,12 @@ The dashboard is a client component that fetches from `/api/analytics` and rende
 
 ### Summary Cards (top row)
 
-| Card | Metric |
-|---|---|
-| Total Page Views | Aggregate views for selected period |
-| Unique Visitors | Distinct session IDs for selected period |
-| Top Referrer | Domain + visit count (highest traffic source) |
-| Pages per Visit | Average (totalPageViews / uniqueVisitors) |
+| Card             | Metric                                        |
+| ---------------- | --------------------------------------------- |
+| Total Page Views | Aggregate views for selected period           |
+| Unique Visitors  | Distinct session IDs for selected period      |
+| Top Referrer     | Domain + visit count (highest traffic source) |
+| Pages per Visit  | Average (totalPageViews / uniqueVisitors)     |
 
 ### Date Range Selector
 
@@ -401,34 +402,34 @@ Buttons to select: **7 days**, **30 days** (default), **90 days**, **365 days**.
 
 ### Top Pages Table
 
-| Column | Description |
-|---|---|
-| Page Path | Clickable path that opens the live page in a new tab |
-| Views | Total page views |
-| Unique Visitors | Distinct sessions |
+| Column          | Description                                          |
+| --------------- | ---------------------------------------------------- |
+| Page Path       | Clickable path that opens the live page in a new tab |
+| Views           | Total page views                                     |
+| Unique Visitors | Distinct sessions                                    |
 
 - "View All" opens the **All Pages** drill-down (paginated, 50 per page).
 - Clicking a row in All Pages navigates to the **Page Referrers** drill-down.
 
 ### Top Referrers Table
 
-| Column | Description |
-|---|---|
-| Referrer Domain | Domain with favicon icon |
-| Visits | Total visits from this domain |
-| Unique Visitors | Distinct sessions |
-| Last Visit | Relative timestamp (e.g. "2 days ago") |
+| Column          | Description                            |
+| --------------- | -------------------------------------- |
+| Referrer Domain | Domain with favicon icon               |
+| Visits          | Total visits from this domain          |
+| Unique Visitors | Distinct sessions                      |
+| Last Visit      | Relative timestamp (e.g. "2 days ago") |
 
 - "View All" opens the **All Referrers** drill-down (paginated).
 - Clicking a row navigates to the **Referrer Pages** drill-down.
 
 ### 404 Errors Table
 
-| Column | Description |
-|---|---|
-| Requested URL | Monospace, error-colored path |
-| Hits | Number of times this 404 was triggered |
-| Last Hit | Timestamp of most recent occurrence |
+| Column        | Description                            |
+| ------------- | -------------------------------------- |
+| Requested URL | Monospace, error-colored path          |
+| Hits          | Number of times this 404 was triggered |
+| Last Hit      | Timestamp of most recent occurrence    |
 
 - Shows count badge with total 404s.
 - "View All" opens the **All 404s** drill-down, which includes the referrer that caused each 404.
@@ -520,7 +521,9 @@ interface ReferrerStats {
 }
 
 // Main dashboard summary (from getAnalyticsSummary)
-interface AnalyticsSummary { /* see section 6 */ }
+interface AnalyticsSummary {
+  /* see section 6 */
+}
 
 // Paginated response wrappers
 interface PaginatedPages {
@@ -568,13 +571,13 @@ interface ReferrerPages {
 
 ### Privacy Principles
 
-| Principle | Implementation |
-|---|---|
-| No IP logging | IP is never read or stored. Country is derived from CDN headers only. |
-| No cookies | Session ID is stored in `sessionStorage` (tab-scoped, not persistent). |
-| No PII | No name, email, or identifiable data is collected at any point. |
-| Admin exclusion | Authenticated users are automatically excluded from tracking. |
-| Bot exclusion | Bot events are flagged and excluded from all dashboard queries. |
+| Principle       | Implementation                                                         |
+| --------------- | ---------------------------------------------------------------------- |
+| No IP logging   | IP is never read or stored. Country is derived from CDN headers only.  |
+| No cookies      | Session ID is stored in `sessionStorage` (tab-scoped, not persistent). |
+| No PII          | No name, email, or identifiable data is collected at any point.        |
+| Admin exclusion | Authenticated users are automatically excluded from tracking.          |
+| Bot exclusion   | Bot events are flagged and excluded from all dashboard queries.        |
 
 ### Rate Limiting
 
@@ -639,23 +642,27 @@ await cleanupOldPageViews(90); // Delete events older than 90 days
 This script is entirely separate from the user-facing analytics system. It is a project-level adoption tracking ping — used to optionally report that the project has been installed or started up.
 
 **What is sent:**
+
 - Domain / hostname
 - Project version
 - Event type (`install` or `startup`)
 - Timestamp
 
 **What is NOT sent:**
+
 - IP addresses
 - Database contents
 - Environment variables
 - Any personal information
 
 **Opt-out:**
+
 ```bash
 export TELEMETRY_DISABLED=true
 ```
 
 **Behavior:**
+
 - Uses `curl` with a 5-second connect timeout and 10-second max time.
 - Fails silently — does not interrupt build or startup if the endpoint is unavailable.
 - Target endpoint: `https://chrishacia.com/api/telemetry` (configurable via env var).
@@ -726,4 +733,4 @@ Every page view event
 
 ---
 
-*Last updated: June 2026*
+_Last updated: June 2026_

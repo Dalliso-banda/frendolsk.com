@@ -1,12 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import {
-  slugify,
-  formatDate,
-  formatDateTime,
-  getRelativeTime,
-  truncate,
-  stripHtml,
-} from './utils';
+import { slugify, formatDate, formatDateTime, getRelativeTime, truncate, stripHtml } from './utils';
 
 describe('utils', () => {
   describe('slugify', () => {

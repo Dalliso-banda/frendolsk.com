@@ -9,7 +9,7 @@ type RouteParams = {
 async function dispatch(
   method: 'DELETE' | 'GET' | 'HEAD' | 'OPTIONS' | 'PATCH' | 'POST' | 'PUT',
   request: NextRequest,
-  { params }: RouteParams,
+  { params }: RouteParams
 ) {
   const { path } = await params;
 

@@ -33,11 +33,11 @@ devholm.config.ts  ← Single configuration contract
 
 ## Core vs User boundary
 
-| Aspect | Core (`src/core/`) | User (`src/user/`, `devholm.config.ts`) |
-|---|---|---|
-| Updated by framework? | ✓ Yes | ✗ Never |
-| Contains | Reusable views, hooks, DB, theme | Content, extensions, overrides |
-| Import alias | `@core/*` | `@user/*` |
+| Aspect                | Core (`src/core/`)               | User (`src/user/`, `devholm.config.ts`) |
+| --------------------- | -------------------------------- | --------------------------------------- |
+| Updated by framework? | ✓ Yes                            | ✗ Never                                 |
+| Contains              | Reusable views, hooks, DB, theme | Content, extensions, overrides          |
+| Import alias          | `@core/*`                        | `@user/*`                               |
 
 ## Data flow
 
@@ -54,16 +54,16 @@ devholm.config.ts
 
 ## Path aliases
 
-| Alias | Resolves to |
-|---|---|
-| `@/*` | `src/*` (app router pages, auth, etc.) |
-| `@core/*` | `src/core/*` |
-| `@user/*` | `src/user/*` |
-| `@config` | `devholm.config.ts` |
-| `@/components/*` | `src/core/components/*` |
-| `@/lib/*` | `src/core/lib/*` |
-| `@/hooks/*` | `src/core/hooks/*` |
-| `@/db/*` | `src/core/db/*` |
-| `@/config/*` | `src/core/config/*` |
-| `@/theme/*` | `src/core/theme/*` |
-| `@/types/*` | `src/core/types_app/*` |
+| Alias            | Resolves to                            |
+| ---------------- | -------------------------------------- |
+| `@/*`            | `src/*` (app router pages, auth, etc.) |
+| `@core/*`        | `src/core/*`                           |
+| `@user/*`        | `src/user/*`                           |
+| `@config`        | `devholm.config.ts`                    |
+| `@/components/*` | `src/core/components/*`                |
+| `@/lib/*`        | `src/core/lib/*`                       |
+| `@/hooks/*`      | `src/core/hooks/*`                     |
+| `@/db/*`         | `src/core/db/*`                        |
+| `@/config/*`     | `src/core/config/*`                    |
+| `@/theme/*`      | `src/core/theme/*`                     |
+| `@/types/*`      | `src/core/types_app/*`                 |

@@ -24,29 +24,21 @@ export async function seedResume(): Promise<void> {
   // ============================================
   const skillCategories = {
     frontend: [
-      'React', 'TypeScript', 'Next.js', 'Vue.js',
-      'HTML5', 'CSS3', 'Tailwind CSS', 'Material UI'
+      'React',
+      'TypeScript',
+      'Next.js',
+      'Vue.js',
+      'HTML5',
+      'CSS3',
+      'Tailwind CSS',
+      'Material UI',
     ],
-    backend: [
-      'Node.js', 'Express', 'Python', 'Django',
-      'GraphQL', 'REST APIs', 'OAuth', 'JWT'
-    ],
-    testing: [
-      'Jest', 'Vitest', 'Playwright', 'Cypress'
-    ],
-    devops: [
-      'Docker', 'GitHub Actions', 'CI/CD', 'Terraform'
-    ],
-    cloud: [
-      'AWS', 'Vercel', 'Railway', 'Netlify'
-    ],
-    databases: [
-      'PostgreSQL', 'MySQL', 'MongoDB', 'Redis'
-    ],
-    tools: [
-      'Git', 'GitHub', 'VS Code', 'Figma',
-      'Jira', 'Notion'
-    ],
+    backend: ['Node.js', 'Express', 'Python', 'Django', 'GraphQL', 'REST APIs', 'OAuth', 'JWT'],
+    testing: ['Jest', 'Vitest', 'Playwright', 'Cypress'],
+    devops: ['Docker', 'GitHub Actions', 'CI/CD', 'Terraform'],
+    cloud: ['AWS', 'Vercel', 'Railway', 'Netlify'],
+    databases: ['PostgreSQL', 'MySQL', 'MongoDB', 'Redis'],
+    tools: ['Git', 'GitHub', 'VS Code', 'Figma', 'Jira', 'Notion'],
   };
 
   for (const [category, skills] of Object.entries(skillCategories)) {
@@ -116,9 +108,7 @@ export async function seedResume(): Promise<void> {
   for (const exp of experiences) {
     const { highlights, technologies, ...experienceData } = exp;
 
-    const [inserted] = await db('experiences')
-      .insert(experienceData)
-      .returning('id');
+    const [inserted] = await db('experiences').insert(experienceData).returning('id');
 
     const experienceId = inserted.id;
 

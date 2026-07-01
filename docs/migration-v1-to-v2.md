@@ -6,15 +6,15 @@ This document covers every breaking change introduced in v2.0.0 and the exact st
 
 ## Overview of Breaking Changes
 
-| Area | v1.0.0 | v2.0.0 |
-|------|--------|--------|
-| Source layout | `src/components/`, `src/lib/`, etc. | `src/core/components/`, `src/core/lib/`, etc. |
-| User content | Scattered in components / hardcoded | `src/user/content/*.ts` |
-| Page logic | `*PageClient.tsx` per page | `src/core/views/*View.tsx` |
-| Site config | `src/config/site.ts` | `devholm.config.ts` at root |
-| Admin nav items | Hardcoded in `AdminLayoutClient.tsx` | `src/user/extensions/admin/index.tsx` |
-| DB migrations | Single `src/db/migrations/` dir | Array: `src/core/db/migrations/` + `src/user/extensions/db/migrations/` |
-| Path aliases | `@/components/*`, `@/lib/*`, etc. | Same aliases preserved + new `@core/*`, `@user/*`, `@config` |
+| Area            | v1.0.0                               | v2.0.0                                                                  |
+| --------------- | ------------------------------------ | ----------------------------------------------------------------------- |
+| Source layout   | `src/components/`, `src/lib/`, etc.  | `src/core/components/`, `src/core/lib/`, etc.                           |
+| User content    | Scattered in components / hardcoded  | `src/user/content/*.ts`                                                 |
+| Page logic      | `*PageClient.tsx` per page           | `src/core/views/*View.tsx`                                              |
+| Site config     | `src/config/site.ts`                 | `devholm.config.ts` at root                                             |
+| Admin nav items | Hardcoded in `AdminLayoutClient.tsx` | `src/user/extensions/admin/index.tsx`                                   |
+| DB migrations   | Single `src/db/migrations/` dir      | Array: `src/core/db/migrations/` + `src/user/extensions/db/migrations/` |
+| Path aliases    | `@/components/*`, `@/lib/*`, etc.    | Same aliases preserved + new `@core/*`, `@user/*`, `@config`            |
 
 ---
 
@@ -201,7 +201,9 @@ Then reference `adminExtensions` in `devholm.config.ts`:
 import { adminExtensions } from './src/user/extensions/admin';
 
 // in config:
-extensions: { admin: adminExtensions }
+extensions: {
+  admin: adminExtensions;
+}
 ```
 
 ### 10. Update `knexfile.js` for dual migrations
@@ -225,18 +227,18 @@ pnpm build        # must produce a successful build
 
 ## Path Alias Quick Reference
 
-| Old import | New import (unchanged) | Resolves to |
-|------------|------------------------|-------------|
-| `@/components/X` | `@/components/X` | `src/core/components/X` |
-| `@/lib/X` | `@/lib/X` | `src/core/lib/X` |
-| `@/hooks/X` | `@/hooks/X` | `src/core/hooks/X` |
-| `@/db/X` | `@/db/X` | `src/core/db/X` |
-| `@/config` | `@/config` | `src/core/config/index` |
-| `@/theme/X` | `@/theme/X` | `src/core/theme/X` |
-| `@/types` | `@/types` | `src/core/types_app/index` |
-| _(new)_ | `@core/X` | `src/core/X` |
-| _(new)_ | `@user/X` | `src/user/X` |
-| _(new)_ | `@config` | `devholm.config` |
+| Old import       | New import (unchanged) | Resolves to                |
+| ---------------- | ---------------------- | -------------------------- |
+| `@/components/X` | `@/components/X`       | `src/core/components/X`    |
+| `@/lib/X`        | `@/lib/X`              | `src/core/lib/X`           |
+| `@/hooks/X`      | `@/hooks/X`            | `src/core/hooks/X`         |
+| `@/db/X`         | `@/db/X`               | `src/core/db/X`            |
+| `@/config`       | `@/config`             | `src/core/config/index`    |
+| `@/theme/X`      | `@/theme/X`            | `src/core/theme/X`         |
+| `@/types`        | `@/types`              | `src/core/types_app/index` |
+| _(new)_          | `@core/X`              | `src/core/X`               |
+| _(new)_          | `@user/X`              | `src/user/X`               |
+| _(new)_          | `@config`              | `devholm.config`           |
 
 > **Note:** All existing `@/` imports continue to work unchanged via tsconfig alias overrides. You only need to rewrite them if you want to explicitly reference the new locations.
 
@@ -270,12 +272,12 @@ All `*PageClient.tsx` files were deleted. Their logic now lives in the correspon
 
 From v2.0.0 onward this project uses [Conventional Commits](https://www.conventionalcommits.org/):
 
-| Commit prefix | Version bump |
-|---------------|-------------|
-| `fix: …` | Patch (2.0.0 → 2.0.1) |
-| `feat: …` | Minor (2.0.0 → 2.1.0) |
+| Commit prefix                            | Version bump          |
+| ---------------------------------------- | --------------------- |
+| `fix: …`                                 | Patch (2.0.0 → 2.0.1) |
+| `feat: …`                                | Minor (2.0.0 → 2.1.0) |
 | `feat!: …` or `BREAKING CHANGE:` in body | Major (2.0.0 → 3.0.0) |
-| `docs:`, `chore:`, `refactor:`, `test:` | No bump |
+| `docs:`, `chore:`, `refactor:`, `test:`  | No bump               |
 
 **Release workflow:**
 

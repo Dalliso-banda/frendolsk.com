@@ -33,9 +33,7 @@ vi.mock('@/config', () => ({
       { label: 'Home', href: '/' },
       { label: 'About', href: '/about' },
     ],
-    resources: [
-      { label: 'Blog', href: '/blog' },
-    ],
+    resources: [{ label: 'Blog', href: '/blog' }],
   },
 }));
 
@@ -64,7 +62,7 @@ describe('Logo', () => {
   it('renders the logo link', async () => {
     const { Logo } = await import('../common/Logo');
     render(<Logo />, { wrapper: Wrapper });
-    
+
     const link = screen.getByRole('link');
     expect(link).toBeInTheDocument();
     expect(link).toHaveAttribute('href', '/');
@@ -73,9 +71,9 @@ describe('Logo', () => {
   it('renders with different sizes', async () => {
     const { Logo } = await import('../common/Logo');
     const { rerender } = render(<Logo size="small" />, { wrapper: Wrapper });
-    
+
     expect(screen.getByRole('link')).toBeInTheDocument();
-    
+
     rerender(
       <Wrapper>
         <Logo size="large" />

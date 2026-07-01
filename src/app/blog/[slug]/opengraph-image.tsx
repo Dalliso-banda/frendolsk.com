@@ -54,7 +54,8 @@ export default async function Image({ params }: { params: Promise<{ slug: string
             left: 0,
             right: 0,
             bottom: 0,
-            background: 'linear-gradient(135deg, rgba(196, 160, 82, 0.1) 0%, rgba(107, 91, 149, 0.1) 50%, rgba(46, 134, 171, 0.1) 100%)',
+            background:
+              'linear-gradient(135deg, rgba(196, 160, 82, 0.1) 0%, rgba(107, 91, 149, 0.1) 50%, rgba(46, 134, 171, 0.1) 100%)',
           }}
         />
 

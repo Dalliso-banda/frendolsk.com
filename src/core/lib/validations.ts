@@ -31,10 +31,7 @@ export const postSchema = z.object({
   featuredImageUrl: z.string().url().optional().or(z.literal('')),
   featuredImageAlt: z.string().max(300).optional(),
   seoTitle: z.string().max(70, 'SEO title should be under 70 characters').optional(),
-  seoDescription: z
-    .string()
-    .max(160, 'SEO description should be under 160 characters')
-    .optional(),
+  seoDescription: z.string().max(160, 'SEO description should be under 160 characters').optional(),
   canonicalUrl: z.string().url().optional().or(z.literal('')),
   ogImageUrl: z.string().url().optional().or(z.literal('')),
   noindex: z.boolean().default(false),
@@ -168,7 +165,11 @@ export type SiteSettingsUpdateInput = z.infer<typeof siteSettingsUpdateSchema>;
 // =============================================================================
 
 export const profileUpdateSchema = z.object({
-  displayName: z.string().min(1, 'Display name is required').max(100, 'Display name too long').optional(),
+  displayName: z
+    .string()
+    .min(1, 'Display name is required')
+    .max(100, 'Display name too long')
+    .optional(),
   bio: z.string().max(500, 'Bio too long').optional().nullable(),
   title: z.string().max(100, 'Title too long').optional().nullable(),
   location: z.string().max(100, 'Location too long').optional().nullable(),
@@ -188,13 +189,15 @@ export const emailChangeSchema = z.object({
 
 export type EmailChangeInput = z.infer<typeof emailChangeSchema>;
 
-export const passwordChangeSchema = z.object({
-  currentPassword: z.string().min(8, 'Password must be at least 8 characters'),
-  newPassword: z.string().min(8, 'Password must be at least 8 characters'),
-  confirmPassword: z.string().min(8, 'Password must be at least 8 characters'),
-}).refine((data) => data.newPassword === data.confirmPassword, {
-  message: "Passwords don't match",
-  path: ['confirmPassword'],
-});
+export const passwordChangeSchema = z
+  .object({
+    currentPassword: z.string().min(8, 'Password must be at least 8 characters'),
+    newPassword: z.string().min(8, 'Password must be at least 8 characters'),
+    confirmPassword: z.string().min(8, 'Password must be at least 8 characters'),
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ['confirmPassword'],
+  });
 
 export type PasswordChangeInput = z.infer<typeof passwordChangeSchema>;

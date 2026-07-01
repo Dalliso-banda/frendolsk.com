@@ -17,9 +17,9 @@ export const DEFAULT_ABOUT_CONTENT: AboutContent = {
     "When I'm not coding, you can find me exploring new technologies, contributing to open source projects, or enjoying a good cup of coffee while reading about the latest trends in web development.",
   ],
   story: [
-    "I started my journey in software development with a curiosity about how things work on the internet. That curiosity led me to learn HTML, CSS, and JavaScript, and eventually to building full-stack applications with modern frameworks.",
+    'I started my journey in software development with a curiosity about how things work on the internet. That curiosity led me to learn HTML, CSS, and JavaScript, and eventually to building full-stack applications with modern frameworks.',
     "Over the years, I've had the opportunity to work on diverse projects, from small business websites to large-scale enterprise applications. Each project has taught me something new and reinforced my love for creating software that makes a difference.",
-    "Today, I focus on building accessible, performant, and user-friendly web applications. I believe in writing clean code, continuous learning, and sharing knowledge with the developer community.",
+    'Today, I focus on building accessible, performant, and user-friendly web applications. I believe in writing clean code, continuous learning, and sharing knowledge with the developer community.',
   ],
   skills: [
     { name: 'React', category: 'frontend' },

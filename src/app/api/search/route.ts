@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
   }
 
   const { searchParams } = new URL(request.url);
-  
+
   // Validate query params
   const queryResult = searchQuerySchema.safeParse({
     q: searchParams.get('q') || '',
@@ -68,9 +68,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(results, { headers: rateLimitHeaders(rateLimit) });
   } catch (error) {
     console.error('Search API error:', error);
-    return NextResponse.json(
-      { error: 'Search failed' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Search failed' }, { status: 500 });
   }
 }

@@ -11,7 +11,7 @@ async function getPosts() {
   try {
     const { getPublishedPosts } = await import('@/db/posts');
     const result = await getPublishedPosts(1, 20);
-    return result.posts.map(post => ({
+    return result.posts.map((post) => ({
       slug: post.slug,
       title: post.title,
       excerpt: post.excerpt || '',
@@ -23,19 +23,22 @@ async function getPosts() {
       {
         slug: 'building-modern-personal-website-nextjs',
         title: 'Building a Modern Personal Website with Next.js',
-        excerpt: 'A deep dive into creating a performant, accessible, and beautiful personal website using Next.js and MUI.',
+        excerpt:
+          'A deep dive into creating a performant, accessible, and beautiful personal website using Next.js and MUI.',
         publishedAt: new Date('2024-01-15'),
       },
       {
         slug: 'art-of-writing-clean-typescript',
         title: 'The Art of Writing Clean TypeScript',
-        excerpt: 'Best practices for writing maintainable, type-safe code that your future self will thank you for.',
+        excerpt:
+          'Best practices for writing maintainable, type-safe code that your future self will thank you for.',
         publishedAt: new Date('2024-01-10'),
       },
       {
         slug: 'devops-for-developers',
         title: 'DevOps for Developers: A Practical Guide',
-        excerpt: 'Understanding CI/CD, containerization, and cloud deployment without becoming a full-time DevOps engineer.',
+        excerpt:
+          'Understanding CI/CD, containerization, and cloud deployment without becoming a full-time DevOps engineer.',
         publishedAt: new Date('2024-01-05'),
       },
     ];
@@ -57,7 +60,7 @@ function formatDate(date: Date): string {
 
 async function generateRssFeed(): Promise<string> {
   const posts = await getPosts();
-  
+
   const items = posts
     .sort((a, b) => b.publishedAt.getTime() - a.publishedAt.getTime())
     .map(

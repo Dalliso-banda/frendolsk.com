@@ -124,7 +124,7 @@ export async function getMessageById(id: string): Promise<InboxMessage | null> {
  */
 export async function createMessage(input: CreateMessageInput): Promise<InboxMessage> {
   const db = getDb();
-  
+
   const [message] = await db('inbox_messages')
     .insert({
       source: input.source || 'contact',
@@ -163,9 +163,9 @@ export async function updateMessageStatus(
   status: InboxMessage['status']
 ): Promise<InboxMessage | null> {
   const db = getDb();
-  
+
   const updateData: Record<string, unknown> = { status };
-  
+
   // Set read_at when marking as read
   if (status === 'read') {
     updateData.read_at = new Date();
@@ -181,13 +181,10 @@ export async function updateMessageStatus(
  */
 export async function markMessagesAsRead(ids: string[]): Promise<number> {
   const db = getDb();
-  return db('inbox_messages')
-    .whereIn('id', ids)
-    .where('status', 'unread')
-    .update({
-      status: 'read',
-      read_at: new Date(),
-    });
+  return db('inbox_messages').whereIn('id', ids).where('status', 'unread').update({
+    status: 'read',
+    read_at: new Date(),
+  });
 }
 
 /**
@@ -195,9 +192,7 @@ export async function markMessagesAsRead(ids: string[]): Promise<number> {
  */
 export async function deleteMessages(ids: string[]): Promise<number> {
   const db = getDb();
-  return db('inbox_messages')
-    .whereIn('id', ids)
-    .update({ status: 'deleted' });
+  return db('inbox_messages').whereIn('id', ids).update({ status: 'deleted' });
 }
 
 /**
@@ -205,9 +200,7 @@ export async function deleteMessages(ids: string[]): Promise<number> {
  */
 export async function hardDeleteMessages(ids: string[]): Promise<number> {
   const db = getDb();
-  return db('inbox_messages')
-    .whereIn('id', ids)
-    .del();
+  return db('inbox_messages').whereIn('id', ids).del();
 }
 
 /**
@@ -215,9 +208,7 @@ export async function hardDeleteMessages(ids: string[]): Promise<number> {
  */
 export async function archiveMessages(ids: string[]): Promise<number> {
   const db = getDb();
-  return db('inbox_messages')
-    .whereIn('id', ids)
-    .update({ status: 'archived' });
+  return db('inbox_messages').whereIn('id', ids).update({ status: 'archived' });
 }
 
 /**
@@ -225,9 +216,7 @@ export async function archiveMessages(ids: string[]): Promise<number> {
  */
 export async function markAsSpam(ids: string[]): Promise<number> {
   const db = getDb();
-  return db('inbox_messages')
-    .whereIn('id', ids)
-    .update({ status: 'spam' });
+  return db('inbox_messages').whereIn('id', ids).update({ status: 'spam' });
 }
 
 /**
@@ -235,9 +224,7 @@ export async function markAsSpam(ids: string[]): Promise<number> {
  */
 export async function getUnreadCount(): Promise<number> {
   const db = getDb();
-  const [{ count }] = await db('inbox_messages')
-    .where('status', 'unread')
-    .count('* as count');
+  const [{ count }] = await db('inbox_messages').where('status', 'unread').count('* as count');
   return Number(count);
 }
 
@@ -252,7 +239,7 @@ export async function getMessageStats(): Promise<{
   spam: number;
 }> {
   const db = getDb();
-  
+
   const stats = await db('inbox_messages')
     .select('status')
     .count('* as count')

@@ -7,7 +7,7 @@ html {
 }
 
 html[data-theme='light'] {
-  background-color: #F0F4F8; /* Light mode - Piltover cool gray */
+  background-color: #f0f4f8; /* Light mode - Piltover cool gray */
   color-scheme: light;
 }
 
@@ -26,8 +26,17 @@ body {
 body {
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
-  font-family: var(--font-inter), 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
-    Oxygen, Ubuntu, Cantarell, sans-serif;
+  font-family:
+    var(--font-inter),
+    'Inter',
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    Roboto,
+    Oxygen,
+    Ubuntu,
+    Cantarell,
+    sans-serif;
 }
 
 img,
@@ -58,7 +67,7 @@ h6 {
 
 /* Focus styles for accessibility */
 :focus-visible {
-  outline: 2px solid var(--focus-color, #7DD4EA);
+  outline: 2px solid var(--focus-color, #7dd4ea);
   outline-offset: 2px;
 }
 
@@ -67,8 +76,8 @@ h6 {
   position: absolute;
   top: -40px;
   left: 0;
-  background: #7DD4EA;
-  color: #0A1628;
+  background: #7dd4ea;
+  color: #0a1628;
   padding: 8px 16px;
   z-index: 9999;
   transition: top 0.3s;
@@ -194,4 +203,3 @@ h6:hover .heading-anchor {
   font-weight: 600;
   text-align: left;
 }
-

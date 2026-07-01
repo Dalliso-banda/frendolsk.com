@@ -19,13 +19,9 @@ export interface SearchResponse {
 /**
  * Search posts using PostgreSQL full-text search
  */
-export async function searchPosts(
-  query: string,
-  limit = 10,
-  offset = 0
-): Promise<SearchResponse> {
+export async function searchPosts(query: string, limit = 10, offset = 0): Promise<SearchResponse> {
   const db = getDb();
-  
+
   if (!query || query.trim().length < 2) {
     return { results: [], query, total: 0 };
   }
@@ -49,9 +45,7 @@ export async function searchPosts(
 
   try {
     // Get total count
-    let countQuery = db('posts')
-      .where('status', 'published')
-      .whereNotNull('published_at');
+    let countQuery = db('posts').where('status', 'published').whereNotNull('published_at');
 
     for (const pattern of likePatterns) {
       countQuery = countQuery.where(function () {
@@ -73,13 +67,16 @@ export async function searchPosts(
         'excerpt',
         'published_at as publishedAt',
         // Calculate a simple relevance score
-        db.raw(`
+        db.raw(
+          `
           (
             CASE WHEN title ILIKE ? THEN 10 ELSE 0 END +
             CASE WHEN excerpt ILIKE ? THEN 5 ELSE 0 END +
             CASE WHEN content_markdown ILIKE ? THEN 1 ELSE 0 END
           ) as relevance
-        `, [`%${searchTerms[0]}%`, `%${searchTerms[0]}%`, `%${searchTerms[0]}%`])
+        `,
+          [`%${searchTerms[0]}%`, `%${searchTerms[0]}%`, `%${searchTerms[0]}%`]
+        )
       )
       .where('status', 'published')
       .whereNotNull('published_at');
@@ -103,10 +100,7 @@ export async function searchPosts(
       type: 'post' as const,
       title: post.title as string,
       slug: post.slug as string,
-      excerpt: highlightSnippet(
-        (post.excerpt as string) || '',
-        searchTerms
-      ),
+      excerpt: highlightSnippet((post.excerpt as string) || '', searchTerms),
       publishedAt: post.publishedAt as Date | null,
       relevance: Number(post.relevance),
     }));
@@ -125,10 +119,7 @@ export async function searchPosts(
 /**
  * Search suggestions for autocomplete
  */
-export async function getSearchSuggestions(
-  query: string,
-  limit = 5
-): Promise<string[]> {
+export async function getSearchSuggestions(query: string, limit = 5): Promise<string[]> {
   const db = getDb();
 
   if (!query || query.trim().length < 2) {
@@ -148,10 +139,7 @@ export async function getSearchSuggestions(
       .limit(limit);
 
     // Get matching tags
-    const tags = await db('tags')
-      .select('name')
-      .whereILike('name', pattern)
-      .limit(limit);
+    const tags = await db('tags').select('name').whereILike('name', pattern).limit(limit);
 
     const suggestions = [
       ...posts.map((p: { title: string }) => p.title),
@@ -170,13 +158,13 @@ export async function getSearchSuggestions(
  */
 function highlightSnippet(text: string, terms: string[], maxLength = 200): string {
   if (!text) return '';
-  
+
   let snippet = text;
-  
+
   // Find the first occurrence of any search term
   let firstMatch = -1;
   let matchTerm = '';
-  
+
   for (const term of terms) {
     const idx = snippet.toLowerCase().indexOf(term.toLowerCase());
     if (idx !== -1 && (firstMatch === -1 || idx < firstMatch)) {
@@ -184,16 +172,17 @@ function highlightSnippet(text: string, terms: string[], maxLength = 200): strin
       matchTerm = term;
     }
   }
-  
+
   // Extract a snippet around the first match
   if (firstMatch !== -1) {
     const start = Math.max(0, firstMatch - 50);
     const end = Math.min(snippet.length, firstMatch + matchTerm.length + 150);
-    snippet = (start > 0 ? '...' : '') + snippet.slice(start, end) + (end < snippet.length ? '...' : '');
+    snippet =
+      (start > 0 ? '...' : '') + snippet.slice(start, end) + (end < snippet.length ? '...' : '');
   } else if (snippet.length > maxLength) {
     snippet = snippet.slice(0, maxLength) + '...';
   }
-  
+
   return snippet;
 }
 

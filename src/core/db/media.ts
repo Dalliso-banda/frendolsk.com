@@ -291,13 +291,11 @@ export async function getMediaAssetById(id: string): Promise<MediaAsset | null> 
  */
 export async function getMediaAssetWithVariants(id: string): Promise<MediaWithVariants | null> {
   const db = getDb();
-  
+
   const asset = await db('media_assets').where('id', id).first();
   if (!asset) return null;
 
-  const variants = await db('media_variants')
-    .where('media_asset_id', id)
-    .orderBy('variant_name');
+  const variants = await db('media_variants').where('media_asset_id', id).orderBy('variant_name');
 
   return {
     ...transformMediaAsset(asset),
@@ -319,7 +317,7 @@ export async function createMediaAsset(data: MediaAssetInsert): Promise<MediaAss
  */
 export async function createMediaVariants(variants: MediaVariantInsert[]): Promise<MediaVariant[]> {
   if (variants.length === 0) return [];
-  
+
   const db = getDb();
   const created = await db('media_variants').insert(variants).returning('*');
   return created.map(transformMediaVariant);
@@ -333,10 +331,7 @@ export async function updateMediaAsset(
   data: MediaAssetUpdate
 ): Promise<MediaAsset | null> {
   const db = getDb();
-  const [updated] = await db('media_assets')
-    .where('id', id)
-    .update(data)
-    .returning('*');
+  const [updated] = await db('media_assets').where('id', id).update(data).returning('*');
   return updated ? transformMediaAsset(updated) : null;
 }
 
@@ -388,18 +383,13 @@ export async function getVariantByName(
  */
 export async function getAllStoragePaths(id: string): Promise<string[]> {
   const db = getDb();
-  
+
   const asset = await db('media_assets').select('storage_path').where('id', id).first();
   if (!asset) return [];
 
-  const variants = await db('media_variants')
-    .select('storage_path')
-    .where('media_asset_id', id);
+  const variants = await db('media_variants').select('storage_path').where('media_asset_id', id);
 
-  return [
-    asset.storage_path,
-    ...variants.map((v: { storage_path: string }) => v.storage_path),
-  ];
+  return [asset.storage_path, ...variants.map((v: { storage_path: string }) => v.storage_path)];
 }
 
 // =============================================================================
@@ -453,10 +443,10 @@ export async function getMediaStats(): Promise<{
     .whereNot('mime_type', 'like', 'text/markdown')
     .whereNot('mime_type', 'like', 'text/csv')
     .count('* as count');
-  
+
   // Sum original file sizes plus variant sizes
   const [assetSize] = await db('media_assets').sum('file_size as total');
-  
+
   // Try to get variant sizes (table may not exist yet before migration)
   let variantSizeTotal = 0;
   try {
@@ -485,10 +475,7 @@ export async function getMediaStats(): Promise<{
  */
 export async function getRecentMedia(limit = 10): Promise<MediaAsset[]> {
   const db = getDb();
-  const assets = await db('media_assets')
-    .select('*')
-    .orderBy('created_at', 'desc')
-    .limit(limit);
+  const assets = await db('media_assets').select('*').orderBy('created_at', 'desc').limit(limit);
   return assets.map(transformMediaAsset);
 }
 
@@ -497,9 +484,7 @@ export async function getRecentMedia(limit = 10): Promise<MediaAsset[]> {
  */
 export async function filenameExists(filename: string): Promise<boolean> {
   const db = getDb();
-  const [{ count }] = await db('media_assets')
-    .where('filename', filename)
-    .count('* as count');
+  const [{ count }] = await db('media_assets').where('filename', filename).count('* as count');
   return Number(count) > 0;
 }
 

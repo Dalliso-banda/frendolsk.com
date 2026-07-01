@@ -85,11 +85,21 @@ function LoadingSkeleton() {
     <TableBody>
       {[1, 2, 3, 4, 5].map((i) => (
         <TableRow key={i}>
-          <TableCell padding="checkbox"><Skeleton width={20} /></TableCell>
-          <TableCell><Skeleton width="80%" /></TableCell>
-          <TableCell><Skeleton width={80} /></TableCell>
-          <TableCell><Skeleton width={100} /></TableCell>
-          <TableCell><Skeleton width={40} /></TableCell>
+          <TableCell padding="checkbox">
+            <Skeleton width={20} />
+          </TableCell>
+          <TableCell>
+            <Skeleton width="80%" />
+          </TableCell>
+          <TableCell>
+            <Skeleton width={80} />
+          </TableCell>
+          <TableCell>
+            <Skeleton width={100} />
+          </TableCell>
+          <TableCell>
+            <Skeleton width={40} />
+          </TableCell>
         </TableRow>
       ))}
     </TableBody>
@@ -98,7 +108,13 @@ function LoadingSkeleton() {
 
 export default function InboxPage() {
   const [messages, setMessages] = useState<Message[]>([]);
-  const [stats, setStats] = useState<MessageStats>({ total: 0, unread: 0, read: 0, archived: 0, spam: 0 });
+  const [stats, setStats] = useState<MessageStats>({
+    total: 0,
+    unread: 0,
+    read: 0,
+    archived: 0,
+    spam: 0,
+  });
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(0);
@@ -150,7 +166,7 @@ export default function InboxPage() {
 
   useEffect(() => {
     fetchMessages();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, rowsPerPage, currentStatus]);
 
   // Client-side search filtering
@@ -177,9 +193,7 @@ export default function InboxPage() {
   };
 
   const handleSelectOne = (id: string) => {
-    setSelected((prev) =>
-      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
-    );
+    setSelected((prev) => (prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]));
   };
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, message: Message) => {
@@ -193,7 +207,9 @@ export default function InboxPage() {
     setSelectedMessage(null);
   };
 
-  const handleBulkAction = async (action: 'read' | 'unread' | 'archive' | 'spam' | 'delete' | 'restore') => {
+  const handleBulkAction = async (
+    action: 'read' | 'unread' | 'archive' | 'spam' | 'delete' | 'restore'
+  ) => {
     if (action === 'delete' && currentStatus !== 'deleted') {
       setDeleteDialogOpen(true);
       return;
@@ -259,11 +275,17 @@ export default function InboxPage() {
         // Update local state
         setMessages((prev) =>
           prev.map((m) =>
-            m.id === message.id ? { ...m, status: 'read' as const, readAt: new Date().toISOString() } : m
+            m.id === message.id
+              ? { ...m, status: 'read' as const, readAt: new Date().toISOString() }
+              : m
           )
         );
         // Update stats
-        setStats(prev => ({ ...prev, unread: Math.max(0, prev.unread - 1), read: prev.read + 1 }));
+        setStats((prev) => ({
+          ...prev,
+          unread: Math.max(0, prev.unread - 1),
+          read: prev.read + 1,
+        }));
       } catch (error) {
         console.error('Error marking message as read:', error);
       }
@@ -278,12 +300,29 @@ export default function InboxPage() {
   return (
     <Box sx={{ maxWidth: '100%', overflow: 'hidden' }}>
       {/* Header */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: { xs: 2, sm: 4 }, flexWrap: 'wrap', gap: 2 }}>
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'flex-start',
+          mb: { xs: 2, sm: 4 },
+          flexWrap: 'wrap',
+          gap: 2,
+        }}
+      >
         <Box>
-          <Typography variant="h4" fontWeight={700} sx={{ fontSize: { xs: '1.25rem', sm: '1.75rem', md: '2.125rem' } }}>
+          <Typography
+            variant="h4"
+            fontWeight={700}
+            sx={{ fontSize: { xs: '1.25rem', sm: '1.75rem', md: '2.125rem' } }}
+          >
             Inbox
           </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}
+          >
             {unreadCount > 0 ? `${unreadCount} unread messages` : 'All messages read'}
           </Typography>
         </Box>
@@ -336,7 +375,11 @@ export default function InboxPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             size="small"
-            sx={{ flexGrow: 1, minWidth: { xs: '100%', sm: 200 }, maxWidth: { xs: '100%', sm: 400 } }}
+            sx={{
+              flexGrow: 1,
+              minWidth: { xs: '100%', sm: 200 },
+              maxWidth: { xs: '100%', sm: 400 },
+            }}
             slotProps={{
               input: {
                 startAdornment: (
@@ -356,12 +399,20 @@ export default function InboxPage() {
               {currentStatus === 'deleted' ? (
                 <>
                   <Tooltip title="Restore">
-                    <IconButton size="small" color="success" onClick={() => handleBulkAction('restore')}>
+                    <IconButton
+                      size="small"
+                      color="success"
+                      onClick={() => handleBulkAction('restore')}
+                    >
                       <Restore />
                     </IconButton>
                   </Tooltip>
                   <Tooltip title="Permanently delete">
-                    <IconButton size="small" color="error" onClick={() => handleBulkAction('delete')}>
+                    <IconButton
+                      size="small"
+                      color="error"
+                      onClick={() => handleBulkAction('delete')}
+                    >
                       <Delete />
                     </IconButton>
                   </Tooltip>
@@ -389,7 +440,11 @@ export default function InboxPage() {
                     </IconButton>
                   </Tooltip>
                   <Tooltip title="Delete">
-                    <IconButton size="small" color="error" onClick={() => handleBulkAction('delete')}>
+                    <IconButton
+                      size="small"
+                      color="error"
+                      onClick={() => handleBulkAction('delete')}
+                    >
                       <Delete />
                     </IconButton>
                   </Tooltip>
@@ -409,7 +464,9 @@ export default function InboxPage() {
                 <TableCell padding="checkbox">
                   <Checkbox
                     indeterminate={selected.length > 0 && selected.length < filteredMessages.length}
-                    checked={filteredMessages.length > 0 && selected.length === filteredMessages.length}
+                    checked={
+                      filteredMessages.length > 0 && selected.length === filteredMessages.length
+                    }
                     onChange={handleSelectAll}
                   />
                 </TableCell>
@@ -426,7 +483,14 @@ export default function InboxPage() {
                 {filteredMessages.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={5} align="center" sx={{ py: 8 }}>
-                      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }}
+                      >
                         <Email sx={{ fontSize: 48, color: 'text.disabled', mb: 2 }} />
                         <Typography variant="h6" color="text.secondary">
                           No messages found
@@ -444,7 +508,10 @@ export default function InboxPage() {
                         onClick={() => handleRowClick(message)}
                         sx={{
                           cursor: 'pointer',
-                          bgcolor: message.status === 'unread' ? (theme) => alpha(theme.palette.primary.main, 0.05) : 'inherit',
+                          bgcolor:
+                            message.status === 'unread'
+                              ? (theme) => alpha(theme.palette.primary.main, 0.05)
+                              : 'inherit',
                           '&:hover': {
                             bgcolor: (theme) => alpha(theme.palette.primary.main, 0.08),
                           },
@@ -456,8 +523,12 @@ export default function InboxPage() {
                             onChange={() => handleSelectOne(message.id)}
                           />
                         </TableCell>
-                        <TableCell sx={{ maxWidth: { xs: 150, sm: 250, md: 350 }, overflow: 'hidden' }}>
-                          <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+                        <TableCell
+                          sx={{ maxWidth: { xs: 150, sm: 250, md: 350 }, overflow: 'hidden' }}
+                        >
+                          <Box
+                            sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden' }}
+                          >
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                               {message.status === 'unread' && (
                                 <Box
@@ -540,10 +611,7 @@ export default function InboxPage() {
                           </Tooltip>
                         </TableCell>
                         <TableCell align="right" onClick={(e) => e.stopPropagation()}>
-                          <IconButton
-                            size="small"
-                            onClick={(e) => handleMenuOpen(e, message)}
-                          >
+                          <IconButton size="small" onClick={(e) => handleMenuOpen(e, message)}>
                             <MoreVert />
                           </IconButton>
                         </TableCell>
@@ -570,11 +638,7 @@ export default function InboxPage() {
       </Card>
 
       {/* Actions Menu */}
-      <Menu
-        anchorEl={anchorEl}
-        open={Boolean(anchorEl)}
-        onClose={handleMenuClose}
-      >
+      <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose}>
         {selectedMessage?.status === 'unread' ? (
           <MenuItem
             onClick={async () => {
@@ -592,7 +656,11 @@ export default function InboxPage() {
                         : m
                     )
                   );
-                  setStats(prev => ({ ...prev, unread: Math.max(0, prev.unread - 1), read: prev.read + 1 }));
+                  setStats((prev) => ({
+                    ...prev,
+                    unread: Math.max(0, prev.unread - 1),
+                    read: prev.read + 1,
+                  }));
                 } catch (error) {
                   console.error('Error marking message as read:', error);
                 }
@@ -619,7 +687,11 @@ export default function InboxPage() {
                         : m
                     )
                   );
-                  setStats(prev => ({ ...prev, unread: prev.unread + 1, read: Math.max(0, prev.read - 1) }));
+                  setStats((prev) => ({
+                    ...prev,
+                    unread: prev.unread + 1,
+                    read: Math.max(0, prev.read - 1),
+                  }));
                 } catch (error) {
                   console.error('Error marking message as unread:', error);
                 }
@@ -711,13 +783,14 @@ export default function InboxPage() {
 
       {/* Delete Confirmation Dialog */}
       <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}>
-        <DialogTitle>{currentStatus === 'deleted' ? 'Permanently Delete Messages' : 'Delete Messages'}</DialogTitle>
+        <DialogTitle>
+          {currentStatus === 'deleted' ? 'Permanently Delete Messages' : 'Delete Messages'}
+        </DialogTitle>
         <DialogContent>
           <Typography>
             {currentStatus === 'deleted'
               ? `Are you sure you want to permanently delete ${selected.length} message${selected.length !== 1 ? 's' : ''}? This action cannot be undone.`
-              : `Are you sure you want to move ${selected.length} message${selected.length !== 1 ? 's' : ''} to trash? You can restore them later from the Trash tab.`
-            }
+              : `Are you sure you want to move ${selected.length} message${selected.length !== 1 ? 's' : ''} to trash? You can restore them later from the Trash tab.`}
           </Typography>
         </DialogContent>
         <DialogActions>

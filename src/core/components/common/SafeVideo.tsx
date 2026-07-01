@@ -2,10 +2,10 @@
 
 import { useState, useCallback, useRef } from 'react';
 import { Box, IconButton, SxProps, Theme, Typography } from '@mui/material';
-import { 
-  PlayArrow, 
-  Pause, 
-  VolumeUp, 
+import {
+  PlayArrow,
+  Pause,
+  VolumeUp,
   VolumeOff,
   Fullscreen,
   Videocam,
@@ -29,12 +29,12 @@ interface SafeVideoProps {
 /**
  * SafeVideo Component
  * ===================
- * 
+ *
  * A wrapper around video that gracefully handles:
  * - Missing/broken video files (shows placeholder)
  * - Null/undefined src values
  * - Network errors
- * 
+ *
  * Usage:
  * <SafeVideo src={post.videoUrl} poster={post.thumbnail} />
  */

@@ -11,16 +11,7 @@
  * For full layout control: pnpm devholm eject now
  */
 
-import {
-  Box,
-  Typography,
-  Container,
-  Grid2,
-  Paper,
-  Chip,
-  Divider,
-  alpha,
-} from '@mui/material';
+import { Box, Typography, Container, Grid2, Paper, Chip, Divider, alpha } from '@mui/material';
 import { Work, LocationOn, Update } from '@mui/icons-material';
 import { format } from 'date-fns';
 import { AuthAwareMainLayout } from '@/components';
@@ -138,10 +129,7 @@ export default function NowView({ content }: NowViewProps) {
             <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 600 }}>
               Key Features
             </Typography>
-            <Box
-              component="ul"
-              sx={{ m: 0, pl: 2, columns: { xs: 1, md: 2 }, columnGap: 4 }}
-            >
+            <Box component="ul" sx={{ m: 0, pl: 2, columns: { xs: 1, md: 2 }, columnGap: 4 }}>
               {currentProject.features.map((feature, i) => (
                 <Typography
                   key={i}

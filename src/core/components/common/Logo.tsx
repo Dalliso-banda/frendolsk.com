@@ -85,9 +85,10 @@ export function Logo({ size = 'medium' }: LogoProps) {
             letterSpacing: '0.02em',
             color: theme.palette.text.primary,
             display: { xs: size === 'small' ? 'none' : 'block', sm: 'block' },
-            textShadow: theme.palette.mode === 'dark' 
-              ? `0 0 24px ${alpha(theme.palette.primary.main, 0.3)}`
-              : 'none',
+            textShadow:
+              theme.palette.mode === 'dark'
+                ? `0 0 24px ${alpha(theme.palette.primary.main, 0.3)}`
+                : 'none',
           }}
         >
           {settings?.site?.name || 'My Site'}

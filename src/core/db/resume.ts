@@ -82,22 +82,30 @@ export async function getSkillsByCategory(category: string): Promise<Skill[]> {
 
 export async function getSkillsGroupedByCategory(): Promise<Record<string, Skill[]>> {
   const skills = await getAllSkills();
-  return skills.reduce((acc, skill) => {
-    if (!acc[skill.category]) {
-      acc[skill.category] = [];
-    }
-    acc[skill.category].push(skill);
-    return acc;
-  }, {} as Record<string, Skill[]>);
+  return skills.reduce(
+    (acc, skill) => {
+      if (!acc[skill.category]) {
+        acc[skill.category] = [];
+      }
+      acc[skill.category].push(skill);
+      return acc;
+    },
+    {} as Record<string, Skill[]>
+  );
 }
 
-export async function createSkill(data: Omit<Skill, 'id' | 'created_at' | 'updated_at'>): Promise<Skill> {
+export async function createSkill(
+  data: Omit<Skill, 'id' | 'created_at' | 'updated_at'>
+): Promise<Skill> {
   const [skill] = await getDb()('skills').insert(data).returning('*');
   return skill;
 }
 
 export async function updateSkill(id: string, data: Partial<Skill>): Promise<Skill | null> {
-  const [skill] = await getDb()('skills').where({ id }).update({ ...data, updated_at: new Date() }).returning('*');
+  const [skill] = await getDb()('skills')
+    .where({ id })
+    .update({ ...data, updated_at: new Date() })
+    .returning('*');
   return skill || null;
 }
 
@@ -111,36 +119,38 @@ export async function getAllExperiences(): Promise<ExperienceWithDetails[]> {
   const experiences = await getDb()('experiences')
     .orderBy('is_current', 'desc')
     .orderBy('start_date', 'desc');
-  
-  return Promise.all(experiences.map(async (exp) => {
-    const highlights = await getDb()('experience_highlights')
-      .where({ experience_id: exp.id })
-      .orderBy('sort_order');
-    
-    const technologies = await getDb()('experience_technologies')
-      .where({ experience_id: exp.id })
-      .orderBy('sort_order');
-    
-    return {
-      ...exp,
-      highlights: highlights.map((h) => h.highlight),
-      technologies: technologies.map((t) => t.technology),
-    };
-  }));
+
+  return Promise.all(
+    experiences.map(async (exp) => {
+      const highlights = await getDb()('experience_highlights')
+        .where({ experience_id: exp.id })
+        .orderBy('sort_order');
+
+      const technologies = await getDb()('experience_technologies')
+        .where({ experience_id: exp.id })
+        .orderBy('sort_order');
+
+      return {
+        ...exp,
+        highlights: highlights.map((h) => h.highlight),
+        technologies: technologies.map((t) => t.technology),
+      };
+    })
+  );
 }
 
 export async function getExperienceById(id: string): Promise<ExperienceWithDetails | null> {
   const experience = await getDb()('experiences').where({ id }).first();
   if (!experience) return null;
-  
+
   const highlights = await getDb()('experience_highlights')
     .where({ experience_id: id })
     .orderBy('sort_order');
-  
+
   const technologies = await getDb()('experience_technologies')
     .where({ experience_id: id })
     .orderBy('sort_order');
-  
+
   return {
     ...experience,
     highlights: highlights.map((h) => h.highlight),
@@ -160,7 +170,7 @@ export async function createExperience(
   technologies: string[] = []
 ): Promise<ExperienceWithDetails> {
   const [experience] = await getDb()('experiences').insert(data).returning('*');
-  
+
   if (highlights.length > 0) {
     await getDb()('experience_highlights').insert(
       highlights.map((highlight, index) => ({
@@ -170,7 +180,7 @@ export async function createExperience(
       }))
     );
   }
-  
+
   if (technologies.length > 0) {
     await getDb()('experience_technologies').insert(
       technologies.map((technology, index) => ({
@@ -180,7 +190,7 @@ export async function createExperience(
       }))
     );
   }
-  
+
   return {
     ...experience,
     highlights,
@@ -198,9 +208,9 @@ export async function updateExperience(
     .where({ id })
     .update({ ...data, updated_at: new Date() })
     .returning('*');
-  
+
   if (!experience) return null;
-  
+
   if (highlights !== undefined) {
     await getDb()('experience_highlights').where({ experience_id: id }).delete();
     if (highlights.length > 0) {
@@ -213,7 +223,7 @@ export async function updateExperience(
       );
     }
   }
-  
+
   if (technologies !== undefined) {
     await getDb()('experience_technologies').where({ experience_id: id }).delete();
     if (technologies.length > 0) {
@@ -226,7 +236,7 @@ export async function updateExperience(
       );
     }
   }
-  
+
   return getExperienceById(id);
 }
 
@@ -244,13 +254,21 @@ export async function getEducationById(id: string): Promise<Education | null> {
   return getDb()('education').where({ id }).first() || null;
 }
 
-export async function createEducation(data: Omit<Education, 'id' | 'created_at' | 'updated_at'>): Promise<Education> {
+export async function createEducation(
+  data: Omit<Education, 'id' | 'created_at' | 'updated_at'>
+): Promise<Education> {
   const [education] = await getDb()('education').insert(data).returning('*');
   return education;
 }
 
-export async function updateEducation(id: string, data: Partial<Education>): Promise<Education | null> {
-  const [education] = await getDb()('education').where({ id }).update({ ...data, updated_at: new Date() }).returning('*');
+export async function updateEducation(
+  id: string,
+  data: Partial<Education>
+): Promise<Education | null> {
+  const [education] = await getDb()('education')
+    .where({ id })
+    .update({ ...data, updated_at: new Date() })
+    .returning('*');
   return education || null;
 }
 
@@ -268,13 +286,21 @@ export async function getCertificationById(id: string): Promise<Certification | 
   return getDb()('certifications').where({ id }).first() || null;
 }
 
-export async function createCertification(data: Omit<Certification, 'id' | 'created_at' | 'updated_at'>): Promise<Certification> {
+export async function createCertification(
+  data: Omit<Certification, 'id' | 'created_at' | 'updated_at'>
+): Promise<Certification> {
   const [certification] = await getDb()('certifications').insert(data).returning('*');
   return certification;
 }
 
-export async function updateCertification(id: string, data: Partial<Certification>): Promise<Certification | null> {
-  const [certification] = await getDb()('certifications').where({ id }).update({ ...data, updated_at: new Date() }).returning('*');
+export async function updateCertification(
+  id: string,
+  data: Partial<Certification>
+): Promise<Certification | null> {
+  const [certification] = await getDb()('certifications')
+    .where({ id })
+    .update({ ...data, updated_at: new Date() })
+    .returning('*');
   return certification || null;
 }
 
@@ -298,6 +324,6 @@ export async function getFullResume(): Promise<FullResume> {
     getAllEducation(),
     getAllCertifications(),
   ]);
-  
+
   return { skills, experiences, education, certifications };
 }

@@ -22,8 +22,8 @@ export function MarkdownRenderer({ content, sx }: MarkdownRendererProps) {
         '& h2': { fontWeight: 600, fontSize: '1.5rem' },
         '& h3': { fontWeight: 600, fontSize: '1.25rem' },
         '& p': { mb: 2, lineHeight: 1.8 },
-        '& ul, & ol': { 
-          mb: 2, 
+        '& ul, & ol': {
+          mb: 2,
           pl: 2.5,
           ml: 0,
         },
@@ -51,23 +51,12 @@ export function MarkdownRenderer({ content, sx }: MarkdownRendererProps) {
     >
       {parts.map((part, index) => {
         if (part.type === 'code') {
-          return (
-            <CodeBlock
-              key={index}
-              code={part.content}
-              language={part.language}
-            />
-          );
+          return <CodeBlock key={index} code={part.content} language={part.language} />;
         }
 
         // Render text content
         const html = renderMarkdownText(part.content);
-        return (
-          <Box
-            key={index}
-            dangerouslySetInnerHTML={{ __html: html }}
-          />
-        );
+        return <Box key={index} dangerouslySetInnerHTML={{ __html: html }} />;
       })}
     </Box>
   );

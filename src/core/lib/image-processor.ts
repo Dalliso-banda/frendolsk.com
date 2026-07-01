@@ -58,12 +58,8 @@ export interface UploadResult {
 /** Magic bytes for file type detection */
 const FILE_SIGNATURES: Record<string, { bytes: number[]; offset?: number }[]> = {
   // Images
-  'image/jpeg': [
-    { bytes: [0xFF, 0xD8, 0xFF] },
-  ],
-  'image/png': [
-    { bytes: [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A] },
-  ],
+  'image/jpeg': [{ bytes: [0xff, 0xd8, 0xff] }],
+  'image/png': [{ bytes: [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a] }],
   'image/gif': [
     { bytes: [0x47, 0x49, 0x46, 0x38, 0x37, 0x61] }, // GIF87a
     { bytes: [0x47, 0x49, 0x46, 0x38, 0x39, 0x61] }, // GIF89a
@@ -72,74 +68,74 @@ const FILE_SIGNATURES: Record<string, { bytes: number[]; offset?: number }[]> = 
     { bytes: [0x52, 0x49, 0x46, 0x46], offset: 0 }, // RIFF
   ],
   'image/svg+xml': [
-    { bytes: [0x3C, 0x3F, 0x78, 0x6D, 0x6C] }, // <?xml
-    { bytes: [0x3C, 0x73, 0x76, 0x67] }, // <svg
+    { bytes: [0x3c, 0x3f, 0x78, 0x6d, 0x6c] }, // <?xml
+    { bytes: [0x3c, 0x73, 0x76, 0x67] }, // <svg
   ],
   'image/bmp': [
-    { bytes: [0x42, 0x4D] }, // BM
+    { bytes: [0x42, 0x4d] }, // BM
   ],
   'image/tiff': [
-    { bytes: [0x49, 0x49, 0x2A, 0x00] }, // Little-endian
-    { bytes: [0x4D, 0x4D, 0x00, 0x2A] }, // Big-endian
+    { bytes: [0x49, 0x49, 0x2a, 0x00] }, // Little-endian
+    { bytes: [0x4d, 0x4d, 0x00, 0x2a] }, // Big-endian
   ],
   // Documents
   'application/pdf': [
     { bytes: [0x25, 0x50, 0x44, 0x46] }, // %PDF
   ],
   'application/msword': [
-    { bytes: [0xD0, 0xCF, 0x11, 0xE0, 0xA1, 0xB1, 0x1A, 0xE1] }, // OLE compound
+    { bytes: [0xd0, 0xcf, 0x11, 0xe0, 0xa1, 0xb1, 0x1a, 0xe1] }, // OLE compound
   ],
   'application/vnd.openxmlformats-officedocument.wordprocessingml.document': [
-    { bytes: [0x50, 0x4B, 0x03, 0x04] }, // ZIP (OOXML)
+    { bytes: [0x50, 0x4b, 0x03, 0x04] }, // ZIP (OOXML)
   ],
   'application/vnd.ms-excel': [
-    { bytes: [0xD0, 0xCF, 0x11, 0xE0, 0xA1, 0xB1, 0x1A, 0xE1] }, // OLE compound
+    { bytes: [0xd0, 0xcf, 0x11, 0xe0, 0xa1, 0xb1, 0x1a, 0xe1] }, // OLE compound
   ],
   'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': [
-    { bytes: [0x50, 0x4B, 0x03, 0x04] }, // ZIP (OOXML)
+    { bytes: [0x50, 0x4b, 0x03, 0x04] }, // ZIP (OOXML)
   ],
   'application/vnd.ms-powerpoint': [
-    { bytes: [0xD0, 0xCF, 0x11, 0xE0, 0xA1, 0xB1, 0x1A, 0xE1] }, // OLE compound
+    { bytes: [0xd0, 0xcf, 0x11, 0xe0, 0xa1, 0xb1, 0x1a, 0xe1] }, // OLE compound
   ],
   'application/vnd.openxmlformats-officedocument.presentationml.presentation': [
-    { bytes: [0x50, 0x4B, 0x03, 0x04] }, // ZIP (OOXML)
+    { bytes: [0x50, 0x4b, 0x03, 0x04] }, // ZIP (OOXML)
   ],
   // Audio
   'audio/mpeg': [
-    { bytes: [0xFF, 0xFB] }, // MP3 frame sync
-    { bytes: [0xFF, 0xFA] },
-    { bytes: [0xFF, 0xF3] },
-    { bytes: [0xFF, 0xF2] },
+    { bytes: [0xff, 0xfb] }, // MP3 frame sync
+    { bytes: [0xff, 0xfa] },
+    { bytes: [0xff, 0xf3] },
+    { bytes: [0xff, 0xf2] },
     { bytes: [0x49, 0x44, 0x33] }, // ID3 tag
   ],
   'audio/wav': [
     { bytes: [0x52, 0x49, 0x46, 0x46] }, // RIFF
   ],
   'audio/ogg': [
-    { bytes: [0x4F, 0x67, 0x67, 0x53] }, // OggS
+    { bytes: [0x4f, 0x67, 0x67, 0x53] }, // OggS
   ],
   'audio/mp4': [
     { bytes: [0x00, 0x00, 0x00], offset: 0 }, // ftyp box (varies)
   ],
   'audio/aac': [
-    { bytes: [0xFF, 0xF1] }, // ADTS
-    { bytes: [0xFF, 0xF9] },
+    { bytes: [0xff, 0xf1] }, // ADTS
+    { bytes: [0xff, 0xf9] },
   ],
   'audio/flac': [
-    { bytes: [0x66, 0x4C, 0x61, 0x43] }, // fLaC
+    { bytes: [0x66, 0x4c, 0x61, 0x43] }, // fLaC
   ],
   'audio/webm': [
-    { bytes: [0x1A, 0x45, 0xDF, 0xA3] }, // EBML
+    { bytes: [0x1a, 0x45, 0xdf, 0xa3] }, // EBML
   ],
   // Video
   'video/mp4': [
     { bytes: [0x00, 0x00, 0x00], offset: 0 }, // ftyp box (varies)
   ],
   'video/webm': [
-    { bytes: [0x1A, 0x45, 0xDF, 0xA3] }, // EBML
+    { bytes: [0x1a, 0x45, 0xdf, 0xa3] }, // EBML
   ],
   'video/ogg': [
-    { bytes: [0x4F, 0x67, 0x67, 0x53] }, // OggS
+    { bytes: [0x4f, 0x67, 0x67, 0x53] }, // OggS
   ],
   'video/quicktime': [
     { bytes: [0x00, 0x00, 0x00], offset: 0 }, // ftyp box
@@ -148,27 +144,25 @@ const FILE_SIGNATURES: Record<string, { bytes: number[]; offset?: number }[]> = 
     { bytes: [0x52, 0x49, 0x46, 0x46] }, // RIFF
   ],
   'video/mpeg': [
-    { bytes: [0x00, 0x00, 0x01, 0xBA] }, // MPEG PS
-    { bytes: [0x00, 0x00, 0x01, 0xB3] }, // MPEG sequence
+    { bytes: [0x00, 0x00, 0x01, 0xba] }, // MPEG PS
+    { bytes: [0x00, 0x00, 0x01, 0xb3] }, // MPEG sequence
   ],
   // Archives
   'application/zip': [
-    { bytes: [0x50, 0x4B, 0x03, 0x04] },
-    { bytes: [0x50, 0x4B, 0x05, 0x06] }, // Empty archive
+    { bytes: [0x50, 0x4b, 0x03, 0x04] },
+    { bytes: [0x50, 0x4b, 0x05, 0x06] }, // Empty archive
   ],
   'application/x-rar-compressed': [
-    { bytes: [0x52, 0x61, 0x72, 0x21, 0x1A, 0x07] }, // Rar!
+    { bytes: [0x52, 0x61, 0x72, 0x21, 0x1a, 0x07] }, // Rar!
   ],
-  'application/gzip': [
-    { bytes: [0x1F, 0x8B] },
-  ],
+  'application/gzip': [{ bytes: [0x1f, 0x8b] }],
   'application/x-7z-compressed': [
-    { bytes: [0x37, 0x7A, 0xBC, 0xAF, 0x27, 0x1C] }, // 7z
+    { bytes: [0x37, 0x7a, 0xbc, 0xaf, 0x27, 0x1c] }, // 7z
   ],
   // Data formats
   'application/json': [], // Text-based, validated differently
   'application/xml': [
-    { bytes: [0x3C, 0x3F, 0x78, 0x6D, 0x6C] }, // <?xml
+    { bytes: [0x3c, 0x3f, 0x78, 0x6d, 0x6c] }, // <?xml
   ],
 };
 
@@ -253,7 +247,7 @@ export function validateFileType(buffer: Buffer, declaredMimeType: string): bool
       const text = buffer.toString('utf-8');
       // Check for null bytes which shouldn't be in text files
       if (text.includes('\0')) return false;
-      
+
       // For JSON, verify it parses
       if (declaredMimeType === 'application/json') {
         JSON.parse(text);
@@ -294,7 +288,7 @@ export function validateExtension(filename: string, mimeType: string): boolean {
  */
 export function checkForMaliciousContent(buffer: Buffer): boolean {
   const content = buffer.toString('utf-8', 0, Math.min(buffer.length, 10000));
-  
+
   // Check for common script injections in SVG
   const dangerousPatterns = [
     /<script[\s>]/i,
@@ -318,11 +312,11 @@ export function checkForMaliciousContent(buffer: Buffer): boolean {
 export function generateSecureFilename(originalFilename: string, mimeType: string): string {
   const uuid = uuidv4();
   const hash = crypto.randomBytes(8).toString('hex');
-  
+
   // Get appropriate extension from MIME type
   const extensions = ALLOWED_TYPES[mimeType];
   const ext = extensions ? extensions[0] : path.extname(originalFilename).toLowerCase();
-  
+
   // Create filename: uuid-hash.ext
   return `${uuid.split('-')[0]}-${hash}${ext}`;
 }
@@ -335,10 +329,10 @@ export function generateStoragePath(): { dir: string; relativeDir: string } {
   const year = now.getFullYear();
   const month = String(now.getMonth() + 1).padStart(2, '0');
   const day = String(now.getDate()).padStart(2, '0');
-  
+
   const relativeDir = path.join('uploads', String(year), month, day);
   const dir = path.join(process.cwd(), 'public', relativeDir);
-  
+
   return { dir, relativeDir };
 }
 
@@ -359,7 +353,7 @@ export async function processImage(
   _originalFilename: string
 ): Promise<ProcessedImage> {
   const { dir, relativeDir } = generateStoragePath();
-  
+
   // Ensure upload directory exists
   if (!existsSync(dir)) {
     await mkdir(dir, { recursive: true });
@@ -504,10 +498,7 @@ export interface UploadOptions {
 /**
  * Process an uploaded file with full security checks
  */
-export async function handleFileUpload(
-  file: File,
-  options: UploadOptions
-): Promise<UploadResult> {
+export async function handleFileUpload(file: File, options: UploadOptions): Promise<UploadResult> {
   try {
     // Check file size
     if (file.size > options.maxSizeBytes) {
@@ -517,9 +508,9 @@ export async function handleFileUpload(
 
     // Check MIME type is allowed
     if (!ALLOWED_TYPES[file.type]) {
-      return { 
-        success: false, 
-        error: `File type not allowed. Allowed: ${Object.keys(ALLOWED_TYPES).join(', ')}` 
+      return {
+        success: false,
+        error: `File type not allowed. Allowed: ${Object.keys(ALLOWED_TYPES).join(', ')}`,
       };
     }
 
@@ -560,9 +551,9 @@ export async function handleFileUpload(
     }
   } catch (error) {
     console.error('File upload error:', error);
-    return { 
-      success: false, 
-      error: error instanceof Error ? error.message : 'Upload failed' 
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Upload failed',
     };
   }
 }
@@ -593,9 +584,9 @@ export function getBestVariantUrl(
 ): string {
   // Sort variants by width
   const sorted = [...variants].sort((a, b) => (a.width || 0) - (b.width || 0));
-  
+
   // Find the smallest variant that's >= maxWidth
   const suitable = sorted.find((v) => (v.width || 0) >= maxWidth);
-  
+
   return suitable?.publicUrl || original.publicUrl;
 }
