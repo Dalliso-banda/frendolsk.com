@@ -2,6 +2,8 @@
 
 All notable changes to this project will be documented in this file.
 
+## [4.3.4](https://github.com///compare/v4.3.3...v4.3.4) (2026-07-01)
+
 ## [4.3.3](https://github.com///compare/v4.3.2...v4.3.3) (2026-07-01)
 
 ### Bug Fixes
